@@ -69,7 +69,6 @@ export async function URLfromServer(URL_input, button_data_track_number) {
  */
 async function configureDataType(extension, track) {
     try {
-
         if (!track.data || typeof track.data !== 'object') {
             track.data = {};
         }
@@ -83,6 +82,7 @@ async function configureDataType(extension, track) {
             console.error('Invalid data type');
             return;
         }
+        
     } catch (error) {
         console.error(error);
     }
@@ -127,7 +127,7 @@ async function checkURLParameters(track, track_nr) {
             plotSpec.xDomain.interval = urlSearch.has("xDomain.interval") ? urlSearch.get("xDomain.interval").split(",").map(Number) : plotSpec.xDomain.interval;
             plotSpec.style.background = urlSearch.get("background") || plotSpec.style.background;
         }
-        console.log(plotSpec);
+        // console.log(plotSpec);
     } catch (error) {
         console.error(error);
     }
