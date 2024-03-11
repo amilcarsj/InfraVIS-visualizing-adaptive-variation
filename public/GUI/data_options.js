@@ -1,3 +1,9 @@
+/**
+ * Populates the given container with HTML content for configuring track settings.
+ * @param {HTMLElement} container - The container element to populate.
+ * @returns {Promise<void>} - A Promise that resolves after the container is populated.
+ */
+
 export async function all_buttons(container) {
     container.innerHTML = `
         <div id="header" class="buttons-container">
@@ -29,6 +35,11 @@ export async function all_buttons(container) {
         </div>`;
 }
 
+/**
+ * Generates HTML for a track button with input fields and selectors.
+ * @param {number} trackNumber - The number of the track.
+ * @returns {string} - The HTML content for the track button.
+ */
 function generateTrackButton(trackNumber) {
     return `
         <div class="track${trackNumber}">
@@ -59,6 +70,11 @@ function generateTrackButton(trackNumber) {
         </div>`;
 }
 
+/**
+ * Generates HTML for input fields related to bin size and sample length for a track.
+ * @param {number} trackNumber - The number of the track.
+ * @returns {string} - The HTML content for bin and sample inputs.
+ */
 function generateTrackBinAndSampleInputs(trackNumber) {
     return `
         <div class="track${trackNumber}">
@@ -72,6 +88,10 @@ function generateTrackBinAndSampleInputs(trackNumber) {
         </div>`;
 }
 
+/**
+ * Generates HTML for input fields related to the X-domain interval.
+ * @returns {string} - The HTML content for X-domain inputs.
+ */
 function generateXDomainInputs() {
     return `
         <div class="both_tracks">
@@ -83,6 +103,11 @@ function generateXDomainInputs() {
         </div>`;
 }
 
+/**
+ * Generates HTML for input fields related to the Y-domain interval for a track.
+ * @param {number} trackNumber - The number of the track.
+ * @returns {string} - The HTML content for Y-domain inputs.
+ */
 function generateYDomainInputs(trackNumber) {
     return `
         <div class="track${trackNumber}">
@@ -94,6 +119,11 @@ function generateYDomainInputs(trackNumber) {
         </div>`;
 }
 
+/**
+ * Generates HTML for selectors related to mark type, color, and size for a track.
+ * @param {number} trackNumber - The number of the track.
+ * @returns {string} - The HTML content for mark selectors.
+ */
 function generateTrackMarkSelector(trackNumber) {
     return `
         <div class="track${trackNumber}">
@@ -127,6 +157,10 @@ function generateTrackMarkSelector(trackNumber) {
         </div>`;
 }
 
+/**
+ * Generates HTML for a selector to choose the background color.
+ * @returns {string} - The HTML content for the background color selector.
+ */
 function generateBackgroundColorSelector() {
     return `
         <div class="both_tracks">

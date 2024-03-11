@@ -30,15 +30,13 @@
         const overlay_container = document.getElementById('overlay');
         const buttons_container = document.getElementById('buttons');
 
-        overlay(overlay_container);
-        all_buttons(buttons_container);
-    </script>
-
-    <script type="module">
         import { URLfromFile, URLfromServer, GoslingPlotWithLocalData } from './plot.js';
         import { trackTemplate } from './track_spec.js';
 
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', async function () {
+            await overlay(overlay_container);
+            await all_buttons(buttons_container);
+            
             const fileInputs = document.querySelectorAll('.file-input');
             document.querySelectorAll('.plot-button').forEach(function (button, button_data_track_num) {
                 button.addEventListener('click', function () {

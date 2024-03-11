@@ -19,9 +19,10 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
         const fileURL = URL.createObjectURL(fileInput);
         if (fileURL) {
             current_track.data.url = fileURL;
-            await checkURLParameters(current_track, button_data_track_number);
+            
             await configureDataType(extension, current_track);
             await handleOptions(fileInput, button_data_track_number);
+            await checkURLParameters(current_track, button_data_track_number);
             await GoslingPlotWithLocalData();
 
         }
@@ -50,9 +51,9 @@ export async function URLfromServer(URL_input, button_data_track_number) {
                 throw new Error('Network response was not ok.');
             }
             const fileBlob = await response.blob(); // Retrieve the file data
-            await checkURLParameters(current_track, button_data_track_number);
             await configureDataType(extension, current_track);
             await handleOptions(fileBlob, button_data_track_number);
+            await checkURLParameters(current_track, button_data_track_number);            
             await GoslingPlotWithLocalData();
 
         }
@@ -110,8 +111,8 @@ export async function GoslingPlotWithLocalData() {
 async function checkURLParameters(track, track_nr) {
     var url = new window.URL(document.location);
     try {
+        const urlSearch = url.searchParams;
         if (url.searchParams.size > 0) {
-            const urlSearch = url.searchParams;
             const generateParamName = param => `${param}${track_nr}`;
             
             track.data.column = track.x.field = track.tooltip[1].field = track.tooltip[1].alt = urlSearch.get(generateParamName("x.field")) || track.data.column;
@@ -126,7 +127,22 @@ async function checkURLParameters(track, track_nr) {
             plotSpec.tracks[1].y.domain = urlSearch.has("y.domain") ? urlSearch.get("y.domain").split(",").map(Number) : track.y.domain;
             plotSpec.xDomain.interval = urlSearch.has("xDomain.interval") ? urlSearch.get("xDomain.interval").split(",").map(Number) : plotSpec.xDomain.interval;
             plotSpec.style.background = urlSearch.get("background") || plotSpec.style.background;
-        }
+        } //else {
+            // set defaults
+            // ------ This won't work for some fields, this is a nightmare
+        //     console.log('SET DEFAULTS')
+        //     // Create a URLSearchParams object
+        //     const params = new URLSearchParams();
+        //     params.set(`sampleLength${track_nr}`, `10000`);
+        //     let x_val = document.getElementById(`columnSelectorX_${track_nr}`).options[track_nr+1].innerText;            
+        //     params.set(`x.field${track_nr}`, x_val);                        
+        //     let y_val = document.getElementById(`columnSelectorY_${track_nr}`).options[track_nr+2].innerText;            
+        //     params.set(`y.field${track_nr}`, y_val);                        
+        //     const url = new URL(window.location.href);
+        //     url.search = params.toString();
+        //     // Replace the current URL with the one containing the updated query parameters
+        //     window.history.replaceState({}, '', url.toString());            
+        // }
         // console.log(plotSpec);
     } catch (error) {
         console.error(error);
