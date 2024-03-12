@@ -22,6 +22,7 @@ function deepCopy(obj) {
 
 class PlotSpecSingleton {
   constructor() {
+    console.log(`------- CREATED NEW SPEC -------`)
     if (!PlotSpecSingleton.instance) {
       this.plotSpec = {
         "title": "",
@@ -35,11 +36,10 @@ class PlotSpecSingleton {
           "background": "#D3D3D3",
           "backgroundOpacity": 0.1
         },
-        "tracks": [this.createTrack(), this.createTrack()]
+        "tracks": [this.createTrack(), this.createTrack(), this.createTrack(), this.createTrack(), this.createTrack()]
       };
       PlotSpecSingleton.instance = this;
     }
-
     return PlotSpecSingleton.instance;
   }
 
@@ -54,8 +54,13 @@ class PlotSpecSingleton {
   getPlotSpec() {
     return this.plotSpec;
   }
+
+  static resetInstance() {
+    PlotSpecSingleton.instance = null;
+  }
+
 }
 
-const plotSpecSingleton = new PlotSpecSingleton();
+// const plotSpecSingleton = new PlotSpecSingleton();
 
-export { plotSpecSingleton };
+export { PlotSpecSingleton };

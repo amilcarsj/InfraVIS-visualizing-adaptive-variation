@@ -1,7 +1,9 @@
 import { GoslingPlotWithLocalData } from './plot.js';
-import { plotSpecSingleton } from './PlotSpecSingleton.js';
+import { PlotSpecSingleton } from './PlotSpecSingleton.js';
 
-const plotSpec = plotSpecSingleton.getPlotSpec(); // Get the current plot spec
+window.plotSpecSingleton = new PlotSpecSingleton();
+// console.log(window.plotSpecSingleton);
+const plotSpec = window.plotSpecSingleton.getPlotSpec(); // Get the current plot spec
 const fileHeaders = new Map();
 
 /**
@@ -27,7 +29,7 @@ export async function handleOptions(data, button_data_track_number) {
     } else {
         console.error("Invalid data type. Expected File or Blob.");
     }
-    // ¤¤¤¤¤¤¤¤¤¤ Creating the dropdown menues for each track ¤¤¤¤¤¤¤¤¤¤  
+    // Creating the dropdown menu for each track  
 
     if (!fileHeaders.has(button_data_track_number)) {
         fileHeaders.set(button_data_track_number, new Set());
@@ -67,13 +69,10 @@ export async function handleOptions(data, button_data_track_number) {
             const trackValue = columnSelectorX.getAttribute('data-track');
             const selectedValue = columnSelectorX.value;
             const chosenColumnName = columnSelectorX.options[selectedValue].textContent;
-
             plotSpec.tracks[trackValue].data.column = chosenColumnName;
             plotSpec.tracks[trackValue].x.field = chosenColumnName;
             plotSpec.tracks[trackValue].tooltip[1].field = chosenColumnName;
             plotSpec.tracks[trackValue].tooltip[1].alt = chosenColumnName;
-
-
             await GoslingPlotWithLocalData();
             updateURLParameters("x.field"+trackValue.toString(), chosenColumnName);
         });
@@ -85,12 +84,10 @@ export async function handleOptions(data, button_data_track_number) {
             const trackValue = columnSelectorY.getAttribute('data-track');
             const selectedValue = columnSelectorY.value;
             const chosenColumnName = columnSelectorY.options[selectedValue].textContent;
-
             plotSpec.tracks[trackValue].data.value = chosenColumnName;
             plotSpec.tracks[trackValue].y.field = chosenColumnName;
             plotSpec.tracks[trackValue].tooltip[0].field = chosenColumnName;
             plotSpec.tracks[trackValue].tooltip[0].alt = chosenColumnName;
-
             await GoslingPlotWithLocalData();
             updateURLParameters("y.field"+trackValue.toString(), chosenColumnName);
         });
@@ -101,12 +98,10 @@ export async function handleOptions(data, button_data_track_number) {
         button.addEventListener('change', async function () {
             const trackValue = button.getAttribute('data-track');
             const chosenmark = button.value;
-
             plotSpec.tracks[trackValue].mark = chosenmark;
-
             await GoslingPlotWithLocalData();
-            const mark = "mark" + trackValue.toString();
-            await updateURLParameters(mark, button.value);
+            const mark = "mark" + trackValue.toString();            
+            await updateURLParameters(mark, button.value);            
         });
     });
 
@@ -115,10 +110,7 @@ export async function handleOptions(data, button_data_track_number) {
         button.addEventListener('change', async function () {
             const trackValue = button.getAttribute('data-track');
             const chosencolor = button.value;
-
             plotSpec.tracks[trackValue].color.value = chosencolor;
-
-
             await GoslingPlotWithLocalData();
             await updateURLParameters("color.value"+trackValue.toString(), button.value);
         });
@@ -127,55 +119,39 @@ export async function handleOptions(data, button_data_track_number) {
     bcolor.addEventListener('change', async function () {
         const chosenBcolor = bcolor.value;
         plotSpec.style.background = chosenBcolor;
-
         await GoslingPlotWithLocalData();
         await updateURLParameters("background", bcolor.value);
     });
 
-    x_interval_button.addEventListener('click', async function () {
-        const startValue = document.getElementById('x_start').value;
-        const endValue = document.getElementById('x_end').value;
-        const start = parseFloat(startValue);
-        const end = parseFloat(endValue);
-
-        const intervalArray = [start, end];
-        plotSpec.xDomain.interval = intervalArray;
-
-        await GoslingPlotWithLocalData();
-
-        const xDomain = "xDomain.interval";
-        updateURLParameters(xDomain, intervalArray);
+    const x_interval_buttons = document.querySelectorAll('.x_interval_button');
+    x_interval_buttons.forEach(button => {
+        button.addEventListener('click', async function () {
+            const startValue = document.getElementById('x_start').value;
+            const endValue = document.getElementById('x_end').value;
+            const start = parseFloat(startValue);
+            const end = parseFloat(endValue);    
+            const intervalArray = [start, end];
+            plotSpec.xDomain.interval = intervalArray;    
+            await GoslingPlotWithLocalData();    
+            const xDomain = "xDomain.interval";
+            updateURLParameters(xDomain, intervalArray);
+        });
+    });    
+    const y_interval_buttons = document.querySelectorAll('.y_interval_button');
+    y_interval_buttons.forEach(button => {
+        button.addEventListener('click', async function () {
+            const startValue = document.getElementById(`y_start${i}`).value;
+            const endValue = document.getElementById(`y_end${i}`).value;
+            const start = parseFloat(startValue);
+            const end = parseFloat(endValue);
+            const intervalArray = [start, end];
+            plotSpec.tracks[i].y.domain = intervalArray;
+            await GoslingPlotWithLocalData();
+            const yDomain = "y.domain";
+            updateURLParameters(yDomain, intervalArray);
+        });
     });
-
-    y_interval_button0.addEventListener('click', async function () {
-        const startValue = document.getElementById('y_start0').value;
-        const endValue = document.getElementById('y_end0').value;
-        const start = parseFloat(startValue);
-        const end = parseFloat(endValue);
-
-        const intervalArray = [start, end];
-        plotSpec.tracks[0].y.domain = intervalArray;
-
-        await GoslingPlotWithLocalData();
-        const yInterval = "yInterval0";
-        updateURLParameters(yInterval, intervalArray);
-    });
-
-    y_interval_button1.addEventListener('click', async function () {
-        const startValue = document.getElementById('y_start1').value;
-        const endValue = document.getElementById('y_end1').value;
-        const start = parseFloat(startValue);
-        const end = parseFloat(endValue);
-
-        const intervalArray = [start, end];
-        plotSpec.tracks[1].y.domain = intervalArray;
-
-        await GoslingPlotWithLocalData();
-
-        const yDomain = "y.domain";
-        updateURLParameters(yDomain, intervalArray);
-    });
-
+    
     const binsizeButtons = document.querySelectorAll('.binsize');
     binsizeButtons.forEach(button => {
         button.addEventListener('click', async function () {
@@ -183,7 +159,6 @@ export async function handleOptions(data, button_data_track_number) {
             const inputField = document.getElementById(`binsize_${trackValue}`);
             const chosenbinsize = parseFloat(inputField.value);
             plotSpec.tracks[trackValue].data.binSize = chosenbinsize;
-
             await GoslingPlotWithLocalData();
             const binSize = "data.binSize" + trackValue.toString();
             updateURLParameters(binSize, chosenbinsize);
@@ -198,7 +173,6 @@ export async function handleOptions(data, button_data_track_number) {
             const inputField = document.getElementById(`samplelength_${trackValue}`);
             const chosensamplelength = parseFloat(inputField.value);
             plotSpec.tracks[trackValue].data.sampleLength = chosensamplelength;
-
             await GoslingPlotWithLocalData();
             const sampleLength = "sampleLength" + trackValue.toString();
             updateURLParameters(sampleLength, chosensamplelength);
@@ -213,16 +187,14 @@ export async function handleOptions(data, button_data_track_number) {
             const inputField = document.getElementById(`marksize_${trackValue}`);
             const chosenmarksize = parseFloat(inputField.value);
             plotSpec.tracks[trackValue].size.value = chosenmarksize;
-
             await GoslingPlotWithLocalData();
-            const markSize = "size.value" + trackValue.toString();
+            const markSize = "size.value" + trackValue.toString();            
             updateURLParameters(markSize, chosenmarksize);
         });
     });
 
     check.addEventListener('click', async function () {
         const trackValue = 1;
-
         if (check.checked) {
             plotSpec.tracks[trackValue].y.axis = "right";
         } else {
@@ -281,8 +253,7 @@ async function extractHeader(file, button_data_track_number) {
 }
 
 /**
- * Extract the header from server data using a Blob.
- * 
+ * Extract the header from server data using a Blob. 
  * @param {Blob} fileBlob - Blob data from the server.
  * @param {number} button_data_track_number - Button data track number.
  * @returns {Promise<Array>} - Promise resolving to the extracted header.
@@ -292,7 +263,6 @@ async function extractHeaderFromServer(fileBlob, button_data_track_number) {
         const text = await new Response(fileBlob).text();
         const data = text.split('\n').map(row => row.split(plotSpec.tracks[button_data_track_number].data.separator));
         const header = data[0];
-
         return header;
     } catch (error) {
         console.error('Error fetching or processing data:', error);
@@ -306,7 +276,7 @@ async function extractHeaderFromServer(fileBlob, button_data_track_number) {
  * @param {string} parameter - Parameter name.
  * @param {string|number} value - Parameter value.
  */
-async function updateURLParameters(parameter, value) {
+export async function updateURLParameters(parameter, value) {
     var url = new window.URL(document.location);
     url.searchParams.set(parameter, value);
     history.pushState({}, '', url);

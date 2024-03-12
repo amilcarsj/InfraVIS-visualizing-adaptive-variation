@@ -1,8 +1,8 @@
 import { embed } from 'gosling.js';
-import { plotSpecSingleton } from './PlotSpecSingleton.js';
+import { PlotSpecSingleton } from './PlotSpecSingleton.js';
 import { handleOptions } from './update_plot_specifications.js';
 
-const plotSpec = plotSpecSingleton.getPlotSpec(); // Get the current plot spec
+const plotSpec = window.plotSpecSingleton.getPlotSpec(); // Get the current plot spec
 
 /**
  * Handle data from a local file input.
@@ -13,13 +13,13 @@ const plotSpec = plotSpecSingleton.getPlotSpec(); // Get the current plot spec
 export async function URLfromFile(fileInputs, button_data_track_number) {
     try {
         const fileInput = fileInputs[button_data_track_number].files[0];
+        // console.log(`button_data_track_number = ${button_data_track_number}`);
         const fileName = fileInput.name;
         const extension = fileName.substring(fileName.lastIndexOf('.') + 1);
         const current_track = plotSpec.tracks[button_data_track_number];
         const fileURL = URL.createObjectURL(fileInput);
         if (fileURL) {
-            current_track.data.url = fileURL;
-            
+            current_track.data.url = fileURL;            
             await configureDataType(extension, current_track);
             await handleOptions(fileInput, button_data_track_number);
             await checkURLParameters(current_track, button_data_track_number);
@@ -94,7 +94,8 @@ async function configureDataType(extension, track) {
  */
 export async function GoslingPlotWithLocalData() {
     try {
-        const plotSpec = plotSpecSingleton.getPlotSpec(); // Get the current plot spec            
+        const plotSpec = window.plotSpecSingleton.getPlotSpec(); // Get the current plot spec
+        console.log(`------ Triggered PRINT ------ \n plotSpec: ${JSON.stringify(plotSpec)}`)            
         const container = document.getElementById('plot-container');
         await embed(container, plotSpec); // Embed the updated plotSpec
     } catch (error) {
@@ -123,27 +124,15 @@ async function checkURLParameters(track, track_nr) {
             track.data.binSize = urlSearch.get(generateParamName("data.binSize")) || track.data.binSize;
             track.data.sampleLength = urlSearch.get(generateParamName("sampleLength")) || track.data.sampleLength;
 
-            plotSpec.tracks[0].y.domain = urlSearch.has("y.domain") ? urlSearch.get("y.domain").split(",").map(Number) : track.y.domain;
-            plotSpec.tracks[1].y.domain = urlSearch.has("y.domain") ? urlSearch.get("y.domain").split(",").map(Number) : track.y.domain;
+            // Iterate over all tracks in plotSpec
+            for (let i = 0; i < plotSpec.tracks.length; i++) {
+                const track = plotSpec.tracks[i];
+                track.y.domain = urlSearch.has("y.domain") ? urlSearch.get("y.domain").split(",").map(Number) : track.y.domain;
+            }
+            
             plotSpec.xDomain.interval = urlSearch.has("xDomain.interval") ? urlSearch.get("xDomain.interval").split(",").map(Number) : plotSpec.xDomain.interval;
             plotSpec.style.background = urlSearch.get("background") || plotSpec.style.background;
-        } //else {
-            // set defaults
-            // ------ This won't work for some fields, this is a nightmare
-        //     console.log('SET DEFAULTS')
-        //     // Create a URLSearchParams object
-        //     const params = new URLSearchParams();
-        //     params.set(`sampleLength${track_nr}`, `10000`);
-        //     let x_val = document.getElementById(`columnSelectorX_${track_nr}`).options[track_nr+1].innerText;            
-        //     params.set(`x.field${track_nr}`, x_val);                        
-        //     let y_val = document.getElementById(`columnSelectorY_${track_nr}`).options[track_nr+2].innerText;            
-        //     params.set(`y.field${track_nr}`, y_val);                        
-        //     const url = new URL(window.location.href);
-        //     url.search = params.toString();
-        //     // Replace the current URL with the one containing the updated query parameters
-        //     window.history.replaceState({}, '', url.toString());            
-        // }
-        // console.log(plotSpec);
+        } 
     } catch (error) {
         console.error(error);
     }
