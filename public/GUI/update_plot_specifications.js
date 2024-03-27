@@ -14,8 +14,8 @@ const fileHeaders = new Map();
  */
 
 export async function handleOptions(data, button_data_track_number) {
-    const columnSelectorsX = document.querySelectorAll(`.columnSelectorX[data-track="${button_data_track_number}"]`);
-    const columnSelectorsY = document.querySelectorAll(`.columnSelectorY[data-track="${button_data_track_number}"]`);
+    const columnSelectorsX = document.querySelectorAll(`.columnSelectorX`);
+    const columnSelectorsY = document.querySelectorAll(`.columnSelectorY`);
     let header = []; // Declare header outside the if-else blocks
     // Check if the provided data is a file or a URL
     if (data instanceof File) {
@@ -27,6 +27,9 @@ export async function handleOptions(data, button_data_track_number) {
         header = await extractHeaderFromServer(data, button_data_track_number);
         // Proceed with handling the extracted header...
     } else {
+        let msg = document.getElementById(`msg-load-track-${button_data_track_number}`)
+        msg.textContent = "Invalid data type. Expected File or Blob."
+        msg.className = "error-msg"
         console.error("Invalid data type. Expected File or Blob.");
     }
     // Creating the dropdown menu for each track  
@@ -66,33 +69,29 @@ export async function handleOptions(data, button_data_track_number) {
 
     columnSelectorsX.forEach(columnSelectorX => {
         columnSelectorX.addEventListener('change', async function () {
-            const trackValue = columnSelectorX.getAttribute('data-track');
+            const trackCountValue = document.getElementById("trackCountSelector").value;            
             const selectedValue = columnSelectorX.value;
             const chosenColumnName = columnSelectorX.options[selectedValue].textContent;
-            plotSpec.tracks[trackValue].data.column = chosenColumnName;
-            plotSpec.tracks[trackValue].x.field = chosenColumnName;
-            plotSpec.tracks[trackValue].tooltip[1].field = chosenColumnName;
-            plotSpec.tracks[trackValue].tooltip[1].alt = chosenColumnName;
+            for (let trackValue = 0; trackValue < trackCountValue; trackValue++){
+                plotSpec.tracks[trackValue].data.column = chosenColumnName;
+                plotSpec.tracks[trackValue].x.field = chosenColumnName;
+                plotSpec.tracks[trackValue].tooltip[1].field = chosenColumnName;
+                plotSpec.tracks[trackValue].tooltip[1].alt = chosenColumnName;
+            }                
             await GoslingPlotWithLocalData();
-            updateURLParameters("x.field"+trackValue.toString(), chosenColumnName);
+            updateURLParameters("x.field", chosenColumnName);
         });
     });
 
-
-    columnSelectorsY.forEach(columnSelectorY => {
-        columnSelectorY.addEventListener('change', async function () {
-            const trackValue = columnSelectorY.getAttribute('data-track');
-            const selectedValue = columnSelectorY.value;
-            const chosenColumnName = columnSelectorY.options[selectedValue].textContent;
-            plotSpec.tracks[trackValue].data.value = chosenColumnName;
-            plotSpec.tracks[trackValue].y.field = chosenColumnName;
-            plotSpec.tracks[trackValue].tooltip[0].field = chosenColumnName;
-            plotSpec.tracks[trackValue].tooltip[0].alt = chosenColumnName;
-            await GoslingPlotWithLocalData();
-            updateURLParameters("y.field"+trackValue.toString(), chosenColumnName);
-        });
+    let columnSelectorL = document.getElementById('columnSelectorYLeft');
+    columnSelectorL.addEventListener('change', async function () {
+        await _eventsSelectedTracksPerYAxis(columnSelectorL, 'left')
     });
-
+    let columnSelectorR = document.getElementById('columnSelectorYRight');
+    columnSelectorR.addEventListener('change', async function () {
+        await _eventsSelectedTracksPerYAxis(columnSelectorR, 'right')
+    });
+        
     const markButtons = document.querySelectorAll('.mark');
     markButtons.forEach(button => {
         button.addEventListener('change', async function () {
@@ -111,6 +110,7 @@ export async function handleOptions(data, button_data_track_number) {
             const trackValue = button.getAttribute('data-track');
             const chosencolor = button.value;
             plotSpec.tracks[trackValue].color.value = chosencolor;
+            // console.log(JSON.stringify(plotSpec.tracks[trackValue].color));
             await GoslingPlotWithLocalData();
             await updateURLParameters("color.value"+trackValue.toString(), button.value);
         });
@@ -126,8 +126,8 @@ export async function handleOptions(data, button_data_track_number) {
     const x_interval_buttons = document.querySelectorAll('.x_interval_button');
     x_interval_buttons.forEach(button => {
         button.addEventListener('click', async function () {
-            const startValue = document.getElementById('x_start').value;
-            const endValue = document.getElementById('x_end').value;
+            const startValue = document.getElementById('x_range_start').value;
+            const endValue = document.getElementById('x_range_end').value;
             const start = parseFloat(startValue);
             const end = parseFloat(endValue);    
             const intervalArray = [start, end];
@@ -138,17 +138,22 @@ export async function handleOptions(data, button_data_track_number) {
         });
     });    
     const y_interval_buttons = document.querySelectorAll('.y_interval_button');
-    y_interval_buttons.forEach(button => {
+    y_interval_buttons.forEach((button, i) => {
         button.addEventListener('click', async function () {
-            const startValue = document.getElementById(`y_start${i}`).value;
-            const endValue = document.getElementById(`y_end${i}`).value;
-            const start = parseFloat(startValue);
-            const end = parseFloat(endValue);
-            const intervalArray = [start, end];
-            plotSpec.tracks[i].y.domain = intervalArray;
-            await GoslingPlotWithLocalData();
-            const yDomain = "y.domain";
-            updateURLParameters(yDomain, intervalArray);
+            // const startValue = document.getElementById(`y_start_left`).value;
+            // const endValue = document.getElementById(`y_end_left`).value;
+            // const start = parseFloat(startValue);
+            // const end = parseFloat(endValue);
+            // const intervalArray = [start, end];
+            // plotSpec.tracks[i].y.domain = intervalArray;
+            // await GoslingPlotWithLocalData();
+            // const yDomain = "y.domain";
+            // updateURLParameters(yDomain, intervalArray);
+            // console.log(`Triggered click`)
+            // _bindEventsSelectedTracksPerYAxis("columnSelectorYLeft","left");
+            // _bindEventsSelectedTracksPerYAxis("columnSelectorYRight","right");
+            _eventsSelectedTracksPerYAxis(columnSelectorL, 'left')
+            _eventsSelectedTracksPerYAxis(columnSelectorR, 'right')
         });
     });
     
@@ -179,7 +184,6 @@ export async function handleOptions(data, button_data_track_number) {
         });
     });
 
-
     const marksizeButtons = document.querySelectorAll('.marksize');
     marksizeButtons.forEach(button => {
         button.addEventListener('click', async function () {
@@ -193,18 +197,67 @@ export async function handleOptions(data, button_data_track_number) {
         });
     });
 
-    check.addEventListener('click', async function () {
-        const trackValue = 1;
-        if (check.checked) {
-            plotSpec.tracks[trackValue].y.axis = "right";
-        } else {
-            plotSpec.tracks[trackValue].y.axis = "left";
-        }
-        await GoslingPlotWithLocalData();
+    let formL = document.getElementById(`checkbox-left-axis`);
+    let checkboxesL = formL.querySelectorAll('input[type="checkbox"]');
+    checkboxesL.forEach(function(checkbox) {
+        checkbox.addEventListener('click', async function() {
+            await _eventsSelectedTracksPerYAxis(columnSelectorL, 'left');
+        });
+        checkbox.addEventListener('change', async function() {
+            await _eventsSelectedTracksPerYAxis(columnSelectorL, 'left');
+        });
+    });
+    let formR = document.getElementById(`checkbox-right-axis`);
+    let checkboxesR = formR.querySelectorAll('input[type="checkbox"]');
+    checkboxesR.forEach(function(checkbox) {
+        checkbox.addEventListener('click', async function() {
+            await _eventsSelectedTracksPerYAxis(columnSelectorR, 'right');
+        });
+        checkbox.addEventListener('change', async function() {
+            await _eventsSelectedTracksPerYAxis(columnSelectorR, 'right');
+        });
     });
 
+    let msg = document.getElementById(`msg-load-track-${button_data_track_number}`)
+    msg.textContent = "File loaded successfuly"
+    msg.className = "success-msg"
 }
 
+async function _eventsSelectedTracksPerYAxis(columnSelector, side){    
+    console.log(`Triggered the event on side ${side}`);
+    const form = document.getElementById(`checkbox-${side}-axis`);
+    const checkboxes = form.querySelectorAll('input[type="checkbox"]:checked');
+    const selectedOptions = [];
+    checkboxes.forEach(function(checkbox) {
+        selectedOptions.push(parseInt(checkbox.value.slice(-1)));
+    });
+    // console.log(`y_end_${side}`)
+    const startValue = document.getElementById(`y_start_${side}`).value;
+    const endValue = document.getElementById(`y_end_${side}`).value;
+    const start = parseFloat(startValue);
+    const end = parseFloat(endValue);
+    const intervalArray = [start, end];
+
+    const selectedValue = columnSelector.value;
+    const chosenColumnName = columnSelector.options[selectedValue].textContent;
+        
+    selectedOptions.forEach(function(trackValue) {
+        plotSpec.tracks[trackValue-1].data.value = chosenColumnName;            
+        if (!(Number.isNaN(intervalArray[0]) || Number.isNaN(intervalArray[0]))){
+            plotSpec.tracks[trackValue-1].y.domain = intervalArray;
+        }            
+        plotSpec.tracks[trackValue-1].y.axis = side;
+        plotSpec.tracks[trackValue-1].y.field = chosenColumnName;
+        plotSpec.tracks[trackValue-1].tooltip[0].field = chosenColumnName;
+        plotSpec.tracks[trackValue-1].tooltip[0].alt = chosenColumnName; 
+    });             
+    await GoslingPlotWithLocalData();
+    if (side == 'right'){
+        updateURLParameters("y.field1", chosenColumnName);
+    } else {
+        updateURLParameters("y.field0", chosenColumnName);
+    }        
+}
 /**
  * Clear options from a select element.
  * 

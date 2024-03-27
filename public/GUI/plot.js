@@ -13,7 +13,6 @@ const plotSpec = window.plotSpecSingleton.getPlotSpec(); // Get the current plot
 export async function URLfromFile(fileInputs, button_data_track_number) {
     try {
         const fileInput = fileInputs[button_data_track_number].files[0];
-        // console.log(`button_data_track_number = ${button_data_track_number}`);
         const fileName = fileInput.name;
         const extension = fileName.substring(fileName.lastIndexOf('.') + 1);
         const current_track = plotSpec.tracks[button_data_track_number];
@@ -24,7 +23,6 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
             await handleOptions(fileInput, button_data_track_number);
             await checkURLParameters(current_track, button_data_track_number);
             await GoslingPlotWithLocalData();
-
         }
     } catch (error) {
         console.error(error);
@@ -95,7 +93,7 @@ async function configureDataType(extension, track) {
 export async function GoslingPlotWithLocalData() {
     try {
         const plotSpec = window.plotSpecSingleton.getPlotSpec(); // Get the current plot spec
-        console.log(`------ Triggered PRINT ------ \n plotSpec: ${JSON.stringify(plotSpec)}`)            
+        // console.log(`------ Triggered PRINT ------ \n plotSpec: ${JSON.stringify(plotSpec)}`)            
         const container = document.getElementById('plot-container');
         await embed(container, plotSpec); // Embed the updated plotSpec
     } catch (error) {

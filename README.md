@@ -1,3 +1,16 @@
+# Running the project
+
+```bash
+# Install project dependencies
+npm install
+
+# Serve the files
+node app
+
+# Go to your browser and access it going to the link
+http://localhost:3000/
+```
+
 # Visualizing-adaptive-variation
 A project within the course of Applied Bioinformatics, using the Gosling grammar to visualize adaptive variation. The project consists of two main parts: the development of a Graphical User Interface for the use of Gosling, as well as the generation of a catalog consisting of HTML pages with visualizations tailored for data provided. 
 

@@ -7,9 +7,14 @@
 import { URLfromFile, URLfromServer, GoslingPlotWithLocalData } from './plot.js';
 import { updateURLParameters } from './update_plot_specifications.js';
 
+window.x_options = []
+
 export async function all_buttons(container) {
     container.innerHTML = `
-        <div id="header" class="buttons-container">
+        <div id="header" class="buttons-container">            
+            <div class="btn-row">
+                <h3>Track Controls</h3>
+            </div>
             <div class="btn-row">
                 <!-- Selector to choose the number of tracks -->
                 <label for="trackCountSelector">Number of Tracks:</label>
@@ -34,7 +39,93 @@ export async function all_buttons(container) {
                     <option value="grey">grey</option>
                 </select>
             </div>
-            <div id="container"></div>
+            <div id="data-load" class="btn-row">
+                <h3>Load data</h3>
+                <div>
+                    <label>Track 1:</label>
+                    <button class="plot-button" data-track="0">Choose file</button>
+                    <input type="file" class="file-input" style="display: none;">
+                
+                    <label for="urlinput_0" style="margin-right:30px;">or</label>
+                    <input type="url" id="urlinput_0" class="url-input" placeholder="Enter URL">
+                    <button class="url-button" data-track="0">Load</button>
+                </div>    
+                <div>    
+                    <label>Track 2:</label>
+                    <button class="plot-button" data-track="1">Choose file</button>
+                    <input type="file" class="file-input" style="display: none;">
+                    
+                    <label for="urlinput_1" style="margin-right:30px;">or</label>
+                    <input type="url" id="urlinput_1" class="url-input" placeholder="Enter URL">
+                    <button class="url-button" data-track="1">Load</button>
+                </div>                
+            </div>
+            <div id="container"></div>    
+            <div class="btn-row"  id="global-variables">
+                <h3>Canvas Controls</h3>
+                <div class="column-container">
+                    <div id="columnLabelX"></div>
+                    <label for="columnSelectorX_0">X-axis: </label>
+                    <select name="xcolumn" id="columnSelectorX_0" class="columnSelectorX" data-track="0">
+                        <option value="" disabled selected></option>
+                    </select>                
+                    <label for="x_range_start">X-range:</label>
+                    <input type="text" class="interval-input" id="x_range_start">                    
+                    <span>-</span>
+                    <input type="text" class="interval-input" id="x_range_end">
+                    <button class="x_interval_button">Apply</button>
+                </div>
+            </div>            
+            <div class="btn-row"  id="global-y-variables-left">                
+                <h4>Left axis</h4>
+                <form id="checkbox-left-axis">
+                    <div class="y-checkbox-option">    
+                        <input class="y-checkbox-option" type="checkbox" id="track1-left" name="option" value="Track 1" checked>
+                        <label for="track1-left">Track 1</label><br>
+                    </div>
+                    <div class="y-checkbox-option">        
+                        <input class="y-checkbox-option" type="checkbox" id="track2-left" name="option" value="Track 2" checked>
+                        <label for="track2-left">Track 2</label><br>                    
+                    </div>
+                </form>
+                <div class="column-container">
+                    <div id="columnLabelY"></div>
+                    <label for="columnSelectorYLeft">Left-Y-axis: </label>
+                    <select name="ycolumn" id="columnSelectorYLeft" class="columnSelectorY" data-track="0">
+                        <option value="" disabled selected></option>
+                    </select>                
+                    <label for="y_start">Y-range:</label>
+                    <input type="text" class="interval-input" id="y_start_left">
+                    <span>-</span>
+                    <input type="text" class="interval-input" id="y_end_left">
+                    <button class="y_interval_button" id="y_interval_button_left">Apply</button>
+                </div>
+            </div>            
+            <div class="btn-row"  id="global-y-variables-right">                
+                <h4>Right axis</h4>
+                <form id="checkbox-right-axis">
+                    <div class="y-checkbox-option">    
+                        <input class="y-checkbox-option" type="checkbox" id="track1-right" name="option" value="Track 1">
+                        <label for="track1-right">Track 1</label><br>
+                    </div>
+                    <div class="y-checkbox-option">    
+                        <input class="y-checkbox-option" type="checkbox" id="track2-right" name="option" value="Track 2">
+                        <label for="track2-right">Track 2</label><br>                    
+                    </div>
+                </form>
+                <div class="column-container">
+                    <div id="columnLabelY"></div>
+                    <label for="columnSelectorYRight">Right-Y-axis: </label>
+                    <select name="ycolumn" id="columnSelectorYRight" class="columnSelectorY" data-track="0">
+                        <option value="" disabled selected></option>
+                    </select>
+                    <label for="y_start">Y-range:</label>
+                    <input type="text" class="interval-input" id="y_start_right">
+                    <span>-</span>
+                    <input type="text" class="interval-input" id="y_end_right">
+                    <button class="y_interval_button" id="y_interval_button_right">Apply</button>
+                </div>
+            </div>            
         </div>
     `;
 }
@@ -47,30 +138,28 @@ window.generateTracks = async function() {
     const container = document.getElementById("container");
 
     let htmlContent = '';
-// Render buttons containers
+    // Render buttons containers
     for (let i = 0; i < trackCount; i++) {
         htmlContent += `
             <div id="track${i}" class="buttons-container">
-                ${await generateTrackButton(i)}
-                ${await generateTrackBinAndSampleInputs(i)}
-                ${await generateXDomainInputs(i)}
-                ${await generateYDomainInputs(i)}
+                <div class="btn-row">
+                    <h3>Track ${i+1}</h3>                
+                </div>
+                ${await generateTrackBinAndSampleInputs(i)}                                
                 ${await generateTrackMarkSelector(i)}
             </div>            
-        `;
+        `; 
     }
-    container.innerHTML = '';
-    container.innerHTML += htmlContent;    
-//  Render detailing track options
+    container.innerHTML = '';    
+    container.innerHTML += htmlContent;        
+    //  Render detailing track options
     htmlContent = '';
     for (let i = 0; i < trackCount; i++){
         htmlContent += `<option value="${i}">Track ${i+1}</option>`
     }
     const trackSelector = document.getElementById("trackSelector");
     trackSelector.innerHTML = '';
-    trackSelector.innerHTML += htmlContent;    
-    await window.generateElementsActions();  
-    await window.showHideTracks();  
+    trackSelector.innerHTML += htmlContent;        
     
     // Updating colors
     for (let i = 0; i < trackCount; i++) {
@@ -79,6 +168,56 @@ window.generateTracks = async function() {
         // Update the query parameter with the default color value
         await updateURLParameters(`color.value${i}`, defaultColor);      
     }
+    // updating axis-controllers
+    let axisFormLeft = document.getElementById('checkbox-left-axis');
+    let axisFormRight = document.getElementById('checkbox-right-axis');
+    let dataLoad = document.getElementById('data-load');
+    axisFormLeft.innerHTML = '';
+    axisFormRight.innerHTML = '';
+    dataLoad.innerHTML = '<h3>Load data</h3>';
+    for (let i = 0; i < trackCount; i++) {
+        axisFormLeft.innerHTML += `<div class="y-checkbox-option">    
+            <input class="y-checkbox-option" type="checkbox" id="track${i}-left" name="option" value="Track ${i+1}" checked>
+            <label for="track${i}-left">Track ${i+1}</label><br>
+        </div>`;
+        axisFormRight.innerHTML += `<div class="y-checkbox-option">    
+        <input class="y-checkbox-option" type="checkbox" id="track${i}-right" name="option" value="Track ${i+1}">
+        <label for="track${i}-right">Track ${i+1}</label><br>
+        </div>`;
+        dataLoad.innerHTML += `<div>
+            <label>Track ${i+1}:</label>
+            <button class="plot-button" data-track="${i}">Choose file</button>
+            <input type="file" class="file-input" style="display: none;">
+        
+            <label for="urlinput_${i}" style="margin-right:30px;">or</label>
+            <input type="url" id="urlinput_${i}" class="url-input" placeholder="Enter URL">
+            <button class="url-button" data-track="${i}">Load</button>
+            <label class="sucess-msg" id="msg-load-track-${i}"></label>
+        </div>`;
+    }
+    dataLoad.innerHTML += `<div id="container"></div>`    
+    // Get all checkboxes
+    const leftCheckboxes = document.querySelectorAll('#checkbox-left-axis input[type="checkbox"]');
+    const rightCheckboxes = document.querySelectorAll('#checkbox-right-axis input[type="checkbox"]');
+
+    // Add event listeners to left checkboxes
+    leftCheckboxes.forEach(leftCheckbox => {
+        leftCheckbox.addEventListener('change', function() {
+            const correspondingCheckbox = document.getElementById(this.id.replace('-left', '-right'));
+            correspondingCheckbox.checked = !this.checked;            
+        });
+    });
+
+    // Add event listeners to right checkboxes
+    rightCheckboxes.forEach(rightCheckbox => {
+        rightCheckbox.addEventListener('change', function() {
+            const correspondingCheckbox = document.getElementById(this.id.replace('-right', '-left'));
+            correspondingCheckbox.checked = !this.checked;            
+        });
+    });
+
+    await window.generateElementsActions();  
+    await window.showHideTracks();
 }
 /**
  * 
@@ -104,21 +243,14 @@ window.showHideTracks = async function () {
 window.generateTrackButton = async function (trackNumber) {
     return `
         <div class="track${trackNumber} btn-row">
+            <h3>Track ${trackNumber+1}</h3>
             <button class="plot-button" data-track="${trackNumber}">Choose file</button>
             <input type="file" class="file-input" style="display: none;">
             
             <label for="urlinput_${trackNumber}" style="margin-right:30px;">or</label>
             <input type="url" id="urlinput_${trackNumber}" class="url-input" placeholder="Enter URL">
             <button class="url-button" data-track="${trackNumber}">Load</button>
-
-            <div class="column-container">
-                <div id="columnLabelX"></div>
-                <label for="columnSelectorX_${trackNumber}">X-axis: </label>
-                <select name="xcolumn" id="columnSelectorX_${trackNumber}" class="columnSelectorX" data-track="${trackNumber}">
-                    <option value="" disabled selected></option>
-                </select>
-            </div>
-
+           
             <div class="column-container">
                 <div id="columnLabelY"></div>
                 <label for="columnSelectorY_${trackNumber}">Y-axis: </label>
@@ -157,10 +289,10 @@ window.generateTrackBinAndSampleInputs = async function (trackNumber) {
 window.generateXDomainInputs = async function(trackNumber) {
     return `
         <div class="both_tracks btn-row">
-            <label for="x_start">X-domain:</label>
-            <input type="text" class="interval-input" id="x_start">
+            <label for="x_range_start">X-domain:</label>
+            <input type="text" class="interval-input" id="x_range_start">
             <span>-</span>
-            <input type="text" class="interval-input" id="x_end">
+            <input type="text" class="interval-input" id="x_range_end">
             <button class="x_interval_button">Apply</button>
         </div>
         `;
@@ -178,7 +310,7 @@ window.generateYDomainInputs = async function(trackNumber) {
             <input type="text" class="interval-input" id="y_start${trackNumber}">
             <span>-</span>
             <input type="text" class="interval-input" id="y_end${trackNumber}">
-            <button id="y_interval_button${trackNumber}">Apply</button>
+            <button class="y_interval_button" id="y_interval_button${trackNumber}">Apply</button>
         </div>`;
 }
 
@@ -192,8 +324,8 @@ window.generateTrackMarkSelector = async function(trackNumber) {
         <div class="track${trackNumber} btn-row">
             <label for="mark_${trackNumber}">Marker:</label>
             <select name="mark" id="mark_${trackNumber}" class="mark" data-track="${trackNumber}">
-                <option value="point">point</option>
-                <option value="line" selected>line</option>
+                <option value="point" selected>point</option>
+                <option value="line">line</option>
                 <option value="area">area</option>
                 <option value="bar">bar</option>
                 <option value="rect">rect</option>
@@ -203,14 +335,11 @@ window.generateTrackMarkSelector = async function(trackNumber) {
             </select>
             <label for="color_${trackNumber}">Color:</label>
             <select name="color" id="color_${trackNumber}" class="color" data-track="${trackNumber}">
-                <option value="blue"${trackNumber === 0 ? " selected" : ""}>blue</option>
-                <option value="pink"${trackNumber === 1 ? " selected" : ""}>pink</option>
-                <option value="red"${trackNumber === 2 ? " selected" : ""}>red</option>
-                <option value="gold"${trackNumber === 3 ? " selected" : ""}>gold</option>
-                <option value="green"${trackNumber === 4 ? " selected" : ""}>green</option>
-                <option value="purple"${trackNumber === 5 ? " selected" : ""}>purple</option>
-                <option value="black"${trackNumber === 6 ? " selected" : ""}>black</option>
-                <option value="orange"${trackNumber === 7 ? " selected" : ""}>orange</option>
+                <option value="#e41a1c"${trackNumber === 0 ? " selected" : ""}>red</option>
+                <option value="#377eb8"${trackNumber === 1 ? " selected" : ""}>blue</option>
+                <option value="#4daf4a"${trackNumber === 2 ? " selected" : ""}>green</option>
+                <option value="#984ea3"${trackNumber === 3 ? " selected" : ""}>purple</option>
+                <option value="#ff7f00"${trackNumber === 4 ? " selected" : ""}>orange</option>                
             </select>
             <label for="marksize_${trackNumber}">Mark size:</label>
             <input name="size" type="number" class="interval-input" id="marksize_${trackNumber}" data-track="${trackNumber}">
@@ -262,7 +391,5 @@ window.generateElementsActions = async function(){
         } catch (error) {
             console.error(error);
         }
-    });
-    
-
+    });        
 }

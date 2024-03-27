@@ -1,4 +1,17 @@
 /* Stylesheet for GUI */
+.error-msg {
+    color: red;
+}
+
+.success-msg {
+    color: green;
+}
+
+.y-checkbox-option {
+    display: inline-block;
+    margin-right: 5px; 
+}
+
 .btn-row {
     margin: 10px;
 }
@@ -11,7 +24,7 @@
 
 body {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     font-family: 'Roboto', sans-serif;
     font-size: 16px;
