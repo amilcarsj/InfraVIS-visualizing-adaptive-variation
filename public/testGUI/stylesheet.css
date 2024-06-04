@@ -207,13 +207,40 @@ body {
 
 /* Media queries */
 /* For screens smaller than 1550px */
+@media only screen and (max-width: 1850px) {
+    .plot-container {
+        right: 15%;
+    }
+    .canvas-container{
+        right: 20%;
+        width:85%;
+    }
+
+}
+
+
+@media only screen and (max-width: 1730px) {
+    .plot-container {
+        right: 15%;
+        max-width: 40%;
+     }
+    .canvas-container{
+        right: 27%;
+        width:85%;
+    }
+
+}
+
+
+/* Media queries */
+/* For screens smaller than 1550px */
 @media only screen and (max-width: 1550px) {
     .body-container {
         flex-direction: column;
     }
 
     .left-section, .right-section {
-        width: 40%;
+        width: 70%;
     }
 }
 
