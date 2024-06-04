@@ -14,9 +14,9 @@ export async function all_buttons(container) {
     <div class="body-container">
         <div class="left-section">
             <div class="canvas"> 
-                <h4 id='canvas-1' class='canvas_header'>Canvas 1</h4>
-                <h4 id='canvas-2' class='canvas_header'>Canvas 2</h4>
-                <h4 id='canvas-' class='canvas_header'>Canvas 3</h4>
+                <button id="canvas1" class="canvas-button">Canvas 1</button>
+                <button id="canvas2" class="canvas-button">Canvas 2</button>
+                <button id="canvas3" class="canvas-button">Canvas 3</button>
             </div>  
             <div id="header" class="buttons-container">            
                 <div class="btn-row">
@@ -33,7 +33,6 @@ export async function all_buttons(container) {
                         <option value="5">5 Tracks</option>
                     </select>
                 </div>
-                
                 <div class="both_tracks btn-row">
                     <div>
                         <label for="trackSelector"></label>
@@ -130,6 +129,7 @@ export async function all_buttons(container) {
                         </div>
                     </div>
                 </div>
+                <div id="plot-container" class="plot-container"></div>
             </div>
         </div>
     </div>

@@ -59,10 +59,15 @@ html, body {
     display: flex;
     width: 100%;
     justify-content: center;
-    gap: 240px;
+    gap: 200px;
     font-size: 23px;
     cursor: pointer;
     max-height: 75px;
+}
+.canvas-button{
+    background: none;
+    border: none;
+    font-size: 21px;
 }
 
 .canvas_header {
@@ -82,6 +87,7 @@ html, body {
     height: calc(100vh - 20px);
     overflow-y: auto;
     overflow-x: hidden;
+
 }
 
 body {
@@ -109,9 +115,8 @@ body {
 
 .add_track_button {
     position: relative;
-    width: 80%;
+    width: 100%;
     top: 50px;
-    left: 10%;
     padding: 10px;
     background-color: rgb(56, 56, 56);
     color: white;
@@ -122,10 +127,10 @@ body {
 
 .canvas-container {
     background-color: rgb(211, 211, 211);
-    width: 100%;
+    width: 80%;
     position: relative;
     top: 40px;
-    right: 50px;
+    right: 15%;
     padding: 30px;
 
 }
@@ -181,6 +186,7 @@ body {
 .left-section {
     padding-right: 10px;
     margin-right: 5%;
+
 }
 
 .right-section {
@@ -189,6 +195,14 @@ body {
     justify-content: space-between;
     padding-left: 10px;
     margin-left: 5%;
+    align-items: flex-end;
+}
+
+.plot-container {
+    width: 100%;
+    position: relative;
+    right: 22%;
+    z-index: 1;
 }
 
 /* Media queries */
@@ -204,15 +218,7 @@ body {
 }
 
 
-.plot-container {
-    width: 100%;
-    min-width: auto;
-    position: relative;
-    left: 44%;
-    bottom: 470px;
-    padding: 0;
-    z-index: 1000;
-}
+
 #trackCountSelector {
     width: 0;
     height: 0;
