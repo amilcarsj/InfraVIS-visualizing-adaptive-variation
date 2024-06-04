@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gosling Visualization</title>
+    <link rel="stylesheet" href="./testGUI/stylesheet.css">
+    <link rel="stylesheet" href="https://esm.sh/higlass@1.13/dist/hglib.css">
+    <script type="importmap">
+        {
+            "imports": {
+              "react": "https://esm.sh/react@18",
+              "react-dom": "https://esm.sh/react-dom@18",
+              "pixi": "https://esm.sh/pixi.js@6",
+              "higlass": "https://esm.sh/higlass@1.13?external=react,react-dom,pixi",
+              "gosling.js": "https://esm.sh/gosling.js@0.11.0?external=react,react-dom,pixi,higlass"
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+    <div id="overlay"></div> 
+    <div id="buttons" class="all_buttons"></div>
+    <div class="right-section">
+    <div id="plot-container" class="plot-container"></div>
+    </div>
+</div>
+
+    <script type="module">
+        import { PlotSpecSingleton } from './testGUI/PlotSpecSingleton.js';         
+        import { all_buttons } from './testGUI/data_options.js';
+        import { overlay } from './testGUI/overlay.js';
+
+        const overlay_container = document.getElementById('overlay');
+        const buttons_container = document.getElementById('buttons');
+
+        import { URLfromFile, URLfromServer, GoslingPlotWithLocalData } from './testGUI/plot.js';
+        import { trackTemplate } from './testGUI/track_spec.js';
+        
+        document.addEventListener('DOMContentLoaded', async function () { 
+            await overlay(overlay_container);
+            await all_buttons(buttons_container);
+            await window.generateTracks();                   
+        });
+    </script>
+</body>
+
+</html>

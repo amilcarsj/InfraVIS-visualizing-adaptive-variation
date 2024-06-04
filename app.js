@@ -7,7 +7,8 @@ app.use(express.static('public'));
 
 app.get('/', (req, res) => {
     // Send the main .html file when the root URL is accessed
-    res.sendFile(path.join(__dirname, 'public', '/GUI/index.html'));
+    res.sendFile(path.join(__dirname, 'public', '/testGUI/index.html'));
+    
 });
 
 const PORT = process.env.PORT || 3000;
