@@ -134,15 +134,6 @@ export async function all_buttons(container) {
         </div>
     </div>
     `;
-
-    // Add event listener to the clear all settings button
-    const clearAllSettingsButton = container.querySelector('#clear_url_button');
-    if (clearAllSettingsButton) {
-        clearAllSettingsButton.addEventListener('click', () => {
-            location.reload();
-        });
-    }
-
     document.addEventListener('DOMContentLoaded', function() {
     const canvas = document.querySelector('.canvas');
 
@@ -161,6 +152,14 @@ export async function all_buttons(container) {
             if (canvasContent) {
                 canvasContent.style.display = canvasContent.style.display === 'none' ? 'block' : 'none';
             }
+        });
+    }
+
+    // Add event listener to the clear all settings button
+    const clearAllSettingsButton = container.querySelector('#clear_url_button');
+    if (clearAllSettingsButton) {
+        clearAllSettingsButton.addEventListener('click', () => {
+            location.reload();
         });
     }
 }
@@ -188,23 +187,9 @@ window.generateTracks = async function() {
     // Render buttons containers
     for (let i = 0; i < trackCount; i++) {
         htmlContent += `
-            <div id="track${i}" class="track-container">
-                <div class="btn-row">
-                    <h3>Track ${i+1}</h3>              
-                    <span  id="clear_url_button${i}"><u class="clear_url_button">Clear settings</u></span >  
-                </div>
-                <div id="data-load" class="btn-row">
-                <div>
-                    <button class="plot-button" data-track="${i}">Select file</button>
-                    <input type="file" class="file-input" style="display: none;">
-                    <label for="urlinput_${i}" style="margin-right:30px; font-size:20px;">OR</label>
-                    <input type="url" id="urlinput_${i}" class="url-input" placeholder="Enter URL">
-                    <button class="url-button" data-track="${i}">Load</button>
-                </div>                 
-            </div>
+            <div id="track${i}" class="track-container">       
                 ${await generateTrackBinAndSampleInputs(i)}                                
                 ${await generateTrackMarkSelector(i)}
-                
             </div>
             
         `; 
@@ -446,9 +431,6 @@ window.generateElementsActions = async function(trackNumber){
         });
     });
 
-    close_button.addEventListener('click', function () {
-        overlay.style.display = "none";
-    });
 
     for (let i = 0; i < trackCount; i++) {
         let clear_url_button = document.getElementById(`clear_url_button${i}`);

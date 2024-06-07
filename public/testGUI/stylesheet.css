@@ -132,6 +132,7 @@ body {
     top: 40px;
     right: 15%;
     padding: 30px;
+    font-size: 12px;
 
 }
 
@@ -201,6 +202,7 @@ body {
 .plot-container {
     width: 100%;
     position: relative;
+    top: 25px;
     right: 22%;
     z-index: 1;
 }
@@ -259,6 +261,7 @@ body {
     background-color: rgb(182, 181, 181);
     padding: 15px;
     border-bottom:15px solid rgb(228, 228, 228);
+    font-size: 14px;
 }
 
 .clear_url_button {
@@ -298,7 +301,7 @@ button, select, input {
     border-width: 1.5px;
     background-color: rgb(239, 239, 239);
     font-family: 'Roboto', sans-serif;
-    font-size: 16px;
+    font-size: 14px;
     margin-right: 30px;
     cursor: pointer;
     padding: 4px;
@@ -316,11 +319,6 @@ label {
     background-color: rgba(210, 127, 231, 0.345);
 }
 
-#close_button {
-    max-width: fit-content;
-    position: fixed;
-    right: 0;
-}
 
 #track0_button:hover, #track1_button:hover, button:hover, select:hover, #info_button:hover, #close_button:hover {
     background: rgb(117, 117, 117);
@@ -364,6 +362,7 @@ button:active, #info_button:active, #close_button:active {
     bottom: 0;
     background-color: rgba(0, 0, 10, 0.2);
     z-index: 999;
+    
 }
 
 .information {
@@ -383,8 +382,8 @@ button:active, #info_button:active, #close_button:active {
 }
 
 .plot-button, .url-input {
-    font-size: 15px;
-    padding: 10px;
+    font-size: 14px;
+    padding: 5px;
     color: #4d4d4d;
     border: 2px solid rgb(182, 181, 181);
     border-radius: 5px;
@@ -395,16 +394,16 @@ button:active, #info_button:active, #close_button:active {
 }
 
 .url-button {
-    padding: 10px;
+    padding: 5px;
     background-color: rgb(56, 56, 56);
     color: white;
-    font-size: 15px;
+    font-size: 14px;
     border: 1px solid rgb(56, 56, 56);
     border-radius: 4px;
 }
 
 .interval-input, .mark, .color {
-    font-size: 20px;
+    font-size: 14px;
     background-color: #c5c5c5;
     border: 2px solid #8a8a8a;
     border-radius: 4px;
@@ -414,7 +413,7 @@ button:active, #info_button:active, #close_button:active {
     font-size: 15px;
     background-color: rgb(85, 85, 85);
     color: white;
-    font-size: 20px;
+    font-size: 14px;
     border: 1px solid rgb(126, 126, 126);
     border-radius: 4px;
 }
@@ -426,4 +425,5 @@ button:active, #info_button:active, #close_button:active {
 
 input[type='text'] {
     padding: 5px;
+    
 }
