@@ -53,7 +53,6 @@ export async function URLfromServer(URL_input, button_data_track_number) {
             await handleOptions(fileBlob, button_data_track_number);
             await checkURLParameters(current_track, button_data_track_number);            
             await GoslingPlotWithLocalData();
-
         }
     } catch (error) {
         console.error(error);
@@ -81,7 +80,6 @@ async function configureDataType(extension, track) {
             console.error('Invalid data type');
             return;
         }
-        
     } catch (error) {
         console.error(error);
     }
@@ -93,9 +91,19 @@ async function configureDataType(extension, track) {
 export async function GoslingPlotWithLocalData() {
     try {
         const plotSpec = window.plotSpecSingleton.getPlotSpec(); // Get the current plot spec
-        // console.log(`------ Triggered PRINT ------ \n plotSpec: ${JSON.stringify(plotSpec)}`)            
-        const container = document.getElementById('plot-container');
-        await embed(container, plotSpec); // Embed the updated plotSpec
+        const container1 = document.getElementById('plot-container-1');
+        const container2 = document.getElementById('plot-container-2');
+        const container3 = document.getElementById('plot-container-3');
+        const currentCanvasNum = window.canvas_num; // Access the global canvas_num
+        if (currentCanvasNum === 1) {
+            await embed(container1, plotSpec); // Embed the updated plotSpec in canvas 1
+        } else if (currentCanvasNum === 2) {
+            await embed(container2, plotSpec); // Embed the updated plotSpec in canvas 2
+        } else if (currentCanvasNum === 3) {
+            await embed(container3, plotSpec); // Embed the updated plotSpec in canvas 2
+        }else {
+            console.error('Unsupported canvas number');
+        }
     } catch (error) {
         console.error(error);
     }
@@ -135,4 +143,3 @@ async function checkURLParameters(track, track_nr) {
         console.error(error);
     }
 }
-

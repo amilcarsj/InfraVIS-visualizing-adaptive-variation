@@ -133,8 +133,9 @@ body {
     right: 15%;
     padding: 30px;
     font-size: 12px;
-
+    margin-top: 40px;
 }
+
 
 .canvas_bar {
     background-color:  rgb(211, 211, 211);
@@ -205,6 +206,7 @@ body {
     top: 25px;
     right: 22%;
     z-index: 1;
+    margin-top: 20px;
 }
 
 /* Media queries */

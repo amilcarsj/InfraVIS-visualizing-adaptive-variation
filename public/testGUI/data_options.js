@@ -7,7 +7,8 @@
 import { URLfromFile, URLfromServer, GoslingPlotWithLocalData } from './plot.js';
 import { updateURLParameters } from './update_plot_specifications.js';
 
-window.x_options = []
+window.x_options = [];
+window.canvas_num = 1;
 
 export async function all_buttons(container) {
     container.innerHTML = `
@@ -20,7 +21,7 @@ export async function all_buttons(container) {
             </div>  
             <div id="header" class="buttons-container">            
                 <div class="btn-row">
-                    <h3>Canvas 1</h3>
+                    <h3 class='canvas_number'>Canvas 1</h3>
                     <h3>Track Controls</h3>
                     <span id="clear_url_button" class="clear_all_settings">Clear all settings</span>
                     <button id='add_track_button' class="add_track_button">Add Track</button>
@@ -45,25 +46,16 @@ export async function all_buttons(container) {
                     </select>
                 </div>
                 <div id="data-load" class="btn-row">
-                    <h3>Load data</h3>
-                    <div>
-                        <label>Track 1:</label>
-                        <button class="plot-button" data-track="0">Choose file</button>
-                        <input type="file" class="file-input" style="display: none;">
-                        <label for="urlinput_0" style="margin-right:30px;">or</label>
-                        <input type="url" id="urlinput_0" class="url-input" placeholder="Enter URL">
-                        <button class="url-button" data-track="0">Load</button>
-                    </div>
                     <div id="container"></div> 
                 </div>
             </div>
         </div>
         <div class="right-section">
-            <div class='canvas-container'>
-                <div class='canvas_bar'>
-                    <h3>Canvas Controls</h3>
+            <div id='canvas-container-1' class='canvas-container'>
+                <div id='canvas-bar-1' class='canvas_bar'>
+                    <h3>Canvas Controls 1</h3>
                 </div>
-                <div class="canvas_content" >
+                <div class="canvas_content">
                     <div class="btn-row" id="global-variables">
                         <div class="column-container">
                             <div id="columnLabelX"></div>
@@ -129,39 +121,216 @@ export async function all_buttons(container) {
                         </div>
                     </div>
                 </div>
-                <div id="plot-container" class="plot-container"></div>
+                <div id="plot-container-1" class="plot-container"></div>
             </div>
         </div>
     </div>
     `;
-    document.addEventListener('DOMContentLoaded', function() {
-    const canvas = document.querySelector('.canvas');
 
-    if (canvas) {
-        canvas.addEventListener('click', function() {
-            canvas.classList.toggle('clicked');
-        });
-    }
-});
-
-    const canvasBar = container.querySelector('.canvas_bar');
+    const canvas1 = document.getElementById('canvas1');
+    const canvas2 = document.getElementById('canvas2');
+    const canvas3 = document.getElementById('canvas3');
+    const right_section = document.querySelector('.right-section');
+    const canvas_number = document.querySelector('.canvas_number');
     
-    if (canvasBar) {
+    canvas1.addEventListener('click', function() {
+        window.canvas_num = 1;
+        canvas_number.innerHTML = 'Canvas 1';
+    });
+
+    canvas2.addEventListener('click', function() {
+        window.canvas_num = 2;
+        canvas_number.innerHTML = 'Canvas 2';
+        if (!document.getElementById('canvas-container-2')) {
+            const canvas_container_2 = document.createElement('div');
+            canvas_container_2.id = 'canvas-container-2';
+            canvas_container_2.classList = 'canvas-container';
+            canvas_container_2.innerHTML = `
+            <div id='canvas-container-2' class='canvas-container-2'>
+                <div id='canvas-bar-2' class='canvas_bar'>
+                    <h3>Canvas Controls 2</h3>
+                </div>
+                <div class="canvas_content">
+                    <div class="btn-row" id="global-variables">
+                        <div class="column-container">
+                            <div id="columnLabelX"></div>
+                            <label for="columnSelectorX_0">X-axis: </label>
+                            <select name="xcolumn" id="columnSelectorX_0" class="columnSelectorX" data-track="0">
+                                <option value="" disabled selected></option>
+                            </select>
+                            <label for="x_range_start">X-range:</label>
+                            <input type="text" class="interval-input" id="x_range_start">
+                            <span>-</span>
+                            <input type="text" class="interval-input" id="x_range_end">
+                            <button class="x_interval_button">Apply</button>
+                        </div>
+                    </div>
+                    <div class="btn-row" id="global-y-variables-left">
+                        <h4>Left axis</h4>
+                        <form id="checkbox-left-axis">
+                            <div class="y-checkbox-option">
+                                <input class="y-checkbox-option" type="checkbox" id="track1-left" name="option" value="Track 1" checked>
+                                <label for="track1-left">Track 1</label><br>
+                            </div>
+                            <div class="y-checkbox-option">
+                                <input class="y-checkbox-option" type="checkbox" id="track2-left" name="option" value="Track 2" checked>
+                                <label for="track2-left">Track 2</label><br>
+                            </div>
+                        </form>
+                        <div class="column-container">
+                            <div id="columnLabelY"></div>
+                            <label for="columnSelectorYLeft">Left-Y-axis: </label>
+                            <select name="ycolumn" id="columnSelectorYLeft" class="columnSelectorY" data-track="0">
+                                <option value="" disabled selected></option>
+                            </select>
+                            <label for="y_start">Y-range:</label>
+                            <input type="text" class="interval-input" id="y_start_left">
+                            <span>-</span>
+                            <input type="text" class="interval-input" id="y_end_left">
+                            <button class="y_interval_button" id="y_interval_button_left">Apply</button>
+                        </div>
+                    </div>
+                    <div class="btn-row" id="global-y-variables-right">
+                        <h4>Right axis</h4>
+                        <form id="checkbox-right-axis">
+                            <div class="y-checkbox-option">
+                                <input class="y-checkbox-option" type="checkbox" id="track1-right" name="option" value="Track 1">
+                                <label for="track1-right">Track 1</label><br>
+                            </div>
+                            <div class="y-checkbox-option">
+                                <input class="y-checkbox-option" type="checkbox" id="track2-right" name="option" value="Track 2">
+                                <label for="track2-right">Track 2</label><br>
+                            </div>
+                        </form>
+                        <div class="column-container">
+                            <div id="columnLabelY"></div>
+                            <label for="columnSelectorYRight">Right-Y-axis: </label>
+                            <select name="ycolumn" id="columnSelectorYRight" class="columnSelectorY" data-track="0">
+                                <option value="" disabled selected></option>
+                            </select>
+                            <label for="y_start">Y-range:</label>
+                            <input type="text" class="interval-input" id="y_start_right">
+                            <span>-</span>
+                            <input type="text" class="interval-input" id="y_end_right">
+                            <button class="y_interval_button" id="y_interval_button_right">Apply</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="plot-container-2" class="plot-container"></div>
+            </div>`;
+            right_section.appendChild(canvas_container_2);
+            addCanvasBarToggle('canvas-bar-2', 'canvas-container-2');
+        }
+    });
+
+    canvas3.addEventListener('click', function() {
+        window.canvas_num = 3;
+        canvas_number.innerHTML = 'Canvas 3';
+        if (!document.getElementById('canvas-container-3')) {
+            const canvas_container_3 = document.createElement('div');
+            canvas_container_3.id = 'canvas-container-3';
+            canvas_container_3.classList = 'canvas-container';
+            canvas_container_3.innerHTML = `
+            <div id='canvas-container-3' class='canvas-container-3'>
+                <div id='canvas-bar-3' class='canvas_bar'>
+                    <h3>Canvas Controls 3</h3>
+                </div>
+                <div class="canvas_content">
+                    <div class="btn-row" id="global-variables">
+                        <div class="column-container">
+                            <div id="columnLabelX"></div>
+                            <label for="columnSelectorX_0">X-axis: </label>
+                            <select name="xcolumn" id="columnSelectorX_0" class="columnSelectorX" data-track="0">
+                                <option value="" disabled selected></option>
+                            </select>
+                            <label for="x_range_start">X-range:</label>
+                            <input type="text" class="interval-input" id="x_range_start">
+                            <span>-</span>
+                            <input type="text" class="interval-input" id="x_range_end">
+                            <button class="x_interval_button">Apply</button>
+                        </div>
+                    </div>
+                    <div class="btn-row" id="global-y-variables-left">
+                        <h4>Left axis</h4>
+                        <form id="checkbox-left-axis">
+                            <div class="y-checkbox-option">
+                                <input class="y-checkbox-option" type="checkbox" id="track1-left" name="option" value="Track 1" checked>
+                                <label for="track1-left">Track 1</label><br>
+                            </div>
+                            <div class="y-checkbox-option">
+                                <input class="y-checkbox-option" type="checkbox" id="track2-left" name="option" value="Track 2" checked>
+                                <label for="track2-left">Track 2</label><br>
+                            </div>
+                        </form>
+                        <div class="column-container">
+                            <div id="columnLabelY"></div>
+                            <label for="columnSelectorYLeft">Left-Y-axis: </label>
+                            <select name="ycolumn" id="columnSelectorYLeft" class="columnSelectorY" data-track="0">
+                                <option value="" disabled selected></option>
+                            </select>
+                            <label for="y_start">Y-range:</label>
+                            <input type="text" class="interval-input" id="y_start_left">
+                            <span>-</span>
+                            <input type="text" class="interval-input" id="y_end_left">
+                            <button class="y_interval_button" id="y_interval_button_left">Apply</button>
+                        </div>
+                    </div>
+                    <div class="btn-row" id="global-y-variables-right">
+                        <h4>Right axis</h4>
+                        <form id="checkbox-right-axis">
+                            <div class="y-checkbox-option">
+                                <input class="y-checkbox-option" type="checkbox" id="track1-right" name="option" value="Track 1">
+                                <label for="track1-right">Track 1</label><br>
+                            </div>
+                            <div class="y-checkbox-option">
+                                <input class="y-checkbox-option" type="checkbox" id="track2-right" name="option" value="Track 2">
+                                <label for="track2-right">Track 2</label><br>
+                            </div>
+                        </form>
+                        <div class="column-container">
+                            <div id="columnLabelY"></div>
+                            <label for="columnSelectorYRight">Right-Y-axis: </label>
+                            <select name="ycolumn" id="columnSelectorYRight" class="columnSelectorY" data-track="0">
+                                <option value="" disabled selected></option>
+                            </select>
+                            <label for="y_start">Y-range:</label>
+                            <input type="text" class="interval-input" id="y_start_right">
+                            <span>-</span>
+                            <input type="text" class="interval-input" id="y_end_right">
+                            <button class="y_interval_button" id="y_interval_button_right">Apply</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="plot-container-3" class="plot-container"></div>
+            </div>`;
+            right_section.appendChild(canvas_container_3);
+            addCanvasBarToggle('canvas-bar-3', 'canvas-container-3');
+        }
+    });
+
+    // Add the toggle effect for the initial canvas container
+    addCanvasBarToggle('canvas-bar-1', 'canvas-container-1');
+}
+
+function addCanvasBarToggle(barId, containerId) {
+    const canvasBar = document.getElementById(barId);
+    const canvasContainer = document.getElementById(containerId);
+    if (canvasBar && canvasContainer) {
         canvasBar.addEventListener('click', () => {
-            const canvasContent = container.querySelector('.canvas_content');
+            const canvasContent = canvasContainer.querySelector('.canvas_content');
             if (canvasContent) {
                 canvasContent.style.display = canvasContent.style.display === 'none' ? 'block' : 'none';
             }
         });
     }
 
-    // Add event listener to the clear all settings button
-    const clearAllSettingsButton = container.querySelector('#clear_url_button');
-    if (clearAllSettingsButton) {
-        clearAllSettingsButton.addEventListener('click', () => {
-            location.reload();
-        });
-    }
+        // Add event listener to the clear all settings button
+        const clearAllSettingsButton = container.querySelector('#clear_url_button');
+        if (clearAllSettingsButton) {
+            clearAllSettingsButton.addEventListener('click', () => {
+                location.reload();
+            });
+        }
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
@@ -169,7 +338,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     if (container) {
         all_buttons(container);
     }
-    
 });
 
 window.updateTrackNumber = function() {
@@ -191,7 +359,6 @@ window.generateTracks = async function() {
                 ${await generateTrackBinAndSampleInputs(i)}                                
                 ${await generateTrackMarkSelector(i)}
             </div>
-            
         `; 
     }
     container.innerHTML = '';    
@@ -199,7 +366,7 @@ window.generateTracks = async function() {
     // Render detailing track options
     htmlContent = '';
     for (let i = 0; i < trackCount; i++){
-        htmlContent += `<option value="${i}">Track ${i+1}</option>`
+        htmlContent += `<option value="${i}">Track ${i+1}</option>`;
     }
     const trackSelector = document.getElementById("trackSelector");
     trackSelector.innerHTML = '';
@@ -233,7 +400,7 @@ window.generateTracks = async function() {
         <div id="track${i}" class="track-container">
         <div class="btn-row">
             <h3>Track ${i+1}</h3>        
-            <span  id="clear_url_button${i}"><u class="clear_url_button">Clear settings</u></span >  
+            <span id="clear_url_button${i}"><u class="clear_url_button">Clear settings</u></span >  
         </div>
         <div id="data-load" class="btn-row">
         <div>
@@ -274,14 +441,13 @@ window.generateTracks = async function() {
     await window.generateElementsActions(trackCount);  
     await window.showHideTracks();
 }
+
 // Ensure the Add Track button triggers the track count update
 window.onload = function() {
     document.getElementById('add_track_button').addEventListener('click', updateTrackNumber);
     generateTracks();
 }
-/**
- * 
- */
+
 window.showHideTracks = async function () {
     let trackCount = parseInt(document.getElementById("trackCountSelector").value);
     const selected = document.getElementById('trackSelector').value;
