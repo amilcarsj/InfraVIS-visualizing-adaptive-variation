@@ -512,7 +512,7 @@ window.generateTrackMarkSelector = async function(trackNumber) {
         </div>`;        
 }
 
-window.generateElementsActions = async function(trackCount){
+window.generateElementsActions = async function(trackNumber){
     const fileInputs = document.querySelectorAll('.file-input');
     document.querySelectorAll('.plot-button').forEach(function (button, button_data_track_num) {
         button.addEventListener('click', function () {
