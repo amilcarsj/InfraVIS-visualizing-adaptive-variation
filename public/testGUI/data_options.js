@@ -55,9 +55,14 @@ export async function all_buttons(container) {
             </div>
         </div>
         <div class="right-section">
+            <div class='bars'> 
+                <button id='view1-btn' class='view-btn'> View 1 </button>
+                <button id='view2-btn' class='view-btn' style='display:none;'> View 2 </button>
+                <button id='view3-btn' class='view-btn' style='display:none;'> View 3 </button>
+            </div>
             <div id='canvas-container-1' class='canvas-container'>
                 <div id='canvas-bar-1' class='canvas_bar'>
-                    <h3>Canvas Controls 1</h3>
+                    <h3 class = 'view-control'>View Controls 1</h3>
                 </div>
                 <div class="canvas_content">
                     <div class="btn-row" id="global-variables">
@@ -125,8 +130,8 @@ export async function all_buttons(container) {
                         </div>
                     </div>
                 </div>
-                <div id="plot-container-1" class="plot-container"></div>
             </div>
+            <div id="plot-container-1" class="plot-container"></div>
         </div>
     </div>
     `;
@@ -134,32 +139,57 @@ export async function all_buttons(container) {
     const canvas1 = document.getElementById('canvas1');
     const canvas2 = document.getElementById('canvas2');
     const canvas3 = document.getElementById('canvas3');
-    const right_section = document.querySelector('.right-section');
+    const view_control = document.querySelector('.view-control');
     const canvas_number = document.querySelector('.canvas_number');
 
     canvas1.addEventListener('click', function () {
+        view_control.innerHTML = 'View Controls 1';
         window.canvas_num = 1;
         canvas_number.innerHTML = 'Canvas 1';
         updateCanvasUI();
     });
 
     canvas2.addEventListener('click', function () {
+        const view2_btn = document.getElementById('view2-btn');
+        view_control.innerHTML = 'View Controls 2';
         window.canvas_num = 2;
         canvas_number.innerHTML = 'Canvas 2';
         if (!document.getElementById('canvas-container-2')) {
+            view2_btn.style.display =  'block';
             createCanvasContainer(2);
         }
         updateCanvasUI();
     });
 
     canvas3.addEventListener('click', function () {
+        const view3_btn = document.getElementById('view3-btn');
+        view_control.innerHTML = 'View Controls 3';
         window.canvas_num = 3;
         canvas_number.innerHTML = 'Canvas 3';
         if (!document.getElementById('canvas-container-3')) {
+            view3_btn.style.display = 'block';
             createCanvasContainer(3);
         }
         updateCanvasUI();
     });
+
+    const view1_btn = document.getElementById('view1-btn');
+    const view2_btn = document.getElementById('view2-btn');
+    const view3_btn = document.getElementById('view3-btn');
+    const canvas_container_1 = document.getElementById('canvas-container-1');
+
+    view1_btn.addEventListener('click', function () {
+        view_control.innerHTML = 'View Controls 1';
+        canvas_container_1.id = 'canvas-container-1';
+    })
+    view2_btn.addEventListener('click', function () {
+        view_control.innerHTML = 'View Controls 2';
+        canvas_container_1.id = 'canvas-container-2';
+    })
+    view3_btn.addEventListener('click', function () {
+        view_control.innerHTML = 'View Controls 3';
+        canvas_container_1.id = 'canvas-container-3';
+    })
 
     // Add the toggle effect for the initial canvas container
     addCanvasBarToggle('canvas-bar-1', 'canvas-container-1');
@@ -190,80 +220,9 @@ function addCanvasBarToggle(barId, containerId) {
 function createCanvasContainer(canvasId) {
     const canvas_container = document.createElement('div');
     canvas_container.id = `canvas-container-${canvasId}`;
-    canvas_container.classList = 'canvas-container';
-    canvas_container.innerHTML = `
-    <div id='canvas-container-${canvasId}' class='canvas-container-${canvasId}'>
-        <div id='canvas-bar-${canvasId}' class='canvas_bar'>
-            <h3>Canvas Controls ${canvasId}</h3>
-        </div>
-        <div class="canvas_content">
-            <div class="btn-row" id="global-variables">
-                <div class="column-container">
-                    <div id="columnLabelX"></div>
-                    <label for="columnSelectorX_0">X-axis: </label>
-                    <select name="xcolumn" id="columnSelectorX_0" class="columnSelectorX" data-track="0">
-                        <option value="" disabled selected></option>
-                    </select>
-                    <label for="x_range_start">X-range:</label>
-                    <input type="text" class="interval-input" id="x_range_start">
-                    <span>-</span>
-                    <input type="text" class="interval-input" id="x_range_end">
-                    <button class="x_interval_button">Apply</button>
-                </div>
-            </div>
-            <div class="btn-row" id="global-y-variables-left">
-                <h4>Left axis</h4>
-                <form id="checkbox-left-axis-${canvasId}">
-                    <div class="y-checkbox-option">
-                        <input class="y-checkbox-option" type="checkbox" id="track1-left" name="option" value="Track 1" checked>
-                        <label for="track1-left">Track 1</label><br>
-                    </div>
-                    <div class="y-checkbox-option">
-                        <input class="y-checkbox-option" type="checkbox" id="track2-left" name="option" value="Track 2" checked>
-                        <label for="track2-left">Track 2</label><br>
-                    </div>
-                </form>
-                <div class="column-container">
-                    <div id="columnLabelY"></div>
-                    <label for="columnSelectorYLeft">Left-Y-axis: </label>
-                    <select name="ycolumn" id="columnSelectorYLeft" class="columnSelectorY" data-track="0">
-                        <option value="" disabled selected></option>
-                    </select>
-                    <label for="y_start">Y-range:</label>
-                    <input type="text" class="interval-input" id="y_start_left">
-                    <span>-</span>
-                    <input type="text" class="interval-input" id="y_end_left">
-                    <button class="y_interval_button" id="y_interval_button_left">Apply</button>
-                </div>
-            </div>
-            <div class="btn-row" id="global-y-variables-right">
-                <h4>Right axis</h4>
-                <form id="checkbox-right-axis-${canvasId}">
-                    <div class="y-checkbox-option">
-                        <input class="y-checkbox-option" type="checkbox" id="track1-right" name="option" value="Track 1">
-                        <label for="track1-right">Track 1</label><br>
-                    </div>
-                    <div class="y-checkbox-option">
-                        <input class="y-checkbox-option" type="checkbox" id="track2-right" name="option" value="Track 2">
-                        <label for="track2-right">Track 2</label><br>
-                    </div>
-                </form>
-                <div class="column-container">
-                    <div id="columnLabelY"></div>
-                    <label for="columnSelectorYRight">Right-Y-axis: </label>
-                    <select name="ycolumn" id="columnSelectorYRight" class="columnSelectorY" data-track="0">
-                        <option value="" disabled selected></option>
-                    </select>
-                    <label for="y_start">Y-range:</label>
-                    <input type="text" class="interval-input" id="y_start_right">
-                    <span>-</span>
-                    <input type="text" class="interval-input" id="y_end_right">
-                    <button class="y_interval_button" id="y_interval_button_right">Apply</button>
-                </div>
-            </div>
-        </div>
-        <div id="plot-container-${canvasId}" class="plot-container"></div>
-    </div>`;
+    // canvas_container.classList = 'canvas-container';
+    canvas_container.innerHTML = 
+    `<div id="plot-container-${canvasId}" class="plot-container"></div>`
     document.querySelector('.right-section').appendChild(canvas_container);
     addCanvasBarToggle(`canvas-bar-${canvasId}`, `canvas-container-${canvasId}`);
 }
@@ -272,7 +231,9 @@ function updateCanvasUI() {
     const currentCanvasState = window.canvas_states[window.canvas_num];
     document.getElementById('trackCountSelector').value = currentCanvasState.trackCount;
     generateTracks();
+    GoslingPlotWithLocalData(); 
 }
+
 
 window.updateTrackNumber = function () {
     const currentCanvasState = window.canvas_states[window.canvas_num];
@@ -512,7 +473,7 @@ window.generateTrackMarkSelector = async function(trackNumber) {
         </div>`;        
 }
 
-window.generateElementsActions = async function(trackCount){
+window.generateElementsActions = async function(trackNumber){
     const fileInputs = document.querySelectorAll('.file-input');
     document.querySelectorAll('.plot-button').forEach(function (button, button_data_track_num) {
         button.addEventListener('click', function () {

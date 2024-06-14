@@ -127,13 +127,11 @@ body {
 
 .canvas-container {
     background-color: rgb(211, 211, 211);
-    width: 80%;
+    width: 96%;
+    top: 1%;
     position: relative;
-    top: 40px;
-    right: 15%;
     padding: 30px;
     font-size: 12px;
-    margin-top: 40px;
 }
 
 
@@ -194,19 +192,37 @@ body {
 .right-section {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     padding-left: 10px;
     margin-left: 5%;
-    align-items: flex-end;
+    align-items: flex-start;
+}
+.bars{
+    width: 100%;
+    display: flex;
+    gap: 100px;
+}
+
+.view-btn{
+    padding: 15px;
+    background-color: none;
+    font-size: 17px;
+    border: none;
+    width: 100%;
+}
+#view2-btn, #view3-btn{
+    display: none;
 }
 
 .plot-container {
-    width: 100%;
+    width: 30%;
     position: relative;
-    top: 25px;
-    right: 22%;
+    right: 10%;
     z-index: 1;
-    margin-top: 20px;
+    margin-top: 50px;
+}
+
+#canvas-container-1, #canvas-container-2, #canvas-container-3{
+    margin-top: 10px;
 }
 
 /* Media queries */
@@ -225,20 +241,28 @@ body {
 
 @media only screen and (max-width: 1730px) {
     .plot-container {
-        right: 15%;
-        max-width: 40%;
+        right: 19%;
+        max-width: 30%;
      }
     .canvas-container{
-        right: 27%;
+        right: 15%;
         width:85%;
     }
-
 }
 
 
 /* Media queries */
 /* For screens smaller than 1550px */
 @media only screen and (max-width: 1550px) {
+
+    .plot-container {
+        max-width: 30%;
+     }
+    .canvas-container{
+        right: 5%;
+        width:100%;
+    }
+
     .body-container {
         flex-direction: column;
     }
