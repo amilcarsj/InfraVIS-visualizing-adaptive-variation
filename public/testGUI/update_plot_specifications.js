@@ -93,14 +93,14 @@ export async function handleOptions(data, button_data_track_number) {
 
   const markButtons = document.querySelectorAll('.mark');
   markButtons.forEach(button => {
-    button.addEventListener('change', async function () {
-      const trackValue = button.getAttribute('data-track');
-      const chosenmark = button.value;
-      plotSpec.tracks[trackValue].mark = chosenmark;
-      await GoslingPlotWithLocalData();
-      const mark = "mark" + trackValue.toString();            
-      await updateURLParameters(mark, button.value);            
-    });
+      button.addEventListener('change', async function () {
+          const trackValue = button.getAttribute('data-track');
+          const chosenmark = button.value;
+          plotSpec.tracks[trackValue].mark = chosenmark;
+          await GoslingPlotWithLocalData();
+          const mark = "mark" + trackValue.toString();            
+          await updateURLParameters(mark, button.value);            
+      });
   });
 
   const colorButtons = document.querySelectorAll('.color');
