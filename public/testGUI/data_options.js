@@ -146,6 +146,7 @@ export async function all_buttons(container) {
         view_control.innerHTML = 'View Controls 1';
         window.canvas_num = 1;
         canvas_number.innerHTML = 'Canvas 1';
+        resetSelections();
         updateCanvasUI();
     });
 
@@ -155,9 +156,10 @@ export async function all_buttons(container) {
         window.canvas_num = 2;
         canvas_number.innerHTML = 'Canvas 2';
         if (!document.getElementById('canvas-container-2')) {
-            view2_btn.style.display =  'block';
+            view2_btn.style.display = 'block';
             createCanvasContainer(2);
         }
+        resetSelections();
         updateCanvasUI();
     });
 
@@ -170,6 +172,7 @@ export async function all_buttons(container) {
             view3_btn.style.display = 'block';
             createCanvasContainer(3);
         }
+        resetSelections();
         updateCanvasUI();
     });
 
@@ -181,19 +184,40 @@ export async function all_buttons(container) {
     view1_btn.addEventListener('click', function () {
         view_control.innerHTML = 'View Controls 1';
         canvas_container_1.id = 'canvas-container-1';
+        resetSelections();
     })
     view2_btn.addEventListener('click', function () {
         view_control.innerHTML = 'View Controls 2';
         canvas_container_1.id = 'canvas-container-2';
+        resetSelections();
     })
     view3_btn.addEventListener('click', function () {
         view_control.innerHTML = 'View Controls 3';
         canvas_container_1.id = 'canvas-container-3';
+        resetSelections();
     })
 
     // Add the toggle effect for the initial canvas container
     addCanvasBarToggle('canvas-bar-1', 'canvas-container-1');
     updateCanvasUI();
+}
+
+function resetSelections() {
+    const xSelectors = document.querySelectorAll('.columnSelectorX');
+    const yLeftSelectors = document.querySelectorAll('#columnSelectorYLeft');
+    const yRightSelectors = document.querySelectorAll('#columnSelectorYRight');
+
+    xSelectors.forEach(selector => {
+        selector.selectedIndex = 0;
+    });
+
+    yLeftSelectors.forEach(selector => {
+        selector.selectedIndex = 0;
+    });
+
+    yRightSelectors.forEach(selector => {
+        selector.selectedIndex = 0;
+    });
 }
 
 function addCanvasBarToggle(barId, containerId) {

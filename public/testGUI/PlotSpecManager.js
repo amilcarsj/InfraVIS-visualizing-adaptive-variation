@@ -42,7 +42,7 @@ class PlotSpecManager {
       xDomain: { interval: [0, 200000] },
       alignment: "overlay",
       width: 900,
-      height: 300,
+      height: 200,
       assembly: "unknown",
       style: {
         background: "#D3D3D3",
