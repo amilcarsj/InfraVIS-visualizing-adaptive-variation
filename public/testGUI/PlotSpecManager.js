@@ -22,33 +22,45 @@ function deepCopy(obj) {
 class PlotSpecManager {
   constructor() {
     this.plotSpecs = {
-      1: null,
-      2: null,
-      3: null,
+      1: this.createNewPlotSpec(),
     };
   }
 
-  getPlotSpec(canvasNum) {
-    if (!this.plotSpecs[canvasNum]) {
-      this.plotSpecs[canvasNum] = this.createNewPlotSpec();
-    }
-    return this.plotSpecs[canvasNum];
+  getPlotSpec() {
+    return this.plotSpecs[1];
+  }
+
+  getPlotSpecViewById(viewId) {
+    const plotSpec = this.getPlotSpec();
+    return plotSpec.views.find(view => view.id === viewId);
   }
 
   createNewPlotSpec() {
     return {
-      title: "",
-      static: false,
-      xDomain: { interval: [0, 200000] },
-      alignment: "overlay",
-      width: 900,
-      height: 200,
-      assembly: "unknown",
-      style: {
-        background: "#D3D3D3",
-        backgroundOpacity: 0.1,
-      },
-      tracks: [this.createTrack(), this.createTrack(), this.createTrack(), this.createTrack(), this.createTrack()],
+      views: [
+        {
+          id: "canvas1",
+          title: "Canvas 1",
+          static: false,
+          xDomain: { interval: [0, 200000] },
+          alignment: "overlay",
+          width: 900,
+          height: 200,
+          assembly: "unknown",
+          linkingId: "detail",
+          style: {
+            background: "#D3D3D3",
+            backgroundOpacity: 0.1,
+          },
+          tracks: [
+            this.createTrack(),
+            this.createTrack(),
+            this.createTrack(),
+            this.createTrack(),
+            this.createTrack(),
+          ]
+        }
+      ]
     };
   }
 
@@ -56,12 +68,19 @@ class PlotSpecManager {
     return deepCopy(trackTemplate);
   }
 
-  updatePlotSpec(canvasNum, newPlotSpec) {
-    this.plotSpecs[canvasNum] = newPlotSpec;
+  addOrUpdateCanvasObject(canvasId, newCanvasObject) {
+    const plotSpec = this.getPlotSpec();
+    const existingViewIndex = plotSpec.views.findIndex(view => view.id === canvasId);
+
+    if (existingViewIndex !== -1) {
+      plotSpec.views[existingViewIndex] = newCanvasObject;
+    } else {
+      plotSpec.views.push(newCanvasObject);
+    }
   }
 
-  resetInstance(canvasNum) {
-    this.plotSpecs[canvasNum] = null;
+  resetInstance() {
+    this.plotSpecs[1] = this.createNewPlotSpec();
   }
 }
 

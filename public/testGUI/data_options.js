@@ -13,7 +13,9 @@ window.canvas_states = {
     3: { trackCount: 1, tracks: [] },
 };
 window.canvas_num = 1;
-
+window.object_2_created = false
+window.object_3_created = false
+window.trackCount = 5;
 export async function all_buttons(container) {
     container.innerHTML = `
     <div class="body-container">
@@ -95,7 +97,7 @@ export async function all_buttons(container) {
                             <div id="columnLabelY"></div>
                             <label for="columnSelectorYLeft">Left-Y-axis: </label>
                             <select name="ycolumn" id="columnSelectorYLeft" class="columnSelectorY" data-track="0">
-                                <option value="" disabled selected></option>
+                                <option value="" disabled selected=""></option>
                             </select>                
                             <label for="y_start">Y-range:</label>
                             <input type="text" class="interval-input" id="y_start_left">
@@ -120,7 +122,7 @@ export async function all_buttons(container) {
                             <div id="columnLabelY"></div>
                             <label for="columnSelectorYRight">Right-Y-axis: </label>
                             <select name="ycolumn" id="columnSelectorYRight" class="columnSelectorY" data-track="0">
-                                <option value="" disabled selected></option>
+                                <option value="" disabled selected=""></option>
                             </select>
                             <label for="y_start">Y-range:</label>
                             <input type="text" class="interval-input" id="y_start_right">
@@ -157,20 +159,25 @@ export async function all_buttons(container) {
         canvas_number.innerHTML = 'Canvas 2';
         if (!document.getElementById('canvas-container-2')) {
             view2_btn.style.display = 'block';
-            createCanvasContainer(2);
+        }
+        if (!window.object_2_created) {
+            addOrUpdateCanvasObject('canvas2');
+            window.object_2_created = true
         }
         resetSelections();
         updateCanvasUI();
     });
 
     canvas3.addEventListener('click', function () {
-        const view3_btn = document.getElementById('view3-btn');
         view_control.innerHTML = 'View Controls 3';
         window.canvas_num = 3;
         canvas_number.innerHTML = 'Canvas 3';
         if (!document.getElementById('canvas-container-3')) {
             view3_btn.style.display = 'block';
-            createCanvasContainer(3);
+        }
+        if (!window.object_3_created) {
+            addOrUpdateCanvasObject('canvas3');
+            window.object_3_created = true
         }
         resetSelections();
         updateCanvasUI();
@@ -185,21 +192,52 @@ export async function all_buttons(container) {
         view_control.innerHTML = 'View Controls 1';
         canvas_container_1.id = 'canvas-container-1';
         resetSelections();
-    })
+    });
     view2_btn.addEventListener('click', function () {
         view_control.innerHTML = 'View Controls 2';
         canvas_container_1.id = 'canvas-container-2';
         resetSelections();
-    })
+    });
     view3_btn.addEventListener('click', function () {
         view_control.innerHTML = 'View Controls 3';
         canvas_container_1.id = 'canvas-container-3';
         resetSelections();
-    })
+    });
 
     // Add the toggle effect for the initial canvas container
     addCanvasBarToggle('canvas-bar-1', 'canvas-container-1');
     updateCanvasUI();
+}
+
+function addOrUpdateCanvasObject(canvasId) {
+    const canvas_container = document.createElement('div');
+    canvas_container.id = `canvas-container-${canvasId}`;
+    const newCanvasObject = {
+        id: canvasId,
+        title: `Canvas ${canvasId.slice(-1)}`,
+        static: false,
+        xDomain: { interval: [0, 200000] },
+        alignment: "overlay",
+        width: 900,
+        height: 200,
+        assembly: "unknown",
+        linkingId: "detail",
+        style: {
+            background: "#D3D3D3",
+            backgroundOpacity: 0.1,
+        },
+        tracks: [
+            window.plotSpecManager.createTrack(),
+            window.plotSpecManager.createTrack(),
+            window.plotSpecManager.createTrack(),
+            window.plotSpecManager.createTrack(),
+            window.plotSpecManager.createTrack(),
+        ],
+    };
+
+    window.plotSpecManager.addOrUpdateCanvasObject(canvasId, newCanvasObject);
+    GoslingPlotWithLocalData();
+    
 }
 
 function resetSelections() {
@@ -241,34 +279,24 @@ function addCanvasBarToggle(barId, containerId) {
     }
 }
 
-function createCanvasContainer(canvasId) {
-    const canvas_container = document.createElement('div');
-    canvas_container.id = `canvas-container-${canvasId}`;
-    // canvas_container.classList = 'canvas-container';
-    canvas_container.innerHTML = 
-    `<div id="plot-container-${canvasId}" class="plot-container"></div>`
-    document.querySelector('.right-section').appendChild(canvas_container);
-    addCanvasBarToggle(`canvas-bar-${canvasId}`, `canvas-container-${canvasId}`);
-}
-
 function updateCanvasUI() {
     const currentCanvasState = window.canvas_states[window.canvas_num];
     document.getElementById('trackCountSelector').value = currentCanvasState.trackCount;
     generateTracks();
-    GoslingPlotWithLocalData(); 
+    GoslingPlotWithLocalData();
 }
 
-
-window.updateTrackNumber = function () {
+window.updateTrackNumber = async function () {
     const currentCanvasState = window.canvas_states[window.canvas_num];
     currentCanvasState.trackCount++;
     if (currentCanvasState.trackCount > 5) currentCanvasState.trackCount = 5;
     document.getElementById("trackCountSelector").value = currentCanvasState.trackCount;
     generateTracks();
+
 }
 
 window.generateTracks = async function () {
-    const currentCanvasState = window.canvas_states[window.canvas_num];
+    let currentCanvasState = window.canvas_states[window.canvas_num];
     const trackCount = currentCanvasState.trackCount;
     const container = document.getElementById("container");
     let htmlContent = '';
@@ -279,6 +307,7 @@ window.generateTracks = async function () {
             <div id="track${i}" class="track-container">       
                 ${await generateTrackBinAndSampleInputs(i)}                                
                 ${await generateTrackMarkSelector(i)}
+               
             </div>
         `; 
     }
@@ -362,6 +391,7 @@ window.generateTracks = async function () {
 
     await window.generateElementsActions(trackCount);  
     await window.showHideTracks();
+    await GoslingPlotWithLocalData()
 }
 
 // Ensure the Add Track button triggers the track count update
@@ -497,7 +527,7 @@ window.generateTrackMarkSelector = async function(trackNumber) {
         </div>`;        
 }
 
-window.generateElementsActions = async function(trackNumber){
+window.generateElementsActions = async function(trackNumber) {
     const fileInputs = document.querySelectorAll('.file-input');
     document.querySelectorAll('.plot-button').forEach(function (button, button_data_track_num) {
         button.addEventListener('click', function () {
@@ -520,6 +550,7 @@ window.generateElementsActions = async function(trackNumber){
 
     for (let i = 0; i < trackCount; i++) {
         let clear_url_button = document.getElementById(`clear_url_button${i}`);
+
         clear_url_button.addEventListener('click', function () {
             var url = new window.URL(document.location);
             url.searchParams.forEach((_, key) => url.searchParams.delete(key));
@@ -536,5 +567,5 @@ window.generateElementsActions = async function(trackNumber){
                 console.error(error);
             }
         });
-    }        
+    }      
 }

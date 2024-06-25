@@ -5,6 +5,12 @@ window.plotSpecManager = new PlotSpecManager(); // Initialize PlotSpecManager gl
 
 const fileHeaders = new Map();
 
+function getCurrentViewSpec() {
+  const currentCanvasId = `canvas${window.canvas_num}`;
+  return window.plotSpecManager.getPlotSpecViewById(currentCanvasId);
+}
+
+
 /**
  * Handle various options for data, such as file or server URL.
  * 
@@ -12,7 +18,7 @@ const fileHeaders = new Map();
  * @param {number} button_data_track_number - Button data track number.
  */
 export async function handleOptions(data, button_data_track_number) {
-  const plotSpec = window.plotSpecManager.getPlotSpec(window.canvas_num); // Get the current plot spec
+  const plotSpec = getCurrentViewSpec(); // Get the current plot spec
   const columnSelectorsX = document.querySelectorAll(`.columnSelectorX`);
   const columnSelectorsY = document.querySelectorAll(`.columnSelectorY`);
   let header = []; // Declare header outside the if-else blocks
@@ -109,7 +115,6 @@ export async function handleOptions(data, button_data_track_number) {
       const trackValue = button.getAttribute('data-track');
       const chosencolor = button.value;
       plotSpec.tracks[trackValue].color.value = chosencolor;
-      // console.log(JSON.stringify(plotSpec.tracks[trackValue].color));
       await GoslingPlotWithLocalData();
       await updateURLParameters("color.value"+trackValue.toString(), button.value);
     });
@@ -210,7 +215,7 @@ export async function handleOptions(data, button_data_track_number) {
 }
 
 async function _eventsSelectedTracksPerYAxis(columnSelector, side, plotSpec) {    
-  console.log(`Triggered the event on side ${side}`);
+  // console.log(`Triggered the event on side ${side}`);
   const form = document.getElementById(`checkbox-${side}-axis`);
   const checkboxes = form.querySelectorAll('input[type="checkbox"]:checked');
   const selectedOptions = [];

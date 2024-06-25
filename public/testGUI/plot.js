@@ -1,8 +1,10 @@
 import { embed } from 'gosling.js';
 import { handleOptions } from './update_plot_specifications.js';
 
-function getCurrentPlotSpec() {
-  return window.plotSpecManager.getPlotSpec(window.canvas_num);
+
+function getCurrentViewSpec() {
+  const currentCanvasId = `canvas${window.canvas_num}`;
+  return window.plotSpecManager.getPlotSpecViewById(currentCanvasId);
 }
 
 /**
@@ -16,8 +18,8 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
     const fileInput = fileInputs[button_data_track_number].files[0];
     const fileName = fileInput.name;
     const extension = fileName.substring(fileName.lastIndexOf('.') + 1);
-    const plotSpec = getCurrentPlotSpec();
-    const current_track = plotSpec.tracks[button_data_track_number];
+    const viewSpec = getCurrentViewSpec();
+    const current_track = viewSpec.tracks[button_data_track_number];
     const fileURL = URL.createObjectURL(fileInput);
     if (fileURL) {
       current_track.data.url = fileURL;            
@@ -39,19 +41,17 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
  */
 export async function URLfromServer(URL_input, button_data_track_number) {
   try {
-    const plotSpec = getCurrentPlotSpec();
-    const current_track = plotSpec.tracks[button_data_track_number];
+    const viewSpec = getCurrentViewSpec();
+    const current_track = viewSpec.tracks[button_data_track_number];
     if (URL_input) {
       current_track.data.url = URL_input;
-      // #1: Extracting the file extension from the URL (Everything after the final "/")
       const filename = URL_input.substring(URL_input.lastIndexOf('/') + 1);
-      const extension = filename.substring(filename.lastIndexOf('.') + 1); // Exclude the "."
-      // #2: Retrieve the webserver data (fetching the file)
+      const extension = filename.substring(filename.lastIndexOf('.') + 1);
       const response = await fetch(URL_input);
       if (!response.ok) {
         throw new Error('Network response was not ok.');
       }
-      const fileBlob = await response.blob(); // Retrieve the file data
+      const fileBlob = await response.blob();
       await configureDataType(extension, current_track);
       await handleOptions(fileBlob, button_data_track_number);
       await checkURLParameters(current_track, button_data_track_number);            
@@ -93,8 +93,8 @@ async function configureDataType(extension, track) {
  */
 export async function GoslingPlotWithLocalData() {
   try {
-    const plotSpec = getCurrentPlotSpec(); // Get the current plot spec
-    const container = document.getElementById(`plot-container-${window.canvas_num}`);
+    const plotSpec =  window.plotSpecManager.getPlotSpec(); // Get the current plot spec
+    const container = document.getElementById(`plot-container-1`);
     if (container) {
       await embed(container, plotSpec); // Embed the updated plotSpec in the appropriate container
     } else {
@@ -117,8 +117,8 @@ async function checkURLParameters(track, track_nr) {
     const urlSearch = url.searchParams;
     if (url.searchParams.size > 0) {
       const generateParamName = param => `${param}${track_nr}`;
-      const plotSpec = getCurrentPlotSpec();
-      
+      const plotSpec = getCurrentViewSpec();
+
       track.data.column = track.x.field = track.tooltip[1].field = track.tooltip[1].alt = urlSearch.get(generateParamName("x.field")) || track.data.column;
       track.data.value = track.y.field = track.tooltip[0].field = track.tooltip[0].alt = urlSearch.get(generateParamName("y.field")) || track.data.value;
       track.mark = urlSearch.get(generateParamName("mark")) || track.mark;
