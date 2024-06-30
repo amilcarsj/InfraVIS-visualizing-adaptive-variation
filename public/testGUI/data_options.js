@@ -324,7 +324,7 @@ function updateCanvasUI() {
     const currentCanvasState = window.canvas_states[window.canvas_num];
     document.getElementById('trackCountSelector').value = currentCanvasState.trackCount;
     generateTracks();
-    GoslingPlotWithLocalData();
+    // GoslingPlotWithLocalData();
 }
 
 window.updateTrackNumber = async function () {
@@ -431,7 +431,6 @@ window.generateTracks = async function () {
     });
 
     await new Promise(resolve => setTimeout(resolve, 0));
-    resetSelections()
     await window.generateElementsActions(trackCount);  
     await window.showHideTracks();
     await GoslingPlotWithLocalData();
@@ -440,8 +439,7 @@ window.generateTracks = async function () {
 // Ensure the Add Track button triggers the track count update
 window.onload = function () {
     document.getElementById('add_track_button').addEventListener('click', updateTrackNumber);
-    generateTracks();
-    
+    // generateTracks();
 }
 
 window.showHideTracks = async function () {
