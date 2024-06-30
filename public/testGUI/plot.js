@@ -2,7 +2,7 @@ import { embed } from 'gosling.js';
 import { handleOptions } from './update_plot_specifications.js';
 
 
-function getCurrentViewSpec() {
+export function getCurrentViewSpec() {
   const currentCanvasId = `canvas${window.canvas_num}`;
   return window.plotSpecManager.getPlotSpecViewById(currentCanvasId);
 }

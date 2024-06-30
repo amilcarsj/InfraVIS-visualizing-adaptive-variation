@@ -102,22 +102,23 @@ export async function handleOptions(data, button_data_track_number) {
       button.addEventListener('change', async function () {
           const trackValue = button.getAttribute('data-track');
           const chosenmark = button.value;
+          const plotSpec = getCurrentViewSpec();
           plotSpec.tracks[trackValue].mark = chosenmark;
           await GoslingPlotWithLocalData();
-          const mark = "mark" + trackValue.toString();            
-          await updateURLParameters(mark, button.value);            
+          await updateURLParameters(`mark${trackValue}`, chosenmark);
       });
   });
-
+  
   const colorButtons = document.querySelectorAll('.color');
   colorButtons.forEach(button => {
-    button.addEventListener('change', async function () {
-      const trackValue = button.getAttribute('data-track');
-      const chosencolor = button.value;
-      plotSpec.tracks[trackValue].color.value = chosencolor;
-      await GoslingPlotWithLocalData();
-      await updateURLParameters("color.value"+trackValue.toString(), button.value);
-    });
+      button.addEventListener('change', async function () {
+          const trackValue = button.getAttribute('data-track');
+          const chosencolor = button.value;
+          const plotSpec = getCurrentViewSpec();
+          plotSpec.tracks[trackValue].color.value = chosencolor;
+          await GoslingPlotWithLocalData();
+          await updateURLParameters(`color.value${trackValue}`, chosencolor);
+      });
   });
 
   bcolor.addEventListener('change', async function () {

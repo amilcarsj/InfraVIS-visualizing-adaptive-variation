@@ -4,7 +4,7 @@
  * @returns {Promise<void>} - A Promise that resolves after the container is populated.
  */
 
-import { URLfromFile, URLfromServer, GoslingPlotWithLocalData } from './plot.js';
+import { URLfromFile, URLfromServer, GoslingPlotWithLocalData, getCurrentViewSpec } from './plot.js';
 import { updateURLParameters } from './update_plot_specifications.js';
 
 window.canvas_states = {
@@ -16,6 +16,7 @@ window.canvas_num = 1;
 window.object_2_created = false
 window.object_3_created = false
 window.trackCount = 5;
+window.displayed_canvas = 1
 export async function all_buttons(container) {
     container.innerHTML = `
     <div class="body-container">
@@ -24,6 +25,7 @@ export async function all_buttons(container) {
                 <button id="canvas1" class="canvas-button">Canvas 1</button>
                 <button id="canvas2" class="canvas-button">Canvas 2</button>
                 <button id="canvas3" class="canvas-button">Canvas 3</button>
+                <button id="add_canvas"> <i class="fa fa-plus"></i></button>
             </div>  
             <div id="header" class="buttons-container">            
                 <div class="btn-row">
@@ -143,6 +145,45 @@ export async function all_buttons(container) {
     const canvas3 = document.getElementById('canvas3');
     const view_control = document.querySelector('.view-control');
     const canvas_number = document.querySelector('.canvas_number');
+    const add_canvas = document.getElementById('add_canvas');
+
+    add_canvas.addEventListener('click', function () {
+        if (displayed_canvas === 1) {
+            canvas2.style.display = 'block';
+            displayed_canvas = 2
+            const view2_btn = document.getElementById('view2-btn');
+            view_control.innerHTML = 'View Controls 2';
+            window.canvas_num = 2;
+            canvas_number.innerHTML = 'Canvas 2';
+            if (!document.getElementById('canvas-container-2')) {
+                view2_btn.style.display = 'block';
+            }
+            if (!window.object_2_created) {
+                addOrUpdateCanvasObject('canvas2');
+                window.object_2_created = true
+            }
+            resetSelections();
+            updateCanvasUI();
+        }
+        
+        else if (displayed_canvas === 2) {
+            canvas3.style.display = 'block';
+            view_control.innerHTML = 'View Controls 3';
+            window.canvas_num = 3;
+            canvas_number.innerHTML = 'Canvas 3';
+            if (!document.getElementById('canvas-container-3')) {
+                view3_btn.style.display = 'block';
+            }
+            if (!window.object_3_created) {
+                addOrUpdateCanvasObject('canvas3');
+                window.object_3_created = true
+            }
+            resetSelections();
+            updateCanvasUI();
+            this.style.cursor = 'not-allowed';
+            this.disabled = true;
+        }
+    })
 
     canvas1.addEventListener('click', function () {
         view_control.innerHTML = 'View Controls 1';
@@ -304,7 +345,7 @@ window.generateTracks = async function () {
     // Render buttons containers
     for (let i = 0; i < trackCount; i++) {
         htmlContent += `
-            <div id="track${i}" class="track-container">       
+            <div id="track${i}" class="track-container">      
                 ${await generateTrackBinAndSampleInputs(i)}                                
                 ${await generateTrackMarkSelector(i)}
                
@@ -389,15 +430,18 @@ window.generateTracks = async function () {
         });
     });
 
+    await new Promise(resolve => setTimeout(resolve, 0));
+    resetSelections()
     await window.generateElementsActions(trackCount);  
     await window.showHideTracks();
-    await GoslingPlotWithLocalData()
+    await GoslingPlotWithLocalData();
 }
 
 // Ensure the Add Track button triggers the track count update
 window.onload = function () {
     document.getElementById('add_track_button').addEventListener('click', updateTrackNumber);
     generateTracks();
+    
 }
 
 window.showHideTracks = async function () {
@@ -409,9 +453,7 @@ window.showHideTracks = async function () {
         if (trackContainer) {
             if (i == selected) {
                 trackContainer.style.display = 'block';
-            } else {
-                trackContainer.style.display = 'none';
-            }
+            } 
         }
     }
 }
@@ -519,12 +561,12 @@ window.generateTrackMarkSelector = async function(trackNumber) {
                 <option value="#377eb8"${trackNumber === 1 ? " selected" : ""}>blue</option>
                 <option value="#4daf4a"${trackNumber === 2 ? " selected" : ""}>green</option>
                 <option value="#984ea3"${trackNumber === 3 ? " selected" : ""}>purple</option>
-                <option value="#ff7f00"${trackNumber === 4 ? " selected" : ""}>orange</option>                
+                <option value="#ff7f00"${trackNumber === 4 ? " selected" : ""}>orange</option>
             </select>
             <label for="marksize_${trackNumber}">Mark size:</label>
             <input name="size" type="number" class="interval-input" id="marksize_${trackNumber}" data-track="${trackNumber}">
             <button class="marksize" id="marksize_button_${trackNumber}" data-track="${trackNumber}">Apply</button>
-        </div>`;        
+        </div>`;
 }
 
 window.generateElementsActions = async function(trackNumber) {
@@ -540,6 +582,40 @@ window.generateElementsActions = async function(trackNumber) {
         });
     });
 
+    document.querySelectorAll('.mark').forEach(function (markSelector) {
+        markSelector.addEventListener('change', async function () {
+            const trackValue = this.getAttribute('data-track');
+            const chosenMark = this.value;
+            const plotSpec = getCurrentViewSpec();
+            plotSpec.tracks[trackValue].mark = chosenMark;
+            await GoslingPlotWithLocalData();
+            await updateURLParameters(`mark${trackValue}`, chosenMark);
+        });
+    });
+
+    document.querySelectorAll('.color').forEach(function (colorSelector) {
+        colorSelector.addEventListener('change', async function () {
+            const trackValue = this.getAttribute('data-track');
+            const chosenColor = this.value;
+            const plotSpec = getCurrentViewSpec();
+            plotSpec.tracks[trackValue].color.value = chosenColor;
+            await GoslingPlotWithLocalData();
+            await updateURLParameters(`color.value${trackValue}`, chosenColor);
+        });
+    });
+
+    document.querySelectorAll('.marksize').forEach(function (sizeButton) {
+        sizeButton.addEventListener('click', async function () {
+            const trackValue = this.getAttribute('data-track');
+            const inputField = document.getElementById(`marksize_${trackValue}`);
+            const chosenSize = parseFloat(inputField.value);
+            const plotSpec = getCurrentViewSpec();
+            plotSpec.tracks[trackValue].size.value = chosenSize;
+            await GoslingPlotWithLocalData();
+            await updateURLParameters(`size.value${trackValue}`, chosenSize);
+        });
+    });
+
     document.querySelectorAll('.url-button').forEach(function (urlButton, trackNumber) {
         const urlInput = document.getElementById(`urlinput_${trackNumber}`);
         
@@ -548,24 +624,25 @@ window.generateElementsActions = async function(trackNumber) {
         });
     });
 
-    for (let i = 0; i < trackCount; i++) {
+    for (let i = 0; i < trackNumber; i++) {
         let clear_url_button = document.getElementById(`clear_url_button${i}`);
-
-        clear_url_button.addEventListener('click', function () {
-            var url = new window.URL(document.location);
-            url.searchParams.forEach((_, key) => url.searchParams.delete(key));
-            history.pushState({}, '', url);
-        });
-
-        clear_url_button.addEventListener('click', function () {
-            try {
-                var url = new URL(document.location);
-                Array.from(url.searchParams.keys()).forEach(key => url.searchParams.delete(key));
+        if (clear_url_button) {
+            clear_url_button.addEventListener('click', function () {
+                var url = new window.URL(document.location);
+                url.searchParams.forEach((_, key) => url.searchParams.delete(key));
                 history.pushState({}, '', url);
-                window.location.reload();
-            } catch (error) {
-                console.error(error);
-            }
-        });
+            });
+
+            clear_url_button.addEventListener('click', function () {
+                try {
+                    var url = new URL(document.location);
+                    Array.from(url.searchParams.keys()).forEach(key => url.searchParams.delete(key));
+                    history.pushState({}, '', url);
+                    // window.location.reload();
+                } catch (error) {
+                    console.error(error);
+                }
+            });
+        }
     }      
 }

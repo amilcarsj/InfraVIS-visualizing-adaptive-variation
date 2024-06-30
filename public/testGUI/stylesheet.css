@@ -59,17 +59,31 @@ html, body {
     display: flex;
     width: 100%;
     justify-content: center;
-    gap: 200px;
+    gap: 80px;
     font-size: 23px;
     cursor: pointer;
     max-height: 75px;
+    margin-left: 10px;
 }
 .canvas-button{
     background: none;
     border: none;
     font-size: 21px;
 }
-
+#canvas2, #canvas3 {
+    display: none;
+}
+#add_canvas{
+    border-radius: 20%;
+    padding: 5px;
+    font-size: 20px;
+    width: 50px;
+    margin-top: 5px;
+}
+#add_canvas:hover{
+    background-color: rgb(56, 56, 56);
+    color: white;
+}
 .canvas_header {
     padding: 3px;
 }
