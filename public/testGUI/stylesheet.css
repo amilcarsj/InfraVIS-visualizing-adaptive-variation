@@ -95,7 +95,7 @@ html, body {
 .buttons-container {
     margin-left: 15px;
     background-color: rgb(228, 228, 228);
-    width: 100%;
+    width: 80%;
     padding: 15px;
     min-height: auto;
     height: calc(100vh - 20px);
@@ -200,7 +200,7 @@ body {
 .left-section {
     padding-right: 10px;
     margin-right: 5%;
-
+    
 }
 
 .right-section {
@@ -299,14 +299,14 @@ body {
     position: relative;
     top: 50%;
     background-color: rgb(182, 181, 181);
-    padding: 15px;
+    padding: 5px;
     border-bottom:15px solid rgb(228, 228, 228);
     font-size: 14px;
 }
 
 .clear_url_button {
     position: relative;
-    left: 70%;
+    left: 60%;
     bottom: 30px;
     background: none;
     border: none;
@@ -345,6 +345,7 @@ button, select, input {
     margin-right: 30px;
     cursor: pointer;
     padding: 4px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 label {
@@ -422,32 +423,83 @@ button:active, #info_button:active, #close_button:active {
 }
 
 .plot-button, .url-input {
-    font-size: 14px;
-    padding: 5px;
+    font-size: 15px;
+    padding: 12px;
     color: #4d4d4d;
     border: 2px solid rgb(182, 181, 181);
     border-radius: 5px;
+    width: 30%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .plot-button:hover {
     color: white;
 }
 
+.fa-plus-circle{
+   margin-right: 20px;
+}
+.fa-times-circle{
+    margin-left: 20px;
+}
+
+.apply-button{
+    width: 100%;
+    font-size: 20px;
+    padding: 10px;
+    margin-top: 10px;
+    background-color: rgb(63, 63, 63);
+    color: white;
+    border-radius: 5px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 .url-button {
-    padding: 5px;
+    padding: 10px;
     background-color: rgb(56, 56, 56);
     color: white;
     font-size: 14px;
     border: 1px solid rgb(56, 56, 56);
     border-radius: 4px;
+    height: 43px;
 }
 
 .interval-input, .mark, .color {
-    font-size: 14px;
+    font-size: 18px;
     background-color: #c5c5c5;
     border: 2px solid #8a8a8a;
     border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+.bin-sample-container {
+    display: flex;
+    flex-direction: column;
+}
+
+#inner-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    row-gap: 20px; 
+}
+
+.input-group {
+    display: flex;
+    align-items: right;
+    
+}
+
+.input-group label {
+    width: 100px; /* Set a fixed width for labels to align properly */
+    text-align: left; /* Right-align labels */
+    margin-right: 10px; /* Space between label and input */
+    margin-top: 10px;
+}
+
+.input-group input,
+.input-group select {
+    margin-top: 10px;
+}
+
 
 .x_interval_button, .y_interval_button, .binsize, .samplelength, .marksize {
     font-size: 15px;
@@ -456,7 +508,9 @@ button:active, #info_button:active, #close_button:active {
     font-size: 14px;
     border: 1px solid rgb(126, 126, 126);
     border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
 
 .x_interval_button:hover, .y_interval_button:hover, .binsize:hover, .samplelength:hover, .marksize:hover {
     background-color: rgb(165, 165, 165);

@@ -29,10 +29,10 @@ export async function all_buttons(container) {
             </div>  
             <div id="header" class="buttons-container">            
                 <div class="btn-row">
-                    <h3 class='canvas_number'>Canvas 1</h3>
-                    <h3>Track Controls</h3>
-                    <span id="clear_url_button" class="clear_all_settings">Clear all settings</span>
-                    <button id='add_track_button' class="add_track_button">Add Track</button>
+                    <h2 class='canvas_number'>Canvas 1</h2>
+                    <h2>Track Controls</h2>
+                    <span id="clear_url_button" class="clear_all_settings"><u>  Clear All </u></span>
+                    <button id='add_track_button' class="add_track_button"><i class="fa fa-plus-circle" style="font-size:24px;"></i>Add Track</button>
                     <label for="trackCountSelector"></label>
                     <select id="trackCountSelector" class='trackCountSelector' onchange="generateTracks()">
                         <option value="1" selected>1 Track</option>
@@ -346,9 +346,7 @@ window.generateTracks = async function () {
     for (let i = 0; i < trackCount; i++) {
         htmlContent += `
             <div id="track${i}" class="track-container">      
-                ${await generateTrackBinAndSampleInputs(i)}                                
-                ${await generateTrackMarkSelector(i)}
-               
+                ${await generateTrackBinAndSampleInputs(i)}                                            
             </div>
         `; 
     }
@@ -390,23 +388,20 @@ window.generateTracks = async function () {
         dataLoad.innerHTML += `
         <div id="track${i}" class="track-container">
         <div class="btn-row">
-            <h3>Track ${i + 1}</h3>        
-            <span id="clear_url_button${i}"><u class="clear_url_button">Clear settings</u></span >  
+            <h2>Track ${i + 1}</h2>        
+            <span id="clear_url_button${i}"><u class="clear_url_button"> Clear settings <i class="fa fa-times-circle" style="font-size:18px;"></i></u></span >  
         </div>
         <div id="data-load" class="btn-row">
         <div>
-            <label>Track ${i + 1}:</label>
-            <button class="plot-button" data-track="${i}">Choose file</button>
+            <button class="plot-button" data-track="${i}"><i class="fa fa-upload" style="font-size:18px;"></i> Select file </button> 
             <input type="file" class="file-input" style="display: none;">
-        
-            <label for="urlinput_${i}" style="margin-right:30px;">or</label>
+            <label for="urlinput_${i}" style="margin-right:30px;">OR</label>
             <input type="url" id="urlinput_${i}" class="url-input" placeholder="Enter URL">
             <button class="url-button" data-track="${i}">Load</button>
             <label class="success-msg" id="msg-load-track-${i}"></label>
         </div>
         </div>
         ${await generateTrackBinAndSampleInputs(i)}                                
-        ${await generateTrackMarkSelector(i)}
     </div>`;
     }
     dataLoad.innerHTML += `<div id="container"></div>`;
@@ -456,33 +451,7 @@ window.showHideTracks = async function () {
     }
 }
 
-/**
- * Generates HTML for a track button with input fields and selectors.
- * @param {number} trackNumber - The number of the track.
- * @returns {string} - The HTML content for the track button.
- */
-window.generateTrackButton = async function (trackNumber) {
-    return `
-        <div class="track${trackNumber} btn-row">
-            <h3>Track ${trackNumber + 1}</h3>
-            <button class="plot-button" data-track="${trackNumber}">Choose file</button>
-            <input type="file" class="file-input" style="display: none;">
-            
-            <label for="urlinput_${trackNumber}" style="margin-right:30px;">or</label>
-            <input type="url" id="urlinput_${trackNumber}" class="url-input" placeholder="Enter URL">
-            <button class="url-button" data-track="${trackNumber}">Load</button>
-           
-            <div class="column-container">
-                <div id="columnLabelY"></div>
-                <label for="columnSelectorY_${trackNumber}">Y-axis: </label>
-                <select name="ycolumn" id="columnSelectorY_${trackNumber}" class="columnSelectorY" data-track="${trackNumber}">
-                    <option value="" disabled selected></option>
-                </select>
-            </div>
 
-            ${trackNumber === 1 ? '<label>Separate y-axis<input type="checkbox" id="check"></label>' : ''}
-        </div>`;
-}
 /**
  * Generates HTML for input fields related to bin size and sample length for a track.
  * @param {number} trackNumber - The number of the track.
@@ -490,15 +459,51 @@ window.generateTrackButton = async function (trackNumber) {
  */
 window.generateTrackBinAndSampleInputs = async function (trackNumber) {
     return `
-        <div class="track${trackNumber} btn-row">
-            <label for="binsize_${trackNumber}">Bin size:</label>
-            <input type="number" class="interval-input" name="binsize" id="binsize_${trackNumber}">
-            <button class="binsize" id="binsize_button_${trackNumber}" data-track="${trackNumber}">Apply</button>
-
-            <label for="samplelength_${trackNumber}">Sample length:</label>
-            <input type="number" class="interval-input" name="samplelength" id="samplelength_${trackNumber}">
-            <button class="samplelength" id="samplelength_button_${trackNumber}" data-track="${trackNumber}">Apply</button>
-        </div>`;
+    <div class='bin-sample-container track-${trackNumber}'> 
+        <div class="btn-row" id ='inner-container'>
+            <div class="left-side">
+                <div class="input-group">
+                    <label for="binsize_${trackNumber}">Bin size</label>
+                    <input type="number" class="interval-input" name="binsize" id="binsize_${trackNumber}">
+                </div>
+                <div class="input-group">
+                    <label for="samplelength_${trackNumber}">Sample length</label>
+                    <input type="number" class="interval-input" name="samplelength" id="samplelength_${trackNumber}">
+                </div>
+                <div class="input-group"> 
+                    <label for="mark_${trackNumber}">Marker type</label>
+                    <select name="mark" id="mark_${trackNumber}" class="mark" data-track="${trackNumber}">
+                        <option value="point" selected>point</option>
+                        <option value="line">line</option>
+                        <option value="area">area</option>
+                        <option value="bar">bar</option>
+                        <option value="rect">rect</option>
+                        <option value="text">text</option>
+                        <option value="link">link</option>
+                        <option value="triangle">triangle</option>
+                    </select>
+                </div>
+            </div>
+            <div class="right-side">
+                <div class="input-group"> 
+                    <label for="color_${trackNumber}">Color</label>
+                    <select name="color" id="color_${trackNumber}" class="color" data-track="${trackNumber}">
+                        <option value="#e41a1c"${trackNumber === 0 ? " selected" : ""}>red</option>
+                        <option value="#377eb8"${trackNumber === 1 ? " selected" : ""}>blue</option>
+                        <option value="#4daf4a"${trackNumber === 2 ? " selected" : ""}>green</option>
+                        <option value="#984ea3"${trackNumber === 3 ? " selected" : ""}>purple</option>
+                        <option value="#ff7f00"${trackNumber === 4 ? " selected" : ""}>orange</option>
+                    </select></div>
+                <div class="input-group">
+                    <label for="marksize_${trackNumber}">Mark size</label>
+                    <input name="size" type="number" class="interval-input" id="marksize_${trackNumber}" data-track="${trackNumber}">
+                </div>
+                <div class="input-group"> 
+                    <button class="apply-button" data-track="${trackNumber}">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>`;
 }
 
 /**
@@ -539,33 +544,13 @@ window.generateYDomainInputs = async function(trackNumber) {
  * @param {number} trackNumber - The number of the track.
  * @returns {string} - The HTML content for mark selectors.
  */
-window.generateTrackMarkSelector = async function(trackNumber) {
-    return `
-        <div class="track${trackNumber} btn-row">
-            <label for="mark_${trackNumber}">Marker:</label>
-            <select name="mark" id="mark_${trackNumber}" class="mark" data-track="${trackNumber}">
-                <option value="point" selected>point</option>
-                <option value="line">line</option>
-                <option value="area">area</option>
-                <option value="bar">bar</option>
-                <option value="rect">rect</option>
-                <option value="text">text</option>
-                <option value="link">link</option>
-                <option value="triangle">triangle</option>
-            </select>
-            <label for="color_${trackNumber}">Color:</label>
-            <select name="color" id="color_${trackNumber}" class="color" data-track="${trackNumber}">
-                <option value="#e41a1c"${trackNumber === 0 ? " selected" : ""}>red</option>
-                <option value="#377eb8"${trackNumber === 1 ? " selected" : ""}>blue</option>
-                <option value="#4daf4a"${trackNumber === 2 ? " selected" : ""}>green</option>
-                <option value="#984ea3"${trackNumber === 3 ? " selected" : ""}>purple</option>
-                <option value="#ff7f00"${trackNumber === 4 ? " selected" : ""}>orange</option>
-            </select>
-            <label for="marksize_${trackNumber}">Mark size:</label>
-            <input name="size" type="number" class="interval-input" id="marksize_${trackNumber}" data-track="${trackNumber}">
-            <button class="marksize" id="marksize_button_${trackNumber}" data-track="${trackNumber}">Apply</button>
-        </div>`;
-}
+// window.generateTrackMarkSelector = async function(trackNumber) {
+//     return `
+//         <div class="track${trackNumber} btn-row">
+
+           
+//         </div>`;
+// }
 
 window.generateElementsActions = async function(trackNumber) {
     const fileInputs = document.querySelectorAll('.file-input');
@@ -602,15 +587,46 @@ window.generateElementsActions = async function(trackNumber) {
         });
     });
 
-    document.querySelectorAll('.marksize').forEach(function (sizeButton) {
-        sizeButton.addEventListener('click', async function () {
+    document.querySelectorAll('.marksize').forEach(function (sizeInput) {
+        sizeInput.addEventListener('input', async function () {
             const trackValue = this.getAttribute('data-track');
-            const inputField = document.getElementById(`marksize_${trackValue}`);
-            const chosenSize = parseFloat(inputField.value);
+            const chosenSize = parseFloat(this.value);
             const plotSpec = getCurrentViewSpec();
             plotSpec.tracks[trackValue].size.value = chosenSize;
             await GoslingPlotWithLocalData();
             await updateURLParameters(`size.value${trackValue}`, chosenSize);
+        });
+    });
+    
+    document.querySelectorAll('.apply-button').forEach(function (applyButton) {
+        applyButton.addEventListener('click', async function () {
+            const trackNumber = this.getAttribute('data-track');
+            const binSizeInput = document.getElementById(`binsize_${trackNumber}`);
+            const sampleLengthInput = document.getElementById(`samplelength_${trackNumber}`);
+            const markSizeInput = document.getElementById(`marksize_${trackNumber}`);
+            
+            const binSize = parseFloat(binSizeInput.value);
+            const sampleLength = parseFloat(sampleLengthInput.value);
+            const markSize = parseFloat(markSizeInput.value);
+            
+            const plotSpec = getCurrentViewSpec();
+            
+            if (!isNaN(binSize)) {
+                plotSpec.tracks[trackNumber].binSize = binSize;
+                await updateURLParameters(`binsize${trackNumber}`, binSize);
+            }
+            
+            if (!isNaN(sampleLength)) {
+                plotSpec.tracks[trackNumber].sampleLength = sampleLength;
+                await updateURLParameters(`samplelength${trackNumber}`, sampleLength);
+            }
+            
+            if (!isNaN(markSize)) {
+                plotSpec.tracks[trackNumber].size.value = markSize;
+                await updateURLParameters(`size.value${trackNumber}`, markSize);
+            }
+            
+            await GoslingPlotWithLocalData();
         });
     });
 
