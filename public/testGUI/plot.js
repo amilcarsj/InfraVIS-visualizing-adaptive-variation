@@ -140,3 +140,16 @@ async function checkURLParameters(track, track_nr) {
     console.error(error);
   }
 }
+
+export async function exportPlotSpecAsSVG() {
+  const plotSpec = window.plotSpecManager.getPlotSpec();
+  const container = document.createElement('div');
+  await embed(container, plotSpec);
+  const svgElement = container.querySelector('svg');
+  if (svgElement) {
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(svgElement);
+      return svgString;
+  }
+  throw new Error('SVG element not found');
+}

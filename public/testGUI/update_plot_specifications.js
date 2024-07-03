@@ -156,22 +156,24 @@ export async function handleOptions(data, button_data_track_number) {
       const trackValue = button.getAttribute('data-track');
       const inputField = document.getElementById(`binsize_${trackValue}`);
       const chosenbinsize = parseFloat(inputField.value);
+      const plotSpec = getCurrentViewSpec();
       plotSpec.tracks[trackValue].data.binSize = chosenbinsize;
       await GoslingPlotWithLocalData();
       const binSize = "data.binSize" + trackValue.toString();
       updateURLParameters(binSize, chosenbinsize);
     });
   });
-
+  
   const samplelengthButtons = document.querySelectorAll('.samplelength');
   samplelengthButtons.forEach(button => {
     button.addEventListener('click', async function () {
       const trackValue = button.getAttribute('data-track');
       const inputField = document.getElementById(`samplelength_${trackValue}`);
       const chosensamplelength = parseFloat(inputField.value);
+      const plotSpec = getCurrentViewSpec();
       plotSpec.tracks[trackValue].data.sampleLength = chosensamplelength;
       await GoslingPlotWithLocalData();
-      const sampleLength = "sampleLength" + trackValue.toString();
+      const sampleLength = "data.sampleLength" + trackValue.toString();
       updateURLParameters(sampleLength, chosensamplelength);
     });
   });
@@ -216,7 +218,6 @@ export async function handleOptions(data, button_data_track_number) {
 }
 
 async function _eventsSelectedTracksPerYAxis(columnSelector, side, plotSpec) {    
-  // console.log(`Triggered the event on side ${side}`);
   const form = document.getElementById(`checkbox-${side}-axis`);
   const checkboxes = form.querySelectorAll('input[type="checkbox"]:checked');
   const selectedOptions = [];

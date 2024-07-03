@@ -42,8 +42,13 @@ html, body {
     bottom: 50px;
 }
 
-#bcolor {
-    display: none;
+.bcolor-container{
+    position: relative;
+    top: 30%;
+}   
+#bcolor{
+    margin-left: 10px;
+    border: none;
 }
 
 #trackSelector {
@@ -141,18 +146,18 @@ body {
 
 .canvas-container {
     background-color: rgb(211, 211, 211);
-    width: 96%;
+    width: 110%;
     top: 1%;
     position: relative;
-    padding: 30px;
+    padding: 19px;
     font-size: 12px;
+    right: 10%;
 }
 
 
 .canvas_bar {
     background-color:  rgb(211, 211, 211);
     cursor: pointer;
-    padding: 5px;
     width: 100%;
     position: relative;
     z-index: 1000;
@@ -164,7 +169,8 @@ body {
     position: absolute;
     right: 10px;
     top: 50%;
-    transform: translateY(-50%);
+    transform: translateY(-20%);
+    transform: rotate(90deg);
     border-width: 10px;
     border-style: solid;
     border-color: transparent transparent transparent black;
@@ -172,21 +178,8 @@ body {
 
 .canvas_bar .canvas_content {
     display: block;
-    background-color: rgb(199, 201, 201);
-    border-top: 10px solid #ffffff;
-    max-height: 430px;
-    overflow-y: auto; 
-    position: absolute;
-    right: 0;
-    top: 100%;
-    width: 100%;
 }
 
-.canvas_bar.active .canvas_content {
-    display: block;
-}
-
-/* Style for left and right sections */
 .body-container {
     display: flex;
     width: 100%;
@@ -211,8 +204,10 @@ body {
     align-items: flex-start;
 }
 .bars{
-    width: 100%;
+    width: 110%;
     display: flex;
+    position: relative;
+    right: 80px;
     gap: 100px;
 }
 
@@ -238,55 +233,17 @@ body {
 #canvas-container-1, #canvas-container-2, #canvas-container-3{
     margin-top: 10px;
 }
-
-/* Media queries */
-/* For screens smaller than 1550px */
-@media only screen and (max-width: 1850px) {
-    .plot-container {
-        right: 15%;
-    }
-    .canvas-container{
-        right: 20%;
-        width:85%;
-    }
-
+.apply-all-button{
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    background-color: rgb(134, 134, 134);
+    position: relative;
+    left: 250%;
+    width: 200px;
+    padding: 10px;
+    color: white;
 }
-
-
-@media only screen and (max-width: 1730px) {
-    .plot-container {
-        right: 19%;
-        max-width: 30%;
-     }
-    .canvas-container{
-        right: 15%;
-        width:85%;
-    }
-}
-
-
-/* Media queries */
-/* For screens smaller than 1550px */
-@media only screen and (max-width: 1550px) {
-
-    .plot-container {
-        max-width: 30%;
-     }
-    .canvas-container{
-        right: 5%;
-        width:100%;
-    }
-
-    .body-container {
-        flex-direction: column;
-    }
-
-    .left-section, .right-section {
-        width: 70%;
-    }
-}
-
-
 
 #trackCountSelector {
     width: 0;
@@ -316,10 +273,10 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
-.clear_all_button {
+.clear_settings_button {
     position: relative;
-    left: 80%;
-    top: -35px;
+    left: 60%;
+    top: -20px;
     background: none;
     border: none;
     padding: 0;
@@ -327,10 +284,7 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
-.both_tracks, .column-container {
-    display: inline-flex;
-    gap: 5px;
-}
+
 
 #header {
     margin-top: 15px;
@@ -365,7 +319,7 @@ label {
     background: rgb(117, 117, 117);
 }
 
-#clear_url_button:hover, .clear_all_button:hover {
+#clear_url_button:hover, .clear_settings_button:hover {
     color: rgba(105, 38, 7, 0.583);
     cursor: pointer;
 }
@@ -489,9 +443,9 @@ button:active, #info_button:active, #close_button:active {
 }
 
 .input-group label {
-    width: 100px; /* Set a fixed width for labels to align properly */
-    text-align: left; /* Right-align labels */
-    margin-right: 10px; /* Space between label and input */
+    width: 100px;
+    text-align: left;
+    margin-right: 10px;
     margin-top: 10px;
 }
 
@@ -520,4 +474,302 @@ button:active, #info_button:active, #close_button:active {
 input[type='text'] {
     padding: 5px;
     
+}
+
+.canvas_content{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    margin-top: 30px;
+}
+
+.column1 {
+    display: inline-block;
+    width: 100%;
+ 
+}
+.column3{
+    margin-top: 30px;
+}
+
+.interval-input{
+    background-color: rgb(245, 245, 245);
+    margin-top: 10px;
+    
+}
+.column-container{
+    margin-top: 10px;
+}
+.columnSelectorY, .columnSelectorX{
+    width: 90px;
+    border: 2px solid gray;
+    border-radius: 5px;
+    height: 35px;
+    
+}
+
+.y-axis-left{
+    margin-top: 15px;
+}
+.y-axis-right{
+    margin-top: 45px;
+}
+#columnLabelY{
+    font-size: 40px;
+}
+.y-range-left{
+    margin-left: 19px;
+}
+.y-range-right{
+    margin-left: 25px;
+}
+
+.x-axis-select{
+    margin-left: 9px;
+}
+
+.hidden {
+    display: none;
+}
+.dashed-range{
+    font-size: 30px;
+    position: relative;
+    top: 5px;
+}
+
+#global-variables{
+    border-right: 2px solid rgb(240, 240, 240);
+}
+#export-json-button{
+    position: absolute;
+    left: 20%;
+    top: 20%;
+    display:  inline-block;;
+    border: none;
+    background-color: #4d4d4d;
+    color: white;
+    padding: 5px;
+}
+#export-svg-button{
+    position: absolute;
+    left: 27%;
+    top: 20%;
+    display: inline-block;
+    border: none;
+    background-color: #4d4d4d;
+    color: white;
+    padding: 5px;
+}
+
+#export-svg-button:hover, #export-json-button:hover{
+    background-color: rgb(180, 180, 180);
+    color: black;
+}
+
+/* Media queries */
+/* For screens smaller than 1550px */
+@media only screen and (max-width: 1850px) {
+    .plot-container {
+        right: 15%;
+    }
+    .apply-button{
+        width: 80%;
+        font-size: 18px;
+        padding: 8px;
+    }
+    .apply-all-button{
+        left: 500px;
+    }
+    .input-group input,
+    .input-group select {
+        width: 70px;
+        font-size: 13px;
+        left: 20px;
+    }
+    .input-group label {
+        width: 80px;
+        margin-right: 8px;
+        margin-top: 8px;
+        font-size: 11px;
+    }
+
+    .canvas-container{
+        width:110%;
+        right: 10%;
+    }
+    .bars{
+        width: 110%;
+        right: 10%;
+    }
+    #export-svg-button{
+        left: 22%;
+    }
+    #export-json-button{
+        left: 15%;
+    }
+    .plot-button, .url-input{
+        font-size: 15px;
+        padding: 8px;
+    }
+    .or-inbetween{
+        position: relative;
+        right: 15px;
+    }
+    .url-button{
+        padding: 5px;
+        font-size: 12px;
+        height: 37px;
+        position: relative;
+        display: block;
+        left: 85%;
+        bottom: 35px;
+    
+    }
+    .interval-input {
+        font-size: 17px;
+    }
+}
+
+@media only screen and (max-width: 1730px) {
+    .plot-container {
+        right: 19%;
+        max-width: 30%;
+     }
+     .apply-button{
+        width: 60%;
+        font-size: 16px;
+        padding: 7px;
+    }
+    .input-group input,
+    .input-group select {
+        width: 65px;
+        left: 20px;
+    }
+    .input-group label {
+        font-size: 10px;
+    }
+    .canvas-container{
+        width:110%;
+        right: 10%;
+    }
+    .apply-all-button{
+        left: 500px;
+    }
+    #export-svg-button{
+        left: 20%;
+    }
+    #export-json-button{
+        left: 12%;
+    }
+    .url-button{
+        padding: 6px;
+        font-size: 13px;
+        height: 31px;
+        left: 86%;
+        bottom: 30px;
+    }
+    .bars{
+        width: 110%;
+    }
+    .plot-button, .url-input{
+        font-size: 13px;
+        padding: 6px;
+    }
+    .interval-input {
+        font-size: 16px;
+    }
+}
+
+
+/* Media queries */
+/* For screens smaller than 1619px */
+@media only screen and (max-width: 1619px) {
+
+    .plot-container {
+        left:100px
+     }
+    .canvas-container{
+        right: 5%;
+        width:90%;
+    }
+    .input-group input,
+    .input-group select {
+        width: 70px;
+        font-size: 13px;
+    }
+    .body-container {
+        flex-direction: column;
+    }
+
+    .left-section, .right-section {
+        width: 70%;
+    }
+    #export-svg-button{
+        left: 40%;
+    }
+    #export-json-button{
+        left: 32%;
+    }
+    .plot-button, .url-input{
+        font-size: 15px;
+        padding: 10px;
+    }
+    .url-button{
+        height: 38px;
+        bottom: 40px;
+        left: 510px;
+    }
+    .bars{
+        width: 92%;
+        right:50px;
+    }
+    .interval-input {
+        font-size: 15px;
+    }
+}
+
+@media only screen and (max-width: 1350px) {
+    .plot-container {
+        left: 1px;
+     }
+
+    .input-group input,
+    .input-group select {
+        width: 60px;
+        font-size: 12px;
+    }
+    .interval-input {
+        font-size: 14px;
+        padding: 1px;
+    }
+    .apply-all-button{
+        left: 300px;
+        padding: 5px;
+        width: 150px;
+    }
+    .columnSelectorY, .columnSelectorX{
+        font-size: 12px;
+        width: 60px;
+        padding: 5px;
+    }
+    .canvas-container{
+        width:80%;
+    }
+    #export-json-button{
+        left: 26%;
+    }
+    .url-button{
+        padding: 8px;
+        font-size: 15px;
+        height: 32px;
+        left: 75%;
+        bottom: 30px;
+    }
+    .plot-button, .url-input{
+        font-size: 13px;
+        padding: 5px;
+    }
+    .bars{
+        margin-left: 20px;
+    }
+
 }

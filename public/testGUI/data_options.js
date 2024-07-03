@@ -47,11 +47,6 @@ export async function all_buttons(container) {
                         <label for="trackSelector"></label>
                         <select id="trackSelector" onchange="showHideTracks()"></select>
                     </div>
-                    <select name="bcolor" id="bcolor">
-                        <option value="" disabled="" selected=""></option>
-                        <option value="white">white</option>
-                        <option value="grey">grey</option>
-                    </select>
                 </div>
                 <div id="data-load" class="btn-row">
                     <div id="container"></div> 
@@ -68,70 +63,88 @@ export async function all_buttons(container) {
                 <div id='canvas-bar-1' class='canvas_bar'>
                     <h3 class = 'view-control'>View Controls 1</h3>
                 </div>
-                <div class="canvas_content">
+                <div class="canvas_content hidden">
                     <div class="btn-row" id="global-variables">
-                        <div class="column-container">
-                            <div id="columnLabelX"></div>
-                            <label for="columnSelectorX_0">X-axis: </label>
-                            <select name="xcolumn" id="columnSelectorX_0" class="columnSelectorX" data-track="0">
-                                <option value="" disabled selected></option>
-                            </select>                
-                            <label for="x_range_start">X-range:</label>
-                            <input type="text" class="interval-input" id="x_range_start">                    
-                            <span>-</span>
-                            <input type="text" class="interval-input" id="x_range_end">
-                            <button class="x_interval_button">Apply</button>
-                        </div>
-                    </div>
-                    <div class="btn-row" id="global-y-variables-left">                
-                        <h4>Left axis</h4>
-                        <form id="checkbox-left-axis">
-                            <div class="y-checkbox-option">    
-                                <input class="y-checkbox-option" type="checkbox" id="track1-left" name="option" value="Track 1" checked>
-                                <label for="track1-left">Track 1</label><br>
+                        <h2>X axis</h2>
+                            <div class="column-container">
+                                <div class='x-axis-select'>
+                                    <label for="columnSelectorX_0">X-axis: </label>
+                                    <select name="xcolumn" id="columnSelectorX_0" class="columnSelectorX" data-track="0">
+                                        <option value="" disabled selected></option>
+                                    </select>
+                                </div>
+                                <div class = 'column1'> 
+                                    <label for="x_range_start">X-range:</label>
+                                    <input type="text" class="interval-input" id="x_range_start">                    
+                                    <span class='dashed-range'>-</span>
+                                    <input type="text" class="interval-input" id="x_range_end">
+                                </div>
                             </div>
-                            <div class="y-checkbox-option">        
-                                <input class="y-checkbox-option" type="checkbox" id="track2-left" name="option" value="Track 2" checked>
-                                <label for="track2-left">Track 2</label><br>                    
-                            </div>
-                        </form>
-                        <div class="column-container">
-                            <div id="columnLabelY"></div>
-                            <label for="columnSelectorYLeft">Left-Y-axis: </label>
-                            <select name="ycolumn" id="columnSelectorYLeft" class="columnSelectorY" data-track="0">
-                                <option value="" disabled selected=""></option>
-                            </select>                
-                            <label for="y_start">Y-range:</label>
-                            <input type="text" class="interval-input" id="y_start_left">
-                            <span>-</span>
-                            <input type="text" class="interval-input" id="y_end_left">
-                            <button class="y_interval_button" id="y_interval_button_left">Apply</button>
-                        </div>
-                    </div>
-                    <div class="btn-row" id="global-y-variables-right">                
-                        <h4>Right axis</h4>
-                        <form id="checkbox-right-axis">
-                            <div class="y-checkbox-option">    
-                                <input class="y-checkbox-option" type="checkbox" id="track1-right" name="option" value="Track 1">
-                                <label for="track1-right">Track 1</label><br>
-                            </div>
-                            <div class="y-checkbox-option">    
-                                <input class="y-checkbox-option" type="checkbox" id="track2-right" name="option" value="Track 2">
-                                <label for="track2-right">Track 2</label><br>                    
-                            </div>
-                        </form>
-                        <div class="column-container">
-                            <div id="columnLabelY"></div>
-                            <label for="columnSelectorYRight">Right-Y-axis: </label>
-                            <select name="ycolumn" id="columnSelectorYRight" class="columnSelectorY" data-track="0">
-                                <option value="" disabled selected=""></option>
+                        <div class='bcolor-container'> 
+                            <label for="bcolor">Select background color  </label>
+                            <select name="bcolor" id="bcolor">
+                                <option value="white">white</option>
+                                <option value="grey">grey</option>
                             </select>
-                            <label for="y_start">Y-range:</label>
-                            <input type="text" class="interval-input" id="y_start_right">
-                            <span>-</span>
-                            <input type="text" class="interval-input" id="y_end_right">
-                            <button class="y_interval_button" id="y_interval_button_right">Apply</button>
                         </div>
+                    </div>
+                    <div class="btn-row" id="global-y-variables-left"> 
+                        <h2>Y-axis</h2>
+                        <div class = 'column2'>                
+                            <h2 class='y-axis-left'><i class="fa fa-solid fa-caret-left"></i>  Left Y-axis </h2>
+                            <form id="checkbox-left-axis">
+                                <div class="y-checkbox-option">    
+                                    <input class="y-checkbox-option" type="checkbox" id="track1-left" name="option" value="Track 1" checked>
+                                    <label for="track1-left">Track 1</label><br>
+                                </div>
+                                <div class="y-checkbox-option">        
+                                    <input class="y-checkbox-option" type="checkbox" id="track2-left" name="option" value="Track 2" checked>
+                                    <label for="track2-left">Track 2</label><br>                    
+                                </div>
+                            </form>
+                            <div class="column-container">
+                                <label for="columnSelectorYLeft">Left-Y-axis: </label>
+                                <select name="ycolumn" id="columnSelectorYLeft" class="columnSelectorY" data-track="0">
+                                    <option value="" disabled selected=""></option>
+                                </select>
+                                <div class = 'y-range-left'>                
+                                    <label for="y_start_left">Y-range:</label>
+                                    <input type="text" class="interval-input" id="y_start_left">
+                                    <span class='dashed-range'>-</span>
+                                    <input type="text" class="interval-input" id="y_end_left">
+                                </div> 
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn-row" id="global-y-variables-right">
+                        <div class = 'column3'>                 
+                            <h2 class='y-axis-right'>Right Y-axis  <i class="fa fa-solid fa-caret-right"></i></h2>
+                            <form id="checkbox-right-axis">
+                                <div class="y-checkbox-option">    
+                                    <input class="y-checkbox-option" type="checkbox" id="track1-right" name="option" value="Track 1">
+                                    <label for="track1-right">Track 1</label><br>
+                                </div>
+                                <div class="y-checkbox-option">    
+                                    <input class="y-checkbox-option" type="checkbox" id="track2-right" name="option" value="Track 2">
+                                    <label for="track2-right">Track 2</label><br>                    
+                                </div>
+                            </form>
+                            <div class="column-container">
+                                <label for="columnSelectorYRight">Right-Y-axis: </label>
+                                <select name="ycolumn" id="columnSelectorYRight" class="columnSelectorY" data-track="0">
+                                    <option value="" disabled selected=""></option>
+                                </select>
+                                <div class = 'y-range-right'>   
+                                    <label for="y_start_right">Y-range:</label>
+                                    <input type="text" class="interval-input" id="y_start_right">
+                                    <span class='dashed-range'>-</span>
+                                    <input type="text" class="interval-input" id="y_end_right">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn-row">
+                        <button class="apply-all-button">Apply</button>
                     </div>
                 </div>
             </div>
@@ -306,7 +319,7 @@ function addCanvasBarToggle(barId, containerId) {
         canvasBar.addEventListener('click', () => {
             const canvasContent = canvasContainer.querySelector('.canvas_content');
             if (canvasContent) {
-                canvasContent.style.display = canvasContent.style.display === 'none' ? 'block' : 'none';
+                canvasContent.classList.toggle('hidden');
             }
         });
     }
@@ -315,6 +328,7 @@ function addCanvasBarToggle(barId, containerId) {
     const clearAllSettingsButton = document.querySelector('#clear_url_button');
     if (clearAllSettingsButton) {
         clearAllSettingsButton.addEventListener('click', () => {
+            updateURLParameters("xDomain.interval", [0, 200000]);
             location.reload();
         });
     }
@@ -325,6 +339,35 @@ function updateCanvasUI() {
     document.getElementById('trackCountSelector').value = currentCanvasState.trackCount;
     generateTracks();
     // GoslingPlotWithLocalData();
+}
+
+function resetTrackSettings(trackNumber) {
+    // Reset inputs and selectors to their default values
+    document.getElementById(`binsize_${trackNumber}`).value = '';
+    document.getElementById(`samplelength_${trackNumber}`).value = '';
+    document.getElementById(`marksize_${trackNumber}`).value = '';
+    document.getElementById(`columnSelectorX_${trackNumber}`).selectedIndex = 0;
+    document.getElementById(`columnSelectorYLeft`).selectedIndex = 0;
+    document.getElementById(`columnSelectorYRight`).selectedIndex = 0;
+    document.getElementById(`mark_${trackNumber}`).selectedIndex = 0;
+    document.getElementById(`color_${trackNumber}`).selectedIndex = 0;
+    
+    // Reset other track-specific settings as needed
+    const plotSpec = getCurrentViewSpec();
+    plotSpec.tracks[trackNumber].data.url = ''
+    plotSpec.tracks[trackNumber].data.binSize = 10;
+    plotSpec.tracks[trackNumber].data.sampleLength = 1000;
+    plotSpec.tracks[trackNumber].size.value = 3;
+    plotSpec.tracks[trackNumber].mark = 'point';
+    plotSpec.tracks[trackNumber].color.value = '#e41a1c';
+
+    // Apply changes and update the UI
+    updateURLParameters(`data.binSize${trackNumber}`, 0);
+    updateURLParameters(`data.sampleLength${trackNumber}`, 0);
+    updateURLParameters(`size.value${trackNumber}`, 0);
+    updateURLParameters(`mark${trackNumber}`, 'point');
+    updateURLParameters(`color.value${trackNumber}`, '#e41a1c');
+    GoslingPlotWithLocalData();
 }
 
 window.updateTrackNumber = async function () {
@@ -387,15 +430,15 @@ window.generateTracks = async function () {
         </div>`;
         dataLoad.innerHTML += `
         <div id="track${i}" class="track-container">
-        <div class="btn-row">
-            <h2>Track ${i + 1}</h2>        
-            <span id="clear_url_button${i}"><u class="clear_url_button"> Clear settings <i class="fa fa-times-circle" style="font-size:18px;"></i></u></span >  
-        </div>
+            <div class="btn-row">
+                <h2>Track ${i + 1}</h2>        
+                <span id="clear_settings_button${i}" class="clear_settings_button">Clear settings <i class="fa fa-times-circle" style="font-size:18px;"></i></span>
+            </div>
         <div id="data-load" class="btn-row">
-        <div>
+        <div class=file-container>
             <button class="plot-button" data-track="${i}"><i class="fa fa-upload" style="font-size:18px;"></i> Select file </button> 
             <input type="file" class="file-input" style="display: none;">
-            <label for="urlinput_${i}" style="margin-right:30px;">OR</label>
+            <label for="urlinput_${i}" class='or-inbetween'>OR</label>
             <input type="url" id="urlinput_${i}" class="url-input" placeholder="Enter URL">
             <button class="url-button" data-track="${i}">Load</button>
             <label class="success-msg" id="msg-load-track-${i}"></label>
@@ -451,7 +494,6 @@ window.showHideTracks = async function () {
     }
 }
 
-
 /**
  * Generates HTML for input fields related to bin size and sample length for a track.
  * @param {number} trackNumber - The number of the track.
@@ -506,52 +548,6 @@ window.generateTrackBinAndSampleInputs = async function (trackNumber) {
     </div>`;
 }
 
-/**
- * Generates HTML for input fields related to the Y-domain interval for a track.
- * @param {number} trackNumber - The number of the track.
- * @returns {string} - The HTML content for Y-domain inputs.
- */
-window.generateXDomainInputs = async function(trackNumber) {
-    return `
-        <div class="both_tracks btn-row">
-            <label for="x_range_start">X-domain:</label>
-            <input type="text" class="interval-input" id="x_range_start">
-            <span>-</span>
-            <input type="text" class="interval-input" id="x_range_end">
-            <button class="x_interval_button">Apply</button>
-        </div>
-        `;
-}
-
-/**
- * Generates HTML for input fields related to the Y-domain interval for a track.
- * @param {number} trackNumber - The number of the track.
- * @returns {string} - The HTML content for Y-domain inputs.
- */
-window.generateYDomainInputs = async function(trackNumber) {
-    return `
-        <div class="track${trackNumber} btn-row">
-            <label for="y_start${trackNumber}">Y-domain:</label>
-            <input type="text" class="interval-input" id="y_start${trackNumber}">
-            <span>-</span>
-            <input type="text" class="interval-input" id="y_end${trackNumber}">
-            <button class="y_interval_button" id="y_interval_button${trackNumber}">Apply</button>
-        </div>`;
-}
-
-/**
- * Generates HTML for selectors related to mark type, color, and size for a track.
- * @param {number} trackNumber - The number of the track.
- * @returns {string} - The HTML content for mark selectors.
- */
-// window.generateTrackMarkSelector = async function(trackNumber) {
-//     return `
-//         <div class="track${trackNumber} btn-row">
-
-           
-//         </div>`;
-// }
-
 window.generateElementsActions = async function(trackNumber) {
     const fileInputs = document.querySelectorAll('.file-input');
     document.querySelectorAll('.plot-button').forEach(function (button, button_data_track_num) {
@@ -604,58 +600,78 @@ window.generateElementsActions = async function(trackNumber) {
             const binSizeInput = document.getElementById(`binsize_${trackNumber}`);
             const sampleLengthInput = document.getElementById(`samplelength_${trackNumber}`);
             const markSizeInput = document.getElementById(`marksize_${trackNumber}`);
-            
             const binSize = parseFloat(binSizeInput.value);
             const sampleLength = parseFloat(sampleLengthInput.value);
             const markSize = parseFloat(markSizeInput.value);
-            
             const plotSpec = getCurrentViewSpec();
             
             if (!isNaN(binSize)) {
-                plotSpec.tracks[trackNumber].binSize = binSize;
-                await updateURLParameters(`binsize${trackNumber}`, binSize);
+                plotSpec.tracks[trackNumber].data.binSize = binSize;
+                await updateURLParameters(`data.binSize${trackNumber}`, binSize);
             }
             
             if (!isNaN(sampleLength)) {
-                plotSpec.tracks[trackNumber].sampleLength = sampleLength;
-                await updateURLParameters(`samplelength${trackNumber}`, sampleLength);
+                plotSpec.tracks[trackNumber].data.sampleLength = sampleLength;
+                await updateURLParameters(`data.sampleLength${trackNumber}`, sampleLength);
             }
             
             if (!isNaN(markSize)) {
                 plotSpec.tracks[trackNumber].size.value = markSize;
                 await updateURLParameters(`size.value${trackNumber}`, markSize);
             }
-            
             await GoslingPlotWithLocalData();
         });
     });
 
-    document.querySelectorAll('.url-button').forEach(function (urlButton, trackNumber) {
-        const urlInput = document.getElementById(`urlinput_${trackNumber}`);
+    document.querySelector('.apply-all-button').addEventListener('click', async function () {
+        // X-axis range
+        const x_start = parseFloat(document.getElementById('x_range_start').value);
+        const x_end = parseFloat(document.getElementById('x_range_end').value);
+        const x_interval = [x_start, x_end];
         
+        // Left Y-axis range
+        const y_start_left = parseFloat(document.getElementById('y_start_left').value);
+        const y_end_left = parseFloat(document.getElementById('y_end_left').value);
+        const y_interval_left = [y_start_left, y_end_left];
+        
+        // Right Y-axis range
+        const y_start_right = parseFloat(document.getElementById('y_start_right').value);
+        const y_end_right = parseFloat(document.getElementById('y_end_right').value);
+        const y_interval_right = [y_start_right, y_end_right];
+    
+        const plotSpec = getCurrentViewSpec();
+        plotSpec.xDomain.interval = x_interval;
+        
+        const leftChecked = document.querySelectorAll('#checkbox-left-axis input[type="checkbox"]:checked');
+        leftChecked.forEach(function (checkbox) {
+            const trackIndex = parseInt(checkbox.value.split(' ')[1]) - 1;
+            plotSpec.tracks[trackIndex].y.domain = y_interval_left;
+        });
+    
+        const rightChecked = document.querySelectorAll('#checkbox-right-axis input[type="checkbox"]:checked');
+        rightChecked.forEach(function (checkbox) {
+            const trackIndex = parseInt(checkbox.value.split(' ')[1]) - 1;
+            plotSpec.tracks[trackIndex].y.domain = y_interval_right;
+        });
+    
+        await GoslingPlotWithLocalData();
+        updateURLParameters("xDomain.interval", x_interval);
+        updateURLParameters("yDomain.left", y_interval_left);
+        updateURLParameters("yDomain.right", y_interval_right);
+    });
+
+    document.querySelectorAll('.url-button').forEach(function (urlButton, trackNumber) {
+        const urlInput = document.getElementById(`urlinput_${trackNumber}`);  
         urlButton.addEventListener('click', function () {
             URLfromServer(urlInput.value, trackNumber);
         });
     });
 
     for (let i = 0; i < trackNumber; i++) {
-        let clear_url_button = document.getElementById(`clear_url_button${i}`);
-        if (clear_url_button) {
-            clear_url_button.addEventListener('click', function () {
-                var url = new window.URL(document.location);
-                url.searchParams.forEach((_, key) => url.searchParams.delete(key));
-                history.pushState({}, '', url);
-            });
-
-            clear_url_button.addEventListener('click', function () {
-                try {
-                    var url = new URL(document.location);
-                    Array.from(url.searchParams.keys()).forEach(key => url.searchParams.delete(key));
-                    history.pushState({}, '', url);
-                    // window.location.reload();
-                } catch (error) {
-                    console.error(error);
-                }
+        let clear_settings_button = document.getElementById(`clear_settings_button${i}`);
+        if (clear_settings_button) {
+            clear_settings_button.addEventListener('click', function () {
+                resetTrackSettings(i);
             });
         }
     }      
