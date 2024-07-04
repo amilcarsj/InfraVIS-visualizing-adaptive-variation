@@ -4,7 +4,7 @@
  * @returns {Promise<void>} - A Promise that resolves after the container is populated.
  */
 
-import { URLfromFile, URLfromServer, GoslingPlotWithLocalData, getCurrentViewSpec } from './plot.js';
+import { URLfromFile, URLfromServer, GoslingPlotWithLocalData, getCurrentViewSpec, exportPlotSpecAsSVG } from './plot.js';
 import { updateURLParameters } from './update_plot_specifications.js';
 
 window.canvas_states = {
@@ -27,7 +27,9 @@ export async function all_buttons(container) {
                 <button id="canvas3" class="canvas-button">Canvas 3</button>
                 <button id="add_canvas"> <i class="fa fa-plus"></i></button>
             </div>  
-            <div id="header" class="buttons-container">            
+            <div id="header" class="buttons-container">        
+                <button id="export-json-button">Export as JSON</button>
+                <button id="export-svg-button">Export as SVG</button>    
                 <div class="btn-row">
                     <h2 class='canvas_number'>Canvas 1</h2>
                     <h2>Track Controls</h2>
@@ -548,6 +550,8 @@ window.generateTrackBinAndSampleInputs = async function (trackNumber) {
     </div>`;
 }
 
+
+
 window.generateElementsActions = async function(trackNumber) {
     const fileInputs = document.querySelectorAll('.file-input');
     document.querySelectorAll('.plot-button').forEach(function (button, button_data_track_num) {
@@ -559,6 +563,32 @@ window.generateElementsActions = async function(trackNumber) {
         fileInput.addEventListener('change', function () {
             URLfromFile(fileInputs, button_data_track_num);
         });
+    });
+    
+    document.getElementById('export-json-button').addEventListener('click', () => {
+        const jsonSpec = window.plotSpecManager.exportPlotSpecAsJSON();
+        const blob = new Blob([jsonSpec], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'plotSpec.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('export-svg-button').addEventListener('click', async () => {
+        try {
+            const svgString = await exportPlotSpecAsSVG();
+            const blob = new Blob([svgString], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'plotSpec.svg';
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error exporting SVG:', error);
+        }
     });
 
     document.querySelectorAll('.mark').forEach(function (markSelector) {

@@ -237,7 +237,7 @@ body {
     font-size: 18px;
     border: none;
     border-radius: 5px;
-    background-color: rgb(134, 134, 134);
+    background-color: rgb(63, 63, 63);
     position: relative;
     left: 250%;
     width: 200px;
@@ -540,9 +540,9 @@ input[type='text'] {
     border-right: 2px solid rgb(240, 240, 240);
 }
 #export-json-button{
-    position: absolute;
-    left: 20%;
-    top: 20%;
+    position: relative;
+    left: 48%;
+    top: 15%;
     display:  inline-block;;
     border: none;
     background-color: #4d4d4d;
@@ -550,9 +550,9 @@ input[type='text'] {
     padding: 5px;
 }
 #export-svg-button{
-    position: absolute;
-    left: 27%;
-    top: 20%;
+    position: relative;
+    left: 50%;
+    top: 15%;
     display: inline-block;
     border: none;
     background-color: #4d4d4d;
@@ -563,6 +563,19 @@ input[type='text'] {
 #export-svg-button:hover, #export-json-button:hover{
     background-color: rgb(180, 180, 180);
     color: black;
+}
+.or-inbetween{
+    position: relative;
+    right: 15px;
+}
+
+@media only screen and (max-width: 1880px) {
+    .url-button{
+        position: relative;
+        display: block;
+        left: 73%;
+        bottom: 45px;
+    }
 }
 
 /* Media queries */
@@ -615,14 +628,11 @@ input[type='text'] {
         right: 15px;
     }
     .url-button{
+        left: 77%;
         padding: 5px;
         font-size: 12px;
         height: 37px;
-        position: relative;
-        display: block;
-        left: 85%;
-        bottom: 35px;
-    
+        bottom: 37px;
     }
     .interval-input {
         font-size: 17px;
@@ -693,8 +703,22 @@ input[type='text'] {
     }
     .input-group input,
     .input-group select {
-        width: 70px;
+        width: 120px;
+        font-size: 15px;
+    }
+    .apply-button{
+        width: 80%;
+        font-size: 20px;
+        padding: 10px;
+    }
+    .input-group .interval-input{
+        min-width: 120px;
+        padding: 5px;
+    }
+    .input-group label {
         font-size: 13px;
+        width: 120px;
+        margin-right: 10px;
     }
     .body-container {
         flex-direction: column;
@@ -704,10 +728,10 @@ input[type='text'] {
         width: 70%;
     }
     #export-svg-button{
-        left: 40%;
+        left: 65%;
     }
     #export-json-button{
-        left: 32%;
+        left: 60%;
     }
     .plot-button, .url-input{
         font-size: 15px;
@@ -716,7 +740,8 @@ input[type='text'] {
     .url-button{
         height: 38px;
         bottom: 40px;
-        left: 510px;
+        left: 515px;
+        font-size: 18px;
     }
     .bars{
         width: 92%;
@@ -734,12 +759,12 @@ input[type='text'] {
 
     .input-group input,
     .input-group select {
-        width: 60px;
+        width: 68px;
         font-size: 12px;
     }
-    .interval-input {
-        font-size: 14px;
-        padding: 1px;
+    .input-group .interval-input{
+        min-width: 70px;
+        padding: 5px;
     }
     .apply-all-button{
         left: 300px;
@@ -761,7 +786,7 @@ input[type='text'] {
         padding: 8px;
         font-size: 15px;
         height: 32px;
-        left: 75%;
+        left: 70%;
         bottom: 30px;
     }
     .plot-button, .url-input{
@@ -769,7 +794,8 @@ input[type='text'] {
         padding: 5px;
     }
     .bars{
-        margin-left: 20px;
+        margin-left: 10px;
+        width: 83%;
     }
 
 }

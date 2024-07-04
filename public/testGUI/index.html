@@ -19,17 +19,13 @@
 </head>
 <body>
     <div class="container">
-        <button id="export-json-button">Export as JSON</button>
-        <button id="export-svg-button">Export as SVG</button>
         <div id="overlay"></div> 
         <div id="buttons" class="all_buttons"></div>
-
     </div>
     <script type="module">
         import { PlotSpecManager } from './testGUI/PlotSpecManager.js';         
         import { all_buttons } from './testGUI/data_options.js';
         import { overlay } from './testGUI/overlay.js';
-        import { exportPlotSpecAsSVG } from './testGUI/plot.js';
 
         const overlay_container = document.getElementById('overlay');
         const buttons_container = document.getElementById('buttons');
@@ -42,31 +38,7 @@
             await all_buttons(buttons_container);
             await window.generateTracks();                   
         });
-        document.getElementById('export-json-button').addEventListener('click', () => {
-        const jsonSpec = window.plotSpecManager.exportPlotSpecAsJSON();
-        const blob = new Blob([jsonSpec], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'plotSpec.json';
-        a.click();
-        URL.revokeObjectURL(url);
-    });
 
-    document.getElementById('export-svg-button').addEventListener('click', async () => {
-        try {
-            const svgString = await exportPlotSpecAsSVG();
-            const blob = new Blob([svgString], { type: 'image/svg+xml' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'plotSpec.svg';
-            a.click();
-            URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Error exporting SVG:', error);
-        }
-    });
     </script>
 </body>
 </html>
