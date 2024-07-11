@@ -1,7 +1,6 @@
 import { embed } from 'gosling.js';
 import { handleOptions } from './update_plot_specifications.js';
 
-
 export function getCurrentViewSpec() {
   const currentCanvasId = `canvas${window.canvas_num}`;
   return window.plotSpecManager.getPlotSpecViewById(currentCanvasId);
@@ -17,19 +16,22 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
   try {
     const fileInput = fileInputs[button_data_track_number].files[0];
     const fileName = fileInput.name;
-    const extension = fileName.substring(fileName.lastIndexOf('.') + 1);
+    const extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase(); // Convert to lower case to avoid case issues
     const viewSpec = getCurrentViewSpec();
     const current_track = viewSpec.tracks[button_data_track_number];
     const fileURL = URL.createObjectURL(fileInput);
+
     if (fileURL) {
-      current_track.data.url = fileURL;            
-      await configureDataType(extension, current_track);
+      current_track.data.url = fileURL;
+      await configureDataType(extension, current_track); // This will throw an error if the file type is invalid
       await handleOptions(fileInput, button_data_track_number);
       await checkURLParameters(current_track, button_data_track_number);
       await GoslingPlotWithLocalData();
+      console.log('File loaded successfully'); // Only log this if everything is successful
     }
   } catch (error) {
     console.error(error);
+    alert(error.message); // Display an alert with the error message
   }
 }
 
@@ -46,7 +48,7 @@ export async function URLfromServer(URL_input, button_data_track_number) {
     if (URL_input) {
       current_track.data.url = URL_input;
       const filename = URL_input.substring(URL_input.lastIndexOf('/') + 1);
-      const extension = filename.substring(filename.lastIndexOf('.') + 1);
+      const extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
       const response = await fetch(URL_input);
       if (!response.ok) {
         throw new Error('Network response was not ok.');
@@ -58,7 +60,7 @@ export async function URLfromServer(URL_input, button_data_track_number) {
       await GoslingPlotWithLocalData();
     }
   } catch (error) {
-    console.error(error);
+    alert(error.message);
   }
 }
 
@@ -69,22 +71,20 @@ export async function URLfromServer(URL_input, button_data_track_number) {
  * @param {object} track - Track object.
  */
 async function configureDataType(extension, track) {
-  try {
-    if (!track.data || typeof track.data !== 'object') {
-      track.data = {};
-    }
+  const validExtensions = ['tsv', 'csv'];
+  if (!track.data || typeof track.data !== 'object') {
+    track.data = {};
+  }
+  if (validExtensions.includes(extension)) {
     if (extension === 'tsv') {
       track.data.type = 'csv';
       track.data.separator = '\t';
     } else if (extension === 'csv') {
       track.data.type = 'csv';
       track.data.separator = ',';
-    } else {
-      console.error('Invalid data type');
-      return;
     }
-  } catch (error) {
-    console.error(error);
+  } else {
+    throw new Error('Invalid file extension. Only .tsv and .csv files are allowed.');
   }
 }
 
@@ -93,7 +93,7 @@ async function configureDataType(extension, track) {
  */
 export async function GoslingPlotWithLocalData() {
   try {
-    const plotSpec =  window.plotSpecManager.getPlotSpec(); // Get the current plot spec
+    const plotSpec = window.plotSpecManager.getPlotSpec(); // Get the current plot spec
     const container = document.getElementById(`plot-container-1`);
     if (container) {
       await embed(container, plotSpec); // Embed the updated plotSpec in the appropriate container
@@ -141,15 +141,29 @@ async function checkURLParameters(track, track_nr) {
   }
 }
 
-export async function exportPlotSpecAsSVG() {
-  const plotSpec = window.plotSpecManager.getPlotSpec();
-  const container = document.createElement('div');
-  await embed(container, plotSpec);
-  const svgElement = container.querySelector('svg');
-  if (svgElement) {
-      const serializer = new XMLSerializer();
-      const svgString = serializer.serializeToString(svgElement);
-      return svgString;
-  }
-  throw new Error('SVG element not found');
+export function exportDivAsHTML() {
+  const div = document.getElementById('plot-container-1');
+  const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Exported Plot</title>
+  <link rel="stylesheet" href="https://esm.sh/higlass@1.13/dist/hglib.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+      /* Include any additional styles here */
+  </style>
+</head>
+<body>
+  ${div.outerHTML}
+</body>
+</html>`;
+
+  const blob = new Blob([htmlContent], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'plotDiv.html';
+  a.click();
+  URL.revokeObjectURL(url);
 }

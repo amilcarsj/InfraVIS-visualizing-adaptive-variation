@@ -728,10 +728,10 @@ input[type='text'] {
         width: 70%;
     }
     #export-svg-button{
-        left: 65%;
+        left: 55%;
     }
     #export-json-button{
-        left: 60%;
+        left: 50%;
     }
     .plot-button, .url-input{
         font-size: 15px;
@@ -779,6 +779,9 @@ input[type='text'] {
     .canvas-container{
         width:80%;
     }
+    #export-svg-button{
+        left: 40%;
+    }
     #export-json-button{
         left: 26%;
     }
@@ -796,6 +799,11 @@ input[type='text'] {
     .bars{
         margin-left: 10px;
         width: 83%;
+    }
+    .apply-button{
+        font-size: 15px;
+        padding: 5px;
+        width: 70%;
     }
 
 }

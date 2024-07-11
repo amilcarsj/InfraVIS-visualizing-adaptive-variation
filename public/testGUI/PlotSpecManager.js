@@ -86,15 +86,12 @@ class PlotSpecManager {
 
 PlotSpecManager.prototype.exportPlotSpecAsJSON = function() {
   const plotSpec = this.getPlotSpec();
-  const jsonString = JSON.stringify(plotSpec, null, 2); // Pretty print with 2 spaces
+  const jsonString = JSON.stringify(plotSpec, null, 2);
   return jsonString;
 }
 
 
 
 window.plotSpecManager = new PlotSpecManager();
-
-const jsonSpec = window.plotSpecManager.exportPlotSpecAsJSON();
-console.log(jsonSpec); // Or save this string to a file
 
 export { PlotSpecManager };

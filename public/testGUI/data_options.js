@@ -4,7 +4,7 @@
  * @returns {Promise<void>} - A Promise that resolves after the container is populated.
  */
 
-import { URLfromFile, URLfromServer, GoslingPlotWithLocalData, getCurrentViewSpec, exportPlotSpecAsSVG } from './plot.js';
+import { URLfromFile, URLfromServer, GoslingPlotWithLocalData, getCurrentViewSpec, exportDivAsHTML } from './plot.js';
 import { updateURLParameters } from './update_plot_specifications.js';
 
 window.canvas_states = {
@@ -263,6 +263,62 @@ export async function all_buttons(container) {
     // Add the toggle effect for the initial canvas container
     addCanvasBarToggle('canvas-bar-1', 'canvas-container-1');
     updateCanvasUI();
+
+    document.getElementById('export-svg-button').addEventListener('click', () => {
+        const container = document.getElementById('plot-container-1');
+    
+        if (!container) {
+            console.error('Plot container element not found');
+            return;
+        }
+    
+        const svgElements = container.getElementsByTagName('svg');
+    
+        if (svgElements.length === 0) {
+            console.error('No SVG elements found in the plot container');
+            return;
+        }
+    
+        const svgContent = svgElements[0].outerHTML;
+    
+        // Embed the SVG content into a full HTML document
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>Exported Plot</title>
+                    <script type="importmap">
+                        {
+                            "imports": {
+                                "react": "https://esm.sh/react@18",
+                                "react-dom": "https://esm.sh/react-dom@18",
+                                "pixi": "https://esm.sh/pixi.js@6",
+                                "higlass": "https://esm.sh/higlass@1.13?external=react,react-dom,pixi",
+                                "gosling.js": "https://esm.sh/gosling.js@0.11.0?external=react,react-dom,pixi,higlass"
+                            }
+                        }
+                    </script>
+                </head>
+                <body>
+                    ${svgContent}
+                    <h1>Exported Plot Container</h1>
+                </body>
+            </html>
+        `;
+    
+        // Create a Blob from the HTML data
+        const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+        const htmlUrl = URL.createObjectURL(htmlBlob);
+    
+        // Create a link element and trigger the download
+        const a = document.createElement('a');
+        a.href = htmlUrl;
+        a.download = 'plot-container.html';
+        a.click();
+    
+        // Revoke the object URL after the download
+        URL.revokeObjectURL(htmlUrl);
+    });
 }
 
 function addOrUpdateCanvasObject(canvasId) {
@@ -574,21 +630,6 @@ window.generateElementsActions = async function(trackNumber) {
         a.download = 'plotSpec.json';
         a.click();
         URL.revokeObjectURL(url);
-    });
-
-    document.getElementById('export-svg-button').addEventListener('click', async () => {
-        try {
-            const svgString = await exportPlotSpecAsSVG();
-            const blob = new Blob([svgString], { type: 'image/svg+xml' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'plotSpec.svg';
-            a.click();
-            URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Error exporting SVG:', error);
-        }
     });
 
     document.querySelectorAll('.mark').forEach(function (markSelector) {
