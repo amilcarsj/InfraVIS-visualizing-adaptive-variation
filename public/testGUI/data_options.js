@@ -535,7 +535,6 @@ window.generateTracks = async function () {
 // Ensure the Add Track button triggers the track count update
 window.onload = function () {
     document.getElementById('add_track_button').addEventListener('click', updateTrackNumber);
-    // generateTracks();
 }
 
 window.showHideTracks = async function () {
@@ -573,14 +572,15 @@ window.generateTrackBinAndSampleInputs = async function (trackNumber) {
                 <div class="input-group"> 
                     <label for="mark_${trackNumber}">Marker type</label>
                     <select name="mark" id="mark_${trackNumber}" class="mark" data-track="${trackNumber}">
-                        <option value="point" selected>point</option>
+                        <option > </option>
+                        <option value="point">point</option>
                         <option value="line">line</option>
                         <option value="area">area</option>
                         <option value="bar">bar</option>
                         <option value="rect">rect</option>
                         <option value="text">text</option>
-                        <option value="link">link</option>
-                        <option value="triangle">triangle</option>
+                        <option value="betweenLink">link</option>
+                        <option value="triangleRight">triangle</option>
                     </select>
                 </div>
             </div>
