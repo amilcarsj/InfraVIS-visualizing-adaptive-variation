@@ -4,7 +4,7 @@
  * @returns {Promise<void>} - A Promise that resolves after the container is populated.
  */
 
-import { URLfromFile, URLfromServer, GoslingPlotWithLocalData, getCurrentViewSpec, exportDivAsHTML } from './plot.js';
+import { URLfromFile, URLfromServer, GoslingPlotWithLocalData, getCurrentViewSpec } from './plot.js';
 import { updateURLParameters } from './update_plot_specifications.js';
 
 window.canvas_states = {
@@ -432,8 +432,11 @@ window.updateTrackNumber = async function () {
     const currentCanvasState = window.canvas_states[window.canvas_num];
     currentCanvasState.trackCount++;
     if (currentCanvasState.trackCount > 5) currentCanvasState.trackCount = 5;
-    document.getElementById("trackCountSelector").value = currentCanvasState.trackCount;
-    generateTracks();
+    else {
+        document.getElementById("trackCountSelector").value = currentCanvasState.trackCount;
+        generateTracks();
+    }
+
 
 }
 
@@ -529,7 +532,7 @@ window.generateTracks = async function () {
     await new Promise(resolve => setTimeout(resolve, 0));
     await window.generateElementsActions(trackCount);  
     await window.showHideTracks();
-    await GoslingPlotWithLocalData();
+
 }
 
 // Ensure the Add Track button triggers the track count update
@@ -638,7 +641,7 @@ window.generateElementsActions = async function(trackNumber) {
             const chosenMark = this.value;
             const plotSpec = getCurrentViewSpec();
             plotSpec.tracks[trackValue].mark = chosenMark;
-            await GoslingPlotWithLocalData();
+            // await GoslingPlotWithLocalData();
             await updateURLParameters(`mark${trackValue}`, chosenMark);
         });
     });
@@ -698,18 +701,26 @@ window.generateElementsActions = async function(trackNumber) {
         // X-axis range
         const x_start = parseFloat(document.getElementById('x_range_start').value);
         const x_end = parseFloat(document.getElementById('x_range_end').value);
-        const x_interval = [x_start, x_end];
+        let x_interval = [x_start, x_end];
+
+        if(isNaN(x_start) && isNaN(x_end)) {
+            x_interval = [0, 200000];
+        }
         
         // Left Y-axis range
         const y_start_left = parseFloat(document.getElementById('y_start_left').value);
         const y_end_left = parseFloat(document.getElementById('y_end_left').value);
-        const y_interval_left = [y_start_left, y_end_left];
+        let y_interval_left = [y_start_left, y_end_left];
         
+        if(isNaN(y_start_left) && isNaN(y_end_left)) {
+            y_interval_left = [0, 1];
+        }
         // Right Y-axis range
         const y_start_right = parseFloat(document.getElementById('y_start_right').value);
         const y_end_right = parseFloat(document.getElementById('y_end_right').value);
         const y_interval_right = [y_start_right, y_end_right];
-    
+        
+
         const plotSpec = getCurrentViewSpec();
         plotSpec.xDomain.interval = x_interval;
         

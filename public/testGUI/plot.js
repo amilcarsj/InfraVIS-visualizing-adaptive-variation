@@ -16,22 +16,22 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
   try {
     const fileInput = fileInputs[button_data_track_number].files[0];
     const fileName = fileInput.name;
-    const extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase(); // Convert to lower case to avoid case issues
+    const extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
     const viewSpec = getCurrentViewSpec();
     const current_track = viewSpec.tracks[button_data_track_number];
     const fileURL = URL.createObjectURL(fileInput);
 
     if (fileURL) {
       current_track.data.url = fileURL;
-      await configureDataType(extension, current_track); // This will throw an error if the file type is invalid
+      await configureDataType(extension, current_track);
       await handleOptions(fileInput, button_data_track_number);
       await checkURLParameters(current_track, button_data_track_number);
-      await GoslingPlotWithLocalData();
-      console.log('File loaded successfully'); // Only log this if everything is successful
+      // await GoslingPlotWithLocalData();
+      console.log('File loaded successfully');
     }
   } catch (error) {
     console.error(error);
-    alert(error.message); // Display an alert with the error message
+    alert(error.message);
   }
 }
 
@@ -139,31 +139,4 @@ async function checkURLParameters(track, track_nr) {
   } catch (error) {
     console.error(error);
   }
-}
-
-export function exportDivAsHTML() {
-  const div = document.getElementById('plot-container-1');
-  const htmlContent = `
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Exported Plot</title>
-  <link rel="stylesheet" href="https://esm.sh/higlass@1.13/dist/hglib.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <style>
-      /* Include any additional styles here */
-  </style>
-</head>
-<body>
-  ${div.outerHTML}
-</body>
-</html>`;
-
-  const blob = new Blob([htmlContent], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'plotDiv.html';
-  a.click();
-  URL.revokeObjectURL(url);
 }

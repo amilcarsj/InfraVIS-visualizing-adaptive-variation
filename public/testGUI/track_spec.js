@@ -14,7 +14,7 @@ const trackTemplate = {
     },
     "metadata": {"categories": ["Track"]},
     "mark": "point",
-    "x": { "field": x_col_preset, "type": "genomic", "axis": "bottom", "legend": true,linkingId: "detail",},
+    "x": { "field": x_col_preset, "type": "genomic", "axis": "bottom", "legend": true, "linkingId": "detail",},
     "y": { "field": y_col_preset, "type": "quantitative", "axis": "left", "domain": [0, 1], "baseline": "2", "legend": true},
     "color": { "value": "orange", "title": "Trackss", "legend": true},
     "opacity": { "value": 0.8 },
