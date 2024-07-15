@@ -151,7 +151,7 @@ body {
     position: relative;
     padding: 19px;
     font-size: 12px;
-    right: 10%;
+    right: 12%;
 }
 
 
@@ -204,10 +204,10 @@ body {
     align-items: flex-start;
 }
 .bars{
-    width: 110%;
+    width: 116%;
     display: flex;
     position: relative;
-    right: 80px;
+    right: 95px;
     gap: 100px;
 }
 
