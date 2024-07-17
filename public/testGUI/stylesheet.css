@@ -541,8 +541,8 @@ input[type='text'] {
 }
 #export-json-button{
     position: relative;
-    left: 48%;
-    top: 15%;
+    left: 83%;
+    top: 10%;
     display:  inline-block;;
     border: none;
     background-color: #4d4d4d;
@@ -551,8 +551,8 @@ input[type='text'] {
 }
 #export-svg-button{
     position: relative;
-    left: 50%;
-    top: 15%;
+    left: 83%;
+    top: 10%;
     display: inline-block;
     border: none;
     background-color: #4d4d4d;
@@ -614,10 +614,10 @@ input[type='text'] {
         right: 10%;
     }
     #export-svg-button{
-        left: 22%;
+        left: 82%;
     }
     #export-json-button{
-        left: 15%;
+        left: 85%;
     }
     .plot-button, .url-input{
         font-size: 15px;
@@ -665,10 +665,10 @@ input[type='text'] {
         left: 500px;
     }
     #export-svg-button{
-        left: 20%;
+        left: 80%;
     }
     #export-json-button{
-        left: 12%;
+        left: 82%;
     }
     .url-button{
         padding: 6px;
@@ -728,10 +728,10 @@ input[type='text'] {
         width: 70%;
     }
     #export-svg-button{
-        left: 55%;
+        left: 85%;
     }
     #export-json-button{
-        left: 50%;
+        left: 80%;
     }
     .plot-button, .url-input{
         font-size: 15px;
@@ -780,10 +780,10 @@ input[type='text'] {
         width:80%;
     }
     #export-svg-button{
-        left: 40%;
+        left: 89%;
     }
     #export-json-button{
-        left: 26%;
+        left: 80%;
     }
     .url-button{
         padding: 8px;

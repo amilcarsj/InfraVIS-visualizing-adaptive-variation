@@ -27,9 +27,11 @@ export async function all_buttons(container) {
                 <button id="canvas3" class="canvas-button">Canvas 3</button>
                 <button id="add_canvas"> <i class="fa fa-plus"></i></button>
             </div>  
-            <div id="header" class="buttons-container">        
-                <button id="export-json-button">Export as JSON</button>
+<div id="notification" style="display: none; color:white;border-radius: 5px ; padding: 10px; opacity:0.7; margin-top: 10px; position: absolute; top: 10px; left: 10%; transform: translateX(-50%); z-index: 1000;"></div>
+                    <button id="export-json-button">Export as JSON</button>
                 <button id="export-svg-button">Export as SVG</button>    
+            <div id="header" class="buttons-container">        
+
                 <div class="btn-row">
                     <h2 class='canvas_number'>Canvas 1</h2>
                     <h2>Track Controls</h2>
@@ -265,24 +267,21 @@ export async function all_buttons(container) {
     updateCanvasUI();
 
     document.getElementById('export-svg-button').addEventListener('click', () => {
-
-
-    document.getElementById('export-json-button').addEventListener('click', () => {
-        const jsonSpec = window.plotSpecManager.exportPlotSpecAsJSON();
-        const blob = new Blob([jsonSpec], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'plotSpec.json';
-        a.click();
-        URL.revokeObjectURL(url);
-    });
-
-
         const container = document.getElementById('plot-container-1');
+        const notification = document.getElementById('notification');
+    
+        const showMessage = (message, color) => {
+            notification.textContent = message;
+            notification.style.backgroundColor = color;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        };
     
         if (!container) {
             console.error('Plot container element not found');
+            showMessage('Plot container element not found', '#ff0000');
             return;
         }
     
@@ -290,6 +289,7 @@ export async function all_buttons(container) {
     
         if (svgElements.length === 0) {
             console.error('No SVG elements found in the plot container');
+            showMessage('No SVG elements found in the plot container', '#ff0000');
             return;
         }
     
@@ -304,42 +304,45 @@ export async function all_buttons(container) {
                     <title>Exported Plot</title>
                     <script type="importmap">
                         {
-                           "imports": {
+                            "imports": {
                                 "react": "https://esm.sh/react@18",
                                 "react-dom": "https://esm.sh/react-dom@18",
                                 "pixi": "https://esm.sh/pixi.js@6",
                                 "higlass": "https://esm.sh/higlass@^1.13.4?external=react,react-dom,pixi",
                                 "gosling.js": "https://esm.sh/gosling.js@0.17.0?external=react,react-dom,pixi,higlass"
-                                }
+                            }
                         }
                     </script>
-
                 </head>
                 <body>
-                <div id="gosling-container">
-                    ${svgContent}
-                </div>
+                    <div id="gosling-container">
+                        ${svgContent}
+                    </div>
                     <script type="module">
                         import { embed } from 'gosling.js';
                         embed(document.getElementById('gosling-container'), ${jsonSpec});
                     </script>
                 </body>
-                
             </html>
         `;
     
-        // Create a Blob from the HTML data
-        const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
-        const htmlUrl = URL.createObjectURL(htmlBlob);
-    
-        // Create a link element and trigger the download
-        const a = document.createElement('a');
-        a.href = htmlUrl;
-        a.download = 'plot-container.html';
-        a.click();
-    
-        // Revoke the object URL after the download
-        URL.revokeObjectURL(htmlUrl);
+        // Send the HTML content to the server
+        fetch('/save-and-render', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ htmlContent }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+            showMessage('Export was done successfully', '#33cc33');
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            showMessage('Error during export: ' + error.message, '#ff0000');
+        });
     });
 }
 
