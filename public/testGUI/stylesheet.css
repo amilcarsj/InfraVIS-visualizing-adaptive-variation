@@ -549,7 +549,7 @@ input[type='text'] {
     color: white;
     padding: 5px;
 }
-#export-svg-button{
+#export-dropdown{
     position: relative;
     left: 83%;
     top: 10%;
@@ -560,7 +560,7 @@ input[type='text'] {
     padding: 5px;
 }
 
-#export-svg-button:hover, #export-json-button:hover{
+#export-dropdown:hover, #export-json-button:hover{
     background-color: rgb(180, 180, 180);
     color: black;
 }
@@ -613,7 +613,7 @@ input[type='text'] {
         width: 110%;
         right: 10%;
     }
-    #export-svg-button{
+    #export-dropdown{
         left: 82%;
     }
     #export-json-button{
@@ -664,7 +664,7 @@ input[type='text'] {
     .apply-all-button{
         left: 500px;
     }
-    #export-svg-button{
+    #export-dropdown{
         left: 80%;
     }
     #export-json-button{
@@ -727,7 +727,7 @@ input[type='text'] {
     .left-section, .right-section {
         width: 70%;
     }
-    #export-svg-button{
+    #export-dropdown{
         left: 85%;
     }
     #export-json-button{
@@ -779,7 +779,7 @@ input[type='text'] {
     .canvas-container{
         width:80%;
     }
-    #export-svg-button{
+    #export-dropdown{
         left: 89%;
     }
     #export-json-button{

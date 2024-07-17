@@ -27,9 +27,13 @@ export async function all_buttons(container) {
                 <button id="canvas3" class="canvas-button">Canvas 3</button>
                 <button id="add_canvas"> <i class="fa fa-plus"></i></button>
             </div>  
-<div id="notification" style="display: none; color:white;border-radius: 5px ; padding: 10px; opacity:0.7; margin-top: 10px; position: absolute; top: 10px; left: 10%; transform: translateX(-50%); z-index: 1000;"></div>
-                    <button id="export-json-button">Export as JSON</button>
-                <button id="export-svg-button">Export as SVG</button>    
+<div id="notification" style="display: none; color:white;border-radius: 5px ; padding: 10px; opacity:0.7; margin-top: 10px; position: absolute; top: 10px; left: 10%; transform: translateX(-50%); z-index: 1000;"></div>   
+                <select id="export-dropdown" class="dropdown-content">
+                    <option value="" disabled selected>Export as</option>
+                    <option id="export-svg-button" value="svg">SVG</option>
+                    <option id="export-png-button" value="png">PNG</option>
+                    <option id="export-html-button" value="html">HTML</option>
+                </select>  
             <div id="header" class="buttons-container">        
 
                 <div class="btn-row">
@@ -266,7 +270,8 @@ export async function all_buttons(container) {
     addCanvasBarToggle('canvas-bar-1', 'canvas-container-1');
     updateCanvasUI();
 
-    document.getElementById('export-svg-button').addEventListener('click', () => {
+    document.getElementById('export-dropdown').addEventListener('change', (event) => {
+        const selectedValue = event.target.value;
         const container = document.getElementById('plot-container-1');
         const notification = document.getElementById('notification');
     
@@ -326,15 +331,39 @@ export async function all_buttons(container) {
             </html>
         `;
     
-        // Send the HTML content to the server
-        fetch('/save-and-render', {
+        let endpoint = '';
+        switch (selectedValue) {
+            case 'svg':
+                endpoint = '/save-svg';
+                break;
+            case 'png':
+                endpoint = '/save-png';
+                break;
+            case 'html':
+                endpoint = '/save-html';
+                break;
+            default:
+                console.error('Invalid export option selected');
+                showMessage('Invalid export option selected', '#ff0000');
+                return;
+        }
+    
+        console.log(`Selected value: ${selectedValue}`);
+        console.log(`Endpoint: ${endpoint}`);
+    
+        fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ htmlContent }),
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             console.log('Success:', data);
             showMessage('Export was done successfully', '#33cc33');
@@ -649,16 +678,16 @@ window.generateElementsActions = async function(trackNumber) {
         });
     });
     
-    document.getElementById('export-json-button').addEventListener('click', () => {
-        const jsonSpec = window.plotSpecManager.exportPlotSpecAsJSON();
-        const blob = new Blob([jsonSpec], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'plotSpec.json';
-        a.click();
-        URL.revokeObjectURL(url);
-    });
+    // document.getElementById('export-json-button').addEventListener('click', () => {
+    //     const jsonSpec = window.plotSpecManager.exportPlotSpecAsJSON();
+    //     const blob = new Blob([jsonSpec], { type: 'application/json' });
+    //     const url = URL.createObjectURL(blob);
+    //     const a = document.createElement('a');
+    //     a.href = url;
+    //     a.download = 'plotSpec.json';
+    //     a.click();
+    //     URL.revokeObjectURL(url);
+    // });
 
     document.querySelectorAll('.mark').forEach(function (markSelector) {
         markSelector.addEventListener('change', async function () {
