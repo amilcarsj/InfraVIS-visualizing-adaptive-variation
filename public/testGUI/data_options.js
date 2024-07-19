@@ -183,7 +183,7 @@ export async function all_buttons(container) {
                 addOrUpdateCanvasObject('canvas2');
                 window.object_2_created = true
             }
-            resetSelections();
+            // resetSelections();
             updateCanvasUI();
         }
         
@@ -199,7 +199,7 @@ export async function all_buttons(container) {
                 addOrUpdateCanvasObject('canvas3');
                 window.object_3_created = true
             }
-            resetSelections();
+            // resetSelections();
             updateCanvasUI();
             this.style.cursor = 'not-allowed';
             this.disabled = true;
@@ -210,7 +210,7 @@ export async function all_buttons(container) {
         view_control.innerHTML = 'View Controls 1';
         window.canvas_num = 1;
         canvas_number.innerHTML = 'Canvas 1';
-        resetSelections();
+        // resetSelections();
         updateCanvasUI();
     });
 
@@ -226,7 +226,7 @@ export async function all_buttons(container) {
             addOrUpdateCanvasObject('canvas2');
             window.object_2_created = true
         }
-        resetSelections();
+        // resetSelections();
         updateCanvasUI();
     });
 
@@ -241,7 +241,7 @@ export async function all_buttons(container) {
             addOrUpdateCanvasObject('canvas3');
             window.object_3_created = true
         }
-        resetSelections();
+        // resetSelections();
         updateCanvasUI();
     });
 
@@ -253,17 +253,17 @@ export async function all_buttons(container) {
     view1_btn.addEventListener('click', function () {
         view_control.innerHTML = 'View Controls 1';
         canvas_container_1.id = 'canvas-container-1';
-        resetSelections();
+        // resetSelections();
     });
     view2_btn.addEventListener('click', function () {
         view_control.innerHTML = 'View Controls 2';
         canvas_container_1.id = 'canvas-container-2';
-        resetSelections();
+        // resetSelections();
     });
     view3_btn.addEventListener('click', function () {
         view_control.innerHTML = 'View Controls 3';
         canvas_container_1.id = 'canvas-container-3';
-        resetSelections();
+        // resetSelections();
     });
 
     // Add the toggle effect for the initial canvas container
