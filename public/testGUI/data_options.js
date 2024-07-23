@@ -6,6 +6,7 @@
 
 import { URLfromFile, URLfromServer, GoslingPlotWithLocalData, getCurrentViewSpec } from './plot.js';
 import { updateURLParameters } from './update_plot_specifications.js';
+import {exportingFigures} from './exporting_functionality.js';
 
 window.canvas_states = {
     1: { trackCount: 1, tracks: [] },
@@ -183,7 +184,6 @@ export async function all_buttons(container) {
                 addOrUpdateCanvasObject('canvas2');
                 window.object_2_created = true
             }
-            // resetSelections();
             updateCanvasUI();
         }
         
@@ -199,7 +199,6 @@ export async function all_buttons(container) {
                 addOrUpdateCanvasObject('canvas3');
                 window.object_3_created = true
             }
-            // resetSelections();
             updateCanvasUI();
             this.style.cursor = 'not-allowed';
             this.disabled = true;
@@ -210,7 +209,6 @@ export async function all_buttons(container) {
         view_control.innerHTML = 'View Controls 1';
         window.canvas_num = 1;
         canvas_number.innerHTML = 'Canvas 1';
-        // resetSelections();
         updateCanvasUI();
     });
 
@@ -226,7 +224,6 @@ export async function all_buttons(container) {
             addOrUpdateCanvasObject('canvas2');
             window.object_2_created = true
         }
-        // resetSelections();
         updateCanvasUI();
     });
 
@@ -241,7 +238,6 @@ export async function all_buttons(container) {
             addOrUpdateCanvasObject('canvas3');
             window.object_3_created = true
         }
-        // resetSelections();
         updateCanvasUI();
     });
 
@@ -253,128 +249,23 @@ export async function all_buttons(container) {
     view1_btn.addEventListener('click', function () {
         view_control.innerHTML = 'View Controls 1';
         canvas_container_1.id = 'canvas-container-1';
-        // resetSelections();
     });
     view2_btn.addEventListener('click', function () {
         view_control.innerHTML = 'View Controls 2';
         canvas_container_1.id = 'canvas-container-2';
-        // resetSelections();
     });
     view3_btn.addEventListener('click', function () {
         view_control.innerHTML = 'View Controls 3';
         canvas_container_1.id = 'canvas-container-3';
-        // resetSelections();
     });
 
     // Add the toggle effect for the initial canvas container
     addCanvasBarToggle('canvas-bar-1', 'canvas-container-1');
     updateCanvasUI();
+    exportingFigures();
 
-    document.getElementById('export-dropdown').addEventListener('change', (event) => {
-        const selectedValue = event.target.value;
-        const container = document.getElementById('plot-container-1');
-        const notification = document.getElementById('notification');
-    
-        const showMessage = (message, color) => {
-            notification.textContent = message;
-            notification.style.backgroundColor = color;
-            notification.style.display = 'block';
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        };
-    
-        if (!container) {
-            console.error('Plot container element not found');
-            showMessage('Plot container element not found', '#ff0000');
-            return;
-        }
-    
-        const svgElements = container.getElementsByTagName('svg');
-    
-        if (svgElements.length === 0) {
-            console.error('No SVG elements found in the plot container');
-            showMessage('No SVG elements found in the plot container', '#ff0000');
-            return;
-        }
-    
-        const svgContent = container.innerHTML;
-        const jsonSpec = window.plotSpecManager.exportPlotSpecAsJSON();
-    
-        // Embed the SVG content into a full HTML document
-        const htmlContent = `
-            <!DOCTYPE html>
-            <html>
-                <head>
-                    <title>Exported Plot</title>
-                    <script type="importmap">
-                        {
-                            "imports": {
-                                "react": "https://esm.sh/react@18",
-                                "react-dom": "https://esm.sh/react-dom@18",
-                                "pixi": "https://esm.sh/pixi.js@6",
-                                "higlass": "https://esm.sh/higlass@^1.13.4?external=react,react-dom,pixi",
-                                "gosling.js": "https://esm.sh/gosling.js@0.17.0?external=react,react-dom,pixi,higlass"
-                            }
-                        }
-                    </script>
-                </head>
-                <body>
-                    <div id="gosling-container">
-                        ${svgContent}
-                    </div>
-                    <script type="module">
-                        import { embed } from 'gosling.js';
-                        embed(document.getElementById('gosling-container'), ${jsonSpec});
-                    </script>
-                </body>
-            </html>
-        `;
-    
-        let endpoint = '';
-        switch (selectedValue) {
-            case 'svg':
-                endpoint = '/save-svg';
-                break;
-            case 'png':
-                endpoint = '/save-png';
-                break;
-            case 'html':
-                endpoint = '/save-html';
-                break;
-            default:
-                console.error('Invalid export option selected');
-                showMessage('Invalid export option selected', '#ff0000');
-                return;
-        }
-    
-        console.log(`Selected value: ${selectedValue}`);
-        console.log(`Endpoint: ${endpoint}`);
-    
-        fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ htmlContent }),
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Success:', data);
-            showMessage('Export was done successfully', '#33cc33');
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            showMessage('Error during export: ' + error.message, '#ff0000');
-        });
-    });
 }
-
+// Add or update a canvas object with the given ID
 function addOrUpdateCanvasObject(canvasId) {
     const canvas_container = document.createElement('div');
     canvas_container.id = `canvas-container-${canvasId}`;
@@ -405,25 +296,7 @@ function addOrUpdateCanvasObject(canvasId) {
     GoslingPlotWithLocalData();
     
 }
-
-function resetSelections() {
-    const xSelectors = document.querySelectorAll('.columnSelectorX');
-    const yLeftSelectors = document.querySelectorAll('#columnSelectorYLeft');
-    const yRightSelectors = document.querySelectorAll('#columnSelectorYRight');
-
-    xSelectors.forEach(selector => {
-        selector.selectedIndex = 0;
-    });
-
-    yLeftSelectors.forEach(selector => {
-        selector.selectedIndex = 0;
-    });
-
-    yRightSelectors.forEach(selector => {
-        selector.selectedIndex = 0;
-    });
-}
-
+// the toggle effect for the canvas bar
 function addCanvasBarToggle(barId, containerId) {
     const canvasBar = document.getElementById(barId);
     const canvasContainer = document.getElementById(containerId);
@@ -450,7 +323,6 @@ function updateCanvasUI() {
     const currentCanvasState = window.canvas_states[window.canvas_num];
     document.getElementById('trackCountSelector').value = currentCanvasState.trackCount;
     generateTracks();
-    // GoslingPlotWithLocalData();
 }
 
 function resetTrackSettings(trackNumber) {
@@ -490,16 +362,13 @@ window.updateTrackNumber = async function () {
         document.getElementById("trackCountSelector").value = currentCanvasState.trackCount;
         generateTracks();
     }
-
-
 }
-
+// Generate track elements based on the selected track count
 window.generateTracks = async function () {
     let currentCanvasState = window.canvas_states[window.canvas_num];
     const trackCount = currentCanvasState.trackCount;
     const container = document.getElementById("container");
     let htmlContent = '';
-
     // Render buttons containers
     for (let i = 0; i < trackCount; i++) {
         htmlContent += `
@@ -584,9 +453,8 @@ window.generateTracks = async function () {
     });
 
     await new Promise(resolve => setTimeout(resolve, 0));
-    await window.generateElementsActions(trackCount);  
+    await window.track_settings_btns(trackCount);  
     await window.showHideTracks();
-
 }
 
 // Ensure the Add Track button triggers the track count update
@@ -594,6 +462,7 @@ window.onload = function () {
     document.getElementById('add_track_button').addEventListener('click', updateTrackNumber);
 }
 
+// Show or hide tracks based on the selected track
 window.showHideTracks = async function () {
     const currentCanvasState = window.canvas_states[window.canvas_num];
     const trackCount = currentCanvasState.trackCount;
@@ -663,9 +532,7 @@ window.generateTrackBinAndSampleInputs = async function (trackNumber) {
     </div>`;
 }
 
-
-
-window.generateElementsActions = async function(trackNumber) {
+window.track_settings_btns = async function(trackNumber){
     const fileInputs = document.querySelectorAll('.file-input');
     document.querySelectorAll('.plot-button').forEach(function (button, button_data_track_num) {
         button.addEventListener('click', function () {
@@ -677,17 +544,6 @@ window.generateElementsActions = async function(trackNumber) {
             URLfromFile(fileInputs, button_data_track_num);
         });
     });
-    
-    // document.getElementById('export-json-button').addEventListener('click', () => {
-    //     const jsonSpec = window.plotSpecManager.exportPlotSpecAsJSON();
-    //     const blob = new Blob([jsonSpec], { type: 'application/json' });
-    //     const url = URL.createObjectURL(blob);
-    //     const a = document.createElement('a');
-    //     a.href = url;
-    //     a.download = 'plotSpec.json';
-    //     a.click();
-    //     URL.revokeObjectURL(url);
-    // });
 
     document.querySelectorAll('.mark').forEach(function (markSelector) {
         markSelector.addEventListener('change', async function () {
@@ -695,7 +551,6 @@ window.generateElementsActions = async function(trackNumber) {
             const chosenMark = this.value;
             const plotSpec = getCurrentViewSpec();
             plotSpec.tracks[trackValue].mark = chosenMark;
-            // await GoslingPlotWithLocalData();
             await updateURLParameters(`mark${trackValue}`, chosenMark);
         });
     });
@@ -751,6 +606,22 @@ window.generateElementsActions = async function(trackNumber) {
         });
     });
 
+    document.querySelectorAll('.url-button').forEach(function (urlButton, trackNumber) {
+        const urlInput = document.getElementById(`urlinput_${trackNumber}`);  
+        urlButton.addEventListener('click', function () {
+            URLfromServer(urlInput.value, trackNumber);
+        });
+    });
+
+    for (let i = 0; i < trackNumber; i++) {
+        let clear_settings_button = document.getElementById(`clear_settings_button${i}`);
+        if (clear_settings_button) {
+            clear_settings_button.addEventListener('click', function () {
+                resetTrackSettings(i);
+            });
+        }
+    }      
+    // Add event listener to the apply all button for the canvas
     document.querySelector('.apply-all-button').addEventListener('click', async function () {
         // X-axis range
         const x_start = parseFloat(document.getElementById('x_range_start').value);
@@ -795,20 +666,4 @@ window.generateElementsActions = async function(trackNumber) {
         updateURLParameters("yDomain.left", y_interval_left);
         updateURLParameters("yDomain.right", y_interval_right);
     });
-
-    document.querySelectorAll('.url-button').forEach(function (urlButton, trackNumber) {
-        const urlInput = document.getElementById(`urlinput_${trackNumber}`);  
-        urlButton.addEventListener('click', function () {
-            URLfromServer(urlInput.value, trackNumber);
-        });
-    });
-
-    for (let i = 0; i < trackNumber; i++) {
-        let clear_settings_button = document.getElementById(`clear_settings_button${i}`);
-        if (clear_settings_button) {
-            clear_settings_button.addEventListener('click', function () {
-                resetTrackSettings(i);
-            });
-        }
-    }      
 }
