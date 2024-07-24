@@ -51,48 +51,27 @@ app.post('/save-png', async (req, res) => {
     res.json({ message: 'Rendered successfully', png: 'plot.png' });
 });
 
-app.post('/save-svg', async (req, res) => {
-    const htmlContent = req.body.htmlContent;
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
 
-    // Load the HTML content directly into Puppeteer
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+app.post('/save-json', (req, res) => {
+    const jsonContent = req.body.jsonContent;
 
-    // Capture as SVG
-    const svgContent = await page.$eval('svg', svg => svg.outerHTML);
-    fs.writeFileSync(path.join(__dirname, 'public', '/testGUI/exports/plot.svg'), svgContent);
+    if (typeof jsonContent !== 'string') {
+        return res.status(400).json({ message: 'Invalid JSON content' });
+    }
 
-    await browser.close();
+    const jsonPath = path.join(__dirname, 'public', 'testGUI', 'exports', 'plot.json');
 
-    // Respond with a link to download the svg file
-    res.json({ message: 'Rendered successfully', svg: 'plot.svg' });
+    fs.writeFile(jsonPath, jsonContent, 'utf8', (err) => {
+        if (err) {
+            console.error('Error writing JSON file:', err);
+            return res.status(500).json({ message: 'Failed to save JSON file' });
+        }
+        
+        // Send the URL of the saved JSON file
+        res.json({ message: 'JSON file saved successfully', fileUrl: '/testGUI/exports/plot.json' });
+    });
 });
 
-
-
-app.post('/save-json', async (req, res) => {
-    const htmlContent = req.body.htmlContent;
-    const filePath = path.join(__dirname, 'public', '/testGUI/exports/plot-container.html');
-
-    // Save the HTML content to a file
-    fs.writeFileSync(filePath, htmlContent);
-
-    // Launch Puppeteer to render the file
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.goto(`file://${filePath}`, { waitUntil: 'networkidle0' });
-
-    // Capture as PNG
-    await page.screenshot({ path: path.join(__dirname, 'public', '/testGUI/exports/plot.png'), fullPage: true });
-
-    // Capture as SVG
-    const svgContent = await page.$eval('svg', svg => svg.outerHTML);
-    fs.writeFileSync(path.join(__dirname, 'public', '/testGUI/exports/plot.svg'), svgContent);
-
-    await browser.close();
-
-});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
