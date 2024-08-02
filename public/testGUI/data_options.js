@@ -169,10 +169,13 @@ export async function all_buttons(container) {
     const canvas_number = document.querySelector('.canvas_number');
     const add_canvas = document.getElementById('add_canvas');
 
+    // Set Canvas 1 as active by default
+    canvas1.classList.add('active');
+
     add_canvas.addEventListener('click', function () {
         if (displayed_canvas === 1) {
             canvas2.style.display = 'block';
-            displayed_canvas = 2
+            displayed_canvas = 2;
             const view2_btn = document.getElementById('view2-btn');
             view_control.innerHTML = 'View Controls 2';
             window.canvas_num = 2;
@@ -182,8 +185,9 @@ export async function all_buttons(container) {
             }
             if (!window.object_2_created) {
                 addOrUpdateCanvasObject('canvas2');
-                window.object_2_created = true
+                window.object_2_created = true;
             }
+            setActiveCanvas(canvas2);
             updateCanvasUI();
         }
         
@@ -200,12 +204,14 @@ export async function all_buttons(container) {
                 window.object_3_created = true
             }
             updateCanvasUI();
+            setActiveCanvas(canvas3);
             this.style.cursor = 'not-allowed';
             this.disabled = true;
         }
     })
 
     canvas1.addEventListener('click', function () {
+        setActiveCanvas(canvas1);
         view_control.innerHTML = 'View Controls 1';
         window.canvas_num = 1;
         canvas_number.innerHTML = 'Canvas 1';
@@ -213,6 +219,7 @@ export async function all_buttons(container) {
     });
 
     canvas2.addEventListener('click', function () {
+        setActiveCanvas(canvas2);
         const view2_btn = document.getElementById('view2-btn');
         view_control.innerHTML = 'View Controls 2';
         window.canvas_num = 2;
@@ -222,12 +229,13 @@ export async function all_buttons(container) {
         }
         if (!window.object_2_created) {
             addOrUpdateCanvasObject('canvas2');
-            window.object_2_created = true
+            window.object_2_created = true;
         }
         updateCanvasUI();
     });
 
     canvas3.addEventListener('click', function () {
+        setActiveCanvas(canvas3);
         view_control.innerHTML = 'View Controls 3';
         window.canvas_num = 3;
         canvas_number.innerHTML = 'Canvas 3';
@@ -236,7 +244,7 @@ export async function all_buttons(container) {
         }
         if (!window.object_3_created) {
             addOrUpdateCanvasObject('canvas3');
-            window.object_3_created = true
+            window.object_3_created = true;
         }
         updateCanvasUI();
     });
@@ -264,6 +272,12 @@ export async function all_buttons(container) {
     updateCanvasUI();
     exportingFigures();
 
+}
+
+function setActiveCanvas(activeCanvas) {
+    const canvasButtons = document.querySelectorAll('.canvas-button');
+    canvasButtons.forEach(button => button.classList.remove('active'));
+    activeCanvas.classList.add('active');
 }
 // Add or update a canvas object with the given ID
 function addOrUpdateCanvasObject(canvasId) {
@@ -621,6 +635,7 @@ window.track_settings_btns = async function(trackNumber){
             });
         }
     }      
+    
     // Add event listener to the apply all button for the canvas
     document.querySelector('.apply-all-button').addEventListener('click', async function () {
         // X-axis range
