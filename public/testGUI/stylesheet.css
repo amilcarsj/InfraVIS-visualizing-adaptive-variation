@@ -553,7 +553,7 @@ input[type='text'] {
     border-right: 2px solid rgb(240, 240, 240);
 }
 #export-json-button{
-    position: relative;
+    position: fixed;
     left: 83%;
     top: 10%;
     display:  inline-block;;
@@ -563,14 +563,15 @@ input[type='text'] {
     padding: 5px;
 }
 #export-dropdown{
-    position: absolute;
-    left: 23%;
-    top: 20%;
+    position: relative;
+    left: 70%;
+    top: 15%;
     display: inline-block;
     border: none;
     background-color: #4d4d4d;
     color: white;
     padding: 5px;
+    z-index: 1000;
 }
 
 #export-dropdown:hover, #export-json-button:hover{
@@ -580,6 +581,15 @@ input[type='text'] {
 .or-inbetween{
     position: relative;
     right: 15px;
+}
+
+#filename-display{
+    position: relative;
+    font-weight: 600;
+    top: 5%;
+    right: 10%;
+    
+    
 }
 
 @media only screen and (max-width: 1880px) {
@@ -737,9 +747,6 @@ input[type='text'] {
     .left-section, .right-section {
         width: 70%;
     }
-    #export-dropdown{
-        left: 45%;
-    }
     #export-json-button{
         left: 80%;
     }
@@ -761,6 +768,8 @@ input[type='text'] {
         font-size: 15px;
     }
 }
+
+
 
 @media only screen and (max-width: 1350px) {
     .plot-container {

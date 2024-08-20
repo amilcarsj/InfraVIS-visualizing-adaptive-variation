@@ -4,7 +4,7 @@
  * @returns {Promise<void>} - A Promise that resolves after the container is populated.
  */
 
-import { URLfromFile, URLfromServer, GoslingPlotWithLocalData, getCurrentViewSpec } from './plot.js';
+import { URLfromFile, URLfromServer, GoslingPlotWithLocalData, getCurrentViewSpec, FILENAME } from './plot.js';
 import { updateURLParameters } from './update_plot_specifications.js';
 import {exportingFigures} from './exporting_functionality.js';
 
@@ -28,19 +28,23 @@ export async function all_buttons(container) {
                 <button id="canvas3" class="canvas-button">Canvas 3</button>
                 <button id="add_canvas"> <i class="fa fa-plus"></i></button>
             </div>  
-<div id="notification" style="display: none; color:white;border-radius: 5px ; padding: 10px; opacity:0.7; margin-top: 10px; position: absolute; top: 10px; left: 10%; transform: translateX(-50%); z-index: 1000;"></div>   
+<div id="notification" style="display: none; color:white;border-radius: 5px ; padding: 10px; opacity:0.7; margin-top: 10px; position: absolute; top: 10px; left: 12%; transform: translateX(-50%); z-index: 1000;"></div>   
+
+            <div id="header" class="buttons-container">   
+  
                 <select id="export-dropdown" class="dropdown-content">
                     <option value="" disabled selected>Export as</option>
                     <option id="export-svg-button" value="json">JSON</option>
                     <option id="export-png-button" value="png">PNG</option>
                     <option id="export-html-button" value="html">HTML</option>
                 </select>  
-            <div id="header" class="buttons-container">        
 
                 <div class="btn-row">
+                
                     <h2 class='canvas_number'>Canvas 1</h2>
                     <h2>Track Controls</h2>
                     <span id="clear_url_button" class="clear_all_settings"><u>  Clear All </u></span>
+                    <span id="filename-display">File Name:  ${FILENAME}</span>
                     <button id='add_track_button' class="add_track_button"><i class="fa fa-plus-circle" style="font-size:24px;"></i>Add Track</button>
                     <label for="trackCountSelector"></label>
                     <select id="trackCountSelector" class='trackCountSelector' onchange="generateTracks()">
@@ -50,13 +54,16 @@ export async function all_buttons(container) {
                         <option value="4">4 Tracks</option>
                         <option value="5">5 Tracks</option>
                     </select>
+                    
                 </div>
+                
                 <div class="both_tracks btn-row">
                     <div>
                         <label for="trackSelector"></label>
                         <select id="trackSelector" onchange="showHideTracks()"></select>
                     </div>
                 </div>
+                
                 <div id="data-load" class="btn-row">
                     <div id="container"></div> 
                 </div>
@@ -161,7 +168,7 @@ export async function all_buttons(container) {
         </div>
     </div>
     `;
-
+    console.log(FILENAME)
     const canvas1 = document.getElementById('canvas1');
     const canvas2 = document.getElementById('canvas2');
     const canvas3 = document.getElementById('canvas3');
@@ -658,8 +665,11 @@ window.track_settings_btns = async function(trackNumber){
         // Right Y-axis range
         const y_start_right = parseFloat(document.getElementById('y_start_right').value);
         const y_end_right = parseFloat(document.getElementById('y_end_right').value);
-        const y_interval_right = [y_start_right, y_end_right];
-        
+        let y_interval_right = [y_start_right, y_end_right];
+
+        if(isNaN(y_start_right) && isNaN(y_end_right)) {
+            y_interval_right = [0, 1];
+        }
 
         const plotSpec = getCurrentViewSpec();
         plotSpec.xDomain.interval = x_interval;

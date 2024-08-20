@@ -1,10 +1,12 @@
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const bodyParser = require('body-parser');
 
 const app = express();
+app.use(cors());
 app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

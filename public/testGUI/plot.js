@@ -5,7 +5,7 @@ export function getCurrentViewSpec() {
   const currentCanvasId = `canvas${window.canvas_num}`;
   return window.plotSpecManager.getPlotSpecViewById(currentCanvasId);
 }
-
+export let FILENAME =""
 /**
  * Handle data from a local file input.
  * 
@@ -15,12 +15,17 @@ export function getCurrentViewSpec() {
 export async function URLfromFile(fileInputs, button_data_track_number) {
   try {
     const fileInput = fileInputs[button_data_track_number].files[0];
-    const fileName = fileInput.name;
-    const extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+    FILENAME = fileInput.name;
+    const extension = FILENAME.substring(FILENAME.lastIndexOf('.') + 1).toLowerCase();
     const viewSpec = getCurrentViewSpec();
     const current_track = viewSpec.tracks[button_data_track_number];
     const fileURL = URL.createObjectURL(fileInput);
 
+    const filenameElement = document.getElementById('filename-display');
+    if (filenameElement) {
+        filenameElement.textContent = FILENAME;
+    }
+    
     if (fileURL) {
       current_track.data.url = fileURL;
       await configureDataType(extension, current_track);
