@@ -547,10 +547,32 @@ window.generateTrackBinAndSampleInputs = async function (trackNumber) {
                 </div>
                 <div class="input-group"> 
                     <button class="apply-button" data-track="${trackNumber}">Apply</button>
+                    <button class="delete-track-button" data-track="${trackNumber}"><i class="fa fa-trash"></i></button>
                 </div>
             </div>
         </div>
     </div>`;
+}
+
+async function deleteTrack(trackToDelete) {
+    const currentCanvasState = window.canvas_states[window.canvas_num];
+    
+    // Remove the track from the plotSpec
+    const plotSpec = getCurrentViewSpec();
+    plotSpec.tracks.splice(trackToDelete, 1);
+
+    // Update the track count
+    currentCanvasState.trackCount--;
+
+    // Update the UI
+    document.getElementById('trackCountSelector').value = currentCanvasState.trackCount;
+    await generateTracks();
+
+    // Update the plot
+    await GoslingPlotWithLocalData();
+
+    // Update URL parameters
+    updateURLParameters(`track${trackToDelete}`, null); // Remove the track from URL parameters
 }
 
 window.track_settings_btns = async function(trackNumber){
@@ -566,6 +588,12 @@ window.track_settings_btns = async function(trackNumber){
         });
     });
 
+    document.querySelectorAll('.delete-track-button').forEach(function (deleteButton) {
+        deleteButton.addEventListener('click', async function () {
+            const trackToDelete = parseInt(this.getAttribute('data-track'));
+            await deleteTrack(trackToDelete);
+        });
+    });
     document.querySelectorAll('.mark').forEach(function (markSelector) {
         markSelector.addEventListener('change', async function () {
             const trackValue = this.getAttribute('data-track');

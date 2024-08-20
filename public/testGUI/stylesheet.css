@@ -591,6 +591,17 @@ input[type='text'] {
     
     
 }
+.delete-track-button{
+    position: absolute;
+    background-color: transparent;
+    border: none;
+    top: 5%;
+    left: 90%;
+    padding: 5px;
+    color: rgb(185, 18, 18);
+    font-size: 30px;
+    box-shadow: none;
+}
 
 @media only screen and (max-width: 1880px) {
     .url-button{
