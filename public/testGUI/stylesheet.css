@@ -44,7 +44,7 @@ html, body {
 
 .bcolor-container{
     position: relative;
-    top: 30%;
+    top: 10%;
 }   
 #bcolor{
     margin-left: 10px;
@@ -58,6 +58,10 @@ html, body {
 .btn-row {
     margin: 10px;
     padding: 5px;
+}
+.file-info{
+    margin-left: 15px;
+    font-weight: 600;
 }
 
 .canvas {
@@ -512,6 +516,7 @@ input[type='text'] {
 .column-container{
     margin-top: 10px;
 }
+
 .columnSelectorY, .columnSelectorX{
     width: 90px;
     border: 2px solid gray;
@@ -519,6 +524,7 @@ input[type='text'] {
     height: 35px;
     
 }
+
 
 .y-axis-left{
     margin-top: 15px;
@@ -537,7 +543,7 @@ input[type='text'] {
 }
 
 .x-axis-select{
-    margin-left: 9px;
+    margin-left: 8px;
 }
 
 .hidden {
@@ -551,6 +557,12 @@ input[type='text'] {
 
 #global-variables{
     border-right: 2px solid rgb(240, 240, 240);
+    position: relative;
+    top: 75px;
+}
+.x_axis_h2{
+    position: relative;
+    bottom: 70px;
 }
 #export-json-button{
     position: fixed;

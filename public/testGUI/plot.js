@@ -5,7 +5,7 @@ export function getCurrentViewSpec() {
   const currentCanvasId = `canvas${window.canvas_num}`;
   return window.plotSpecManager.getPlotSpecViewById(currentCanvasId);
 }
-export let FILENAME =""
+window.FILENAMES = window.FILENAMES || {};
 /**
  * Handle data from a local file input.
  * 
@@ -15,15 +15,16 @@ export let FILENAME =""
 export async function URLfromFile(fileInputs, button_data_track_number) {
   try {
     const fileInput = fileInputs[button_data_track_number].files[0];
-    FILENAME = fileInput.name;
-    const extension = FILENAME.substring(FILENAME.lastIndexOf('.') + 1).toLowerCase();
+    FILENAMES[button_data_track_number] = fileInput.name;
+    const extension = FILENAMES[button_data_track_number].substring(FILENAMES[button_data_track_number].lastIndexOf('.') + 1).toLowerCase();
     const viewSpec = getCurrentViewSpec();
     const current_track = viewSpec.tracks[button_data_track_number];
     const fileURL = URL.createObjectURL(fileInput);
 
-    const filenameElement = document.getElementById('filename-display');
+    // Update the filename display for this specific track
+    const filenameElement = document.getElementById(`filename-display-${button_data_track_number}`);
     if (filenameElement) {
-        filenameElement.textContent = FILENAME;
+      filenameElement.textContent = `File: ${FILENAMES[button_data_track_number]}`;
     }
     
     if (fileURL) {
@@ -31,7 +32,6 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
       await configureDataType(extension, current_track);
       await handleOptions(fileInput, button_data_track_number);
       await checkURLParameters(current_track, button_data_track_number);
-      // await GoslingPlotWithLocalData();
       console.log('File loaded successfully');
     }
   } catch (error) {
