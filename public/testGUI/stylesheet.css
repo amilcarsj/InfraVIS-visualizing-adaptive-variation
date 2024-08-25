@@ -102,14 +102,20 @@ html, body {
 #canvas2, #canvas3 {
     display: none;
 }
-#add_canvas{
+#add_canvas, #add_view{
     border-radius: 20%;
     padding: 5px;
     font-size: 20px;
     width: 50px;
     margin-top: 5px;
+    min-width: 50px;
 }
-#add_canvas:hover{
+#add_view{
+    position: relative;
+    right: 50px;
+    
+}
+#add_canvas:hover , #add_view:hover{
     background-color: rgb(56, 56, 56);
     color: white;
 }

@@ -9,42 +9,9 @@ import { updateURLParameters } from './update_plot_specifications.js';
 import {exportingFigures} from './exporting_functionality.js';
 
 window.canvas_states = {
-    1: { 
-        trackCount: 1, 
-        tracks: [],
-        view_control_settings: {
-            x_axis: '',
-            x_range: [0, 200000],
-            left_y_axis: '',
-            left_y_range: [0, 1],
-            right_y_axis: '',
-            right_y_range: [0, 1]
-        }
-    },
-    2: { 
-        trackCount: 1, 
-        tracks: [],
-        view_control_settings: {
-            x_axis: '',
-            x_range: [0, 200000],
-            left_y_axis: '',
-            left_y_range: [0, 1],
-            right_y_axis: '',
-            right_y_range: [0, 1]
-        }
-    },
-    3: { 
-        trackCount: 1, 
-        tracks: [],
-        view_control_settings: {
-            x_axis: '',
-            x_range: [0, 200000],
-            left_y_axis: '',
-            left_y_range: [0, 1],
-            right_y_axis: '',
-            right_y_range: [0, 1]
-        }
-    }
+    1: { trackCount: 1, tracks: [], view_control_settings: {x_axis: '', x_range: [0, 200000], left_y_axis: '', left_y_range: [0, 1], right_y_axis: '', right_y_range: [0, 1], checked_left : [], checked_right : []}},
+    2: { trackCount: 1, tracks: [], view_control_settings: {x_axis: '', x_range: [0, 200000], left_y_axis: '', left_y_range: [0, 1], right_y_axis: '', right_y_range: [0, 1], checked_left : [], checked_right : []}},
+    3: { trackCount: 1, tracks: [], view_control_settings: {x_axis: '', x_range: [0, 200000], left_y_axis: '', left_y_range: [0, 1], right_y_axis: '', right_y_range: [0, 1], checked_left : [], checked_right : []}}
 };
 
 window.currentView = 1
@@ -53,6 +20,7 @@ window.object_2_created = false
 window.object_3_created = false
 window.trackCount = 5;
 window.displayed_canvas = 1
+window.track_for_views = 0
 export async function all_buttons(container) {
     container.innerHTML = `
     <div class="body-container">
@@ -63,19 +31,15 @@ export async function all_buttons(container) {
                 <button id="canvas3" class="canvas-button">Canvas 3</button>
                 <button id="add_canvas"> <i class="fa fa-plus"></i></button>
             </div>  
-<div id="notification" style="display: none; color:white;border-radius: 5px ; padding: 10px; opacity:0.7; margin-top: 10px; position: absolute; top: 10px; left: 12%; transform: translateX(-50%); z-index: 1000;"></div>   
-
+            <div id="notification" style="display: none; color:white;border-radius: 5px ; padding: 10px; opacity:0.7; margin-top: 10px; position: absolute; top: 10px; left: 12%; transform: translateX(-50%); z-index: 1000;"></div>   
             <div id="header" class="buttons-container">   
-  
                 <select id="export-dropdown" class="dropdown-content">
                     <option value="" disabled selected>Export as</option>
                     <option id="export-svg-button" value="json">JSON</option>
                     <option id="export-png-button" value="png">PNG</option>
                     <option id="export-html-button" value="html">HTML</option>
-                </select>  
-
+                </select> 
                 <div class="btn-row">
-                
                     <h2 class='canvas_number'>Canvas 1</h2>
                     <h2>Track Controls</h2>
                     <span id="clear_url_button" class="clear_all_settings"><u>  Clear All </u></span>                   
@@ -87,17 +51,14 @@ export async function all_buttons(container) {
                         <option value="3">3 Tracks</option>
                         <option value="4">4 Tracks</option>
                         <option value="5">5 Tracks</option>
-                    </select>
-                    
+                    </select>       
                 </div>
-                
                 <div class="both_tracks btn-row">
                     <div>
                         <label for="trackSelector"></label>
                         <select id="trackSelector" onchange="showHideTracks()"></select>
                     </div>
-                </div>
-                
+                </div>     
                 <div id="data-load" class="btn-row">
                     <div id="container"></div> 
                 </div>
@@ -108,6 +69,7 @@ export async function all_buttons(container) {
                 <button id='view1-btn' class='view-btn'> View 1 </button>
                 <button id='view2-btn' class='view-btn' style='display:none;'> View 2 </button>
                 <button id='view3-btn' class='view-btn' style='display:none;'> View 3 </button>
+                <button id="add_view"> <i class="fa fa-plus"></i></button>
             </div>
             ${generateViewControl(window.currentView)}
             <div id="plot-container-1" class="plot-container"></div>
@@ -120,22 +82,34 @@ export async function all_buttons(container) {
     const view_control = document.querySelector('.view-control');
     const canvas_number = document.querySelector('.canvas_number');
     const add_canvas = document.getElementById('add_canvas');
-
+    const add_view = document.getElementById('add_view');
+    const view1_btn = document.getElementById('view1-btn');
+    const view2_btn = document.getElementById('view2-btn');
+    const view3_btn = document.getElementById('view3-btn');
     // Set Canvas 1 as active by default
+    add_view.addEventListener('click', function(){
+        if(currentView === 1) {
+            view2_btn.style.display = 'block';
+            window.currentView = 2
+            view_control.innerHTML = 'View Controls 2'
+            updateViewSettings(2);
+        } else if(currentView === 2) {
+            view_control.innerHTML = 'View Controls 3'
+            view3_btn.style.display = 'block';
+            window.currentView = 3
+            updateViewSettings(3);
+            this.style.cursor = 'not-allowed';
+            this.disabled = true;
+        }    
+    })
+    
     canvas1.classList.add('active');
-
     add_canvas.addEventListener('click', function () {
         if (displayed_canvas === 1) {
             canvas2.style.display = 'block';
             displayed_canvas = 2;
-            const view2_btn = document.getElementById('view2-btn');
-            view_control.innerHTML = 'View Controls 2';
             window.canvas_num = 2;
-            window.currentView = 2
             canvas_number.innerHTML = 'Canvas 2';
-            if (!document.getElementById('canvas-container-2')) {
-                view2_btn.style.display = 'block';
-            }
             if (!window.object_2_created) {
                 addOrUpdateCanvasObject('canvas2');
                 window.object_2_created = true;
@@ -143,16 +117,10 @@ export async function all_buttons(container) {
             setActiveCanvas(canvas2);
             updateCanvasUI();
         }
-        
         else if (displayed_canvas === 2) {
             canvas3.style.display = 'block';
-            view_control.innerHTML = 'View Controls 3';
             window.canvas_num = 3;
-            window.currentView = 3
             canvas_number.innerHTML = 'Canvas 3';
-            if (!document.getElementById('canvas-container-3')) {
-                view3_btn.style.display = 'block';
-            }
             if (!window.object_3_created) {
                 addOrUpdateCanvasObject('canvas3');
                 window.object_3_created = true
@@ -163,39 +131,26 @@ export async function all_buttons(container) {
             this.disabled = true;
         }
     })
-
     canvas1.addEventListener('click', function () {
         setActiveCanvas(canvas1);
-        view_control.innerHTML = 'View Controls 1';
         window.canvas_num = 1;
         canvas_number.innerHTML = 'Canvas 1';
         updateCanvasUI();
     });
-
     canvas2.addEventListener('click', function () {
         setActiveCanvas(canvas2);
-        const view2_btn = document.getElementById('view2-btn');
-        view_control.innerHTML = 'View Controls 2';
         window.canvas_num = 2;
         canvas_number.innerHTML = 'Canvas 2';
-        if (!document.getElementById('canvas-container-2')) {
-            view2_btn.style.display = 'block';
-        }
         if (!window.object_2_created) {
             addOrUpdateCanvasObject('canvas2');
             window.object_2_created = true;
         }
         updateCanvasUI();
     });
-
     canvas3.addEventListener('click', function () {
         setActiveCanvas(canvas3);
-        view_control.innerHTML = 'View Controls 3';
         window.canvas_num = 3;
         canvas_number.innerHTML = 'Canvas 3';
-        if (!document.getElementById('canvas-container-3')) {
-            view3_btn.style.display = 'block';
-        }
         if (!window.object_3_created) {
             addOrUpdateCanvasObject('canvas3');
             window.object_3_created = true;
@@ -203,68 +158,47 @@ export async function all_buttons(container) {
         updateCanvasUI();
     });
 
-    const view1_btn = document.getElementById('view1-btn');
-    const view2_btn = document.getElementById('view2-btn');
-    const view3_btn = document.getElementById('view3-btn');
-    const canvas_container_1 = document.getElementById('canvas-container-1');
 
+    const canvas_container_1 = document.getElementById('canvas-container-1');
     view1_btn.addEventListener('click', function () {
         view_control.innerHTML = 'View Controls 1';
         canvas_container_1.id = 'canvas-container-1';
         window.currentView = 1;
         updateViewSettings(1);
     });
-    
     view2_btn.addEventListener('click', function () {
         view_control.innerHTML = 'View Controls 2';
         canvas_container_1.id = 'canvas-container-2';
         window.currentView = 2;
         updateViewSettings(2);
     });
-    
     view3_btn.addEventListener('click', function () {
         view_control.innerHTML = 'View Controls 3';
         canvas_container_1.id = 'canvas-container-3';
         window.currentView = 3;
         updateViewSettings(3);
     });
-
-    
     // Add the toggle effect for the initial canvas container
     addCanvasBarToggle('canvas-bar-1', 'canvas-container-1');
     updateCanvasUI();
     exportingFigures();
-
 }
 
-
-function updateViewSettings(view) {
-    const settings = window.canvas_states[view].view_control_settings;
-    
-    // Update X-axis
-    document.getElementById('x_range_start').value = settings.x_range[0];
-    document.getElementById('x_range_end').value = settings.x_range[1];
-    document.getElementById('columnSelectorX_0').value = settings.x_axis;
-
-    // Update Left Y-axis
-    document.getElementById('y_start_left').value = settings.left_y_range[0];
-    document.getElementById('y_end_left').value = settings.left_y_range[1];
-    document.getElementById('columnSelectorYLeft').value = settings.left_y_axis;
-
-    // Update Right Y-axis
-    document.getElementById('y_start_right').value = settings.right_y_range[0];
-    document.getElementById('y_end_right').value = settings.right_y_range[1];
-    document.getElementById('columnSelectorYRight').value = settings.right_y_axis;
-}
 function setActiveCanvas(activeCanvas) {
     const canvasButtons = document.querySelectorAll('.canvas-button');
     canvasButtons.forEach(button => button.classList.remove('active'));
     activeCanvas.classList.add('active');
 }
+function updateCanvasUI() {
+    const currentCanvasState = window.canvas_states[window.canvas_num];
+    document.getElementById('trackCountSelector').value = currentCanvasState.trackCount;
+    generateTracks();
+}
 // Add or update a canvas object with the given ID
 function addOrUpdateCanvasObject(canvasId) {
     const canvas_container = document.createElement('div');
-    canvas_container.id = `canvas-container-${canvasId}`;
+    canvas_container.id = `canvas-container-${canvasId}-${currentView}`;
+    console.log(canvas_container)
     const newCanvasObject = {
         id: canvasId,
         title: `Canvas ${canvasId.slice(-1)}`,
@@ -287,10 +221,8 @@ function addOrUpdateCanvasObject(canvasId) {
             window.plotSpecManager.createTrack(),
         ],
     };
-
     window.plotSpecManager.addOrUpdateCanvasObject(canvasId, newCanvasObject);
     GoslingPlotWithLocalData();
-    
 }
 // the toggle effect for the canvas bar
 function addCanvasBarToggle(barId, containerId) {
@@ -304,17 +236,14 @@ function addCanvasBarToggle(barId, containerId) {
             }
         });
     }
-
     // Add event listener to the clear all settings button
     const clearAllSettingsButton = document.querySelector('#clear_url_button');
     if (clearAllSettingsButton) {
         clearAllSettingsButton.addEventListener('click', () => {
             // Clear FILENAMES object
-            window.FILENAMES = {};
-            
+            window.FILENAMES = {};     
             // Clear other settings
-            updateURLParameters("xDomain.interval", [0, 200000]);
-            
+            updateURLParameters("xDomain.interval", [0, 200000]);  
             // Reset canvas states
             for (let i = 1; i <= 3; i++) {
                 window.canvas_states[i] = {
@@ -329,20 +258,39 @@ function addCanvasBarToggle(barId, containerId) {
                         right_y_range: [0, 1]
                     }
                 };
-            }
-            
+            }     
             // Reload the page
             location.reload();
         });
     }
 }
+function updateViewSettings(view) {
+    const settings = window.canvas_states[view].view_control_settings;
+    // Update X-axis
+    document.getElementById('x_range_start').value = settings.x_range[0];
+    document.getElementById('x_range_end').value = settings.x_range[1];
+    document.getElementById('columnSelectorX_0').value = settings.x_axis;
+    // Update Left Y-axis
+    document.getElementById('y_start_left').value = settings.left_y_range[0];
+    document.getElementById('y_end_left').value = settings.left_y_range[1];
+    document.getElementById('columnSelectorYLeft').value = settings.left_y_axis;
+    // Update Right Y-axis
+    document.getElementById('y_start_right').value = settings.right_y_range[0];
+    document.getElementById('y_end_right').value = settings.right_y_range[1];
+    document.getElementById('columnSelectorYRight').value = settings.right_y_axis;
 
-function updateCanvasUI() {
-    const currentCanvasState = window.canvas_states[window.canvas_num];
-    document.getElementById('trackCountSelector').value = currentCanvasState.trackCount;
-    generateTracks();
+    const leftCheckboxes = document.querySelectorAll('#checkbox-left-axis input[type="checkbox"]');
+    leftCheckboxes.forEach(checkbox => {
+        checkbox.checked = settings.checked_left.includes(checkbox.id);
+    });
+
+    // Restore right axis checked boxes
+    const rightCheckboxes = document.querySelectorAll('#checkbox-right-axis input[type="checkbox"]');
+    rightCheckboxes.forEach(checkbox => {
+        checkbox.checked = settings.checked_right.includes(checkbox.id);
+    });
+
 }
-
 function resetTrackSettings(trackNumber) {
     // Reset inputs and selectors to their default values
     document.getElementById(`binsize_${trackNumber}`).value = '';
@@ -353,7 +301,6 @@ function resetTrackSettings(trackNumber) {
     document.getElementById(`columnSelectorYRight`).selectedIndex = 0;
     document.getElementById(`mark_${trackNumber}`).selectedIndex = 0;
     document.getElementById(`color_${trackNumber}`).selectedIndex = 0;
-    
     // Reset other track-specific settings as needed
     const plotSpec = getCurrentViewSpec();
     plotSpec.tracks[trackNumber].data.url = ''
@@ -362,7 +309,6 @@ function resetTrackSettings(trackNumber) {
     plotSpec.tracks[trackNumber].size.value = 3;
     plotSpec.tracks[trackNumber].mark = 'point';
     plotSpec.tracks[trackNumber].color.value = '#e41a1c';
-
     // Apply changes and update the UI
     updateURLParameters(`data.binSize${trackNumber}`, 0);
     updateURLParameters(`data.sampleLength${trackNumber}`, 0);
@@ -371,9 +317,6 @@ function resetTrackSettings(trackNumber) {
     updateURLParameters(`color.value${trackNumber}`, '#e41a1c');
     GoslingPlotWithLocalData();
 }
-
-
-
 window.updateTrackNumber = async function () {
     const currentCanvasState = window.canvas_states[window.canvas_num];
     currentCanvasState.trackCount++;
@@ -389,49 +332,40 @@ window.generateTracks = async function () {
     const trackCount = currentCanvasState.trackCount;
     const container = document.getElementById("container");
     let htmlContent = '';
-    
     // Render buttons containers
-    for (let i = 0; i < trackCount; i++) {
-        
+    for (let i = 0; i < trackCount; i++) { 
         htmlContent += `
             <div id="track${i}" class="track-container">      
                 ${await generateTrackBinAndSampleInputs(i)}                                            
             </div>
         `; 
     }
-    
     container.innerHTML = '';    
     container.innerHTML += htmlContent;        
-
     // Render detailing track options
     htmlContent = '';
     for (let i = 0; i < trackCount; i++) {
         
         htmlContent += `<option value="${i}">Track ${i + 1}</option>`;
         
-    }
-    
+    } 
     const trackSelector = document.getElementById("trackSelector");
     trackSelector.innerHTML = '';
-    trackSelector.innerHTML += htmlContent;        
-    
+    trackSelector.innerHTML += htmlContent;          
     // Updating colors
     for (let i = 0; i < trackCount; i++) {
         const defaultColor = document.getElementById(`color_${i}`).value;
         await updateURLParameters(`color.value${i}`, defaultColor);    
           
     }
-
     // Updating axis-controllers
     let axisFormLeft = document.getElementById('checkbox-left-axis');
     let axisFormRight = document.getElementById('checkbox-right-axis');
     let dataLoad = document.getElementById('data-load');
     axisFormLeft.innerHTML = '';
     axisFormRight.innerHTML = '';
-    dataLoad.innerHTML = '';
-    
-    for (let i = 0; i < trackCount; i++) {
-        
+    dataLoad.innerHTML = ''; 
+    for (let i = 0; i < trackCount; i++) {  
         axisFormLeft.innerHTML += `
         <div class="y-checkbox-option">    
             <input class="y-checkbox-option" type="checkbox" id="track${i}-left" name="option" value="Track ${i + 1}" checked>
@@ -465,11 +399,9 @@ window.generateTracks = async function () {
     }
     }
     dataLoad.innerHTML += `<div id="container"></div>`;
-    
     // Get all checkboxes
     const leftCheckboxes = document.querySelectorAll('#checkbox-left-axis input[type="checkbox"]');
     const rightCheckboxes = document.querySelectorAll('#checkbox-right-axis input[type="checkbox"]');
-
     // Add event listeners to left checkboxes
     leftCheckboxes.forEach(leftCheckbox => {
         leftCheckbox.addEventListener('change', function () {
@@ -484,17 +416,14 @@ window.generateTracks = async function () {
             correspondingCheckbox.checked = !this.checked;            
         });
     });
-
     await new Promise(resolve => setTimeout(resolve, 0));
     await window.track_settings_btns(trackCount);  
     await window.showHideTracks();
 }
-
 // Ensure the Add Track button triggers the track count update
 window.onload = function () {
     document.getElementById('add_track_button').addEventListener('click', updateTrackNumber);
 }
-
 // Show or hide tracks based on the selected track
 window.showHideTracks = async function () {
     const currentCanvasState = window.canvas_states[window.canvas_num];
@@ -509,7 +438,6 @@ window.showHideTracks = async function () {
         }
     }
 }
-
 /**
  * Generates HTML for input fields related to bin size and sample length for a track.
  * @param {number} trackNumber - The number of the track.
@@ -569,10 +497,8 @@ window.generateTrackBinAndSampleInputs = async function (trackNumber) {
         </div>
     </div>`;
 }
-
 async function deleteTrack(trackToDelete) {
     const currentCanvasState = window.canvas_states[window.canvas_num];
-    
     // Remove the track from the plotSpec
     const plotSpec = getCurrentViewSpec();
     plotSpec.tracks.splice(trackToDelete, 1);
@@ -587,21 +513,16 @@ async function deleteTrack(trackToDelete) {
             delete window.FILENAMES[i];
         }
     }
-
     // Update the track count
     currentCanvasState.trackCount--;
-
     // Update the UI
     document.getElementById('trackCountSelector').value = currentCanvasState.trackCount;
     await generateTracks();
-
     // Update the plot
     await GoslingPlotWithLocalData();
-
     // Update URL parameters
     updateURLParameters(`track${trackToDelete}`, null);
 }
-
 window.track_settings_btns = async function(trackNumber){
     const fileInputs = document.querySelectorAll('.file-input');
     document.querySelectorAll('.plot-button').forEach(function (button, button_data_track_num) {
@@ -614,7 +535,6 @@ window.track_settings_btns = async function(trackNumber){
             URLfromFile(fileInputs, button_data_track_num);
         });
     });
-
     document.querySelectorAll('.delete-track-button').forEach(function (deleteButton) {
         deleteButton.addEventListener('click', async function () {
             const trackToDelete = parseInt(this.getAttribute('data-track'));
@@ -630,7 +550,6 @@ window.track_settings_btns = async function(trackNumber){
             await updateURLParameters(`mark${trackValue}`, chosenMark);
         });
     });
-
     document.querySelectorAll('.color').forEach(function (colorSelector) {
         colorSelector.addEventListener('change', async function () {
             const trackValue = this.getAttribute('data-track');
@@ -641,7 +560,6 @@ window.track_settings_btns = async function(trackNumber){
             await updateURLParameters(`color.value${trackValue}`, chosenColor);
         });
     });
-
     document.querySelectorAll('.marksize').forEach(function (sizeInput) {
         sizeInput.addEventListener('input', async function () {
             const trackValue = this.getAttribute('data-track');
@@ -652,7 +570,6 @@ window.track_settings_btns = async function(trackNumber){
             await updateURLParameters(`size.value${trackValue}`, chosenSize);
         });
     });
-    
     document.querySelectorAll('.apply-button').forEach(function (applyButton) {
         applyButton.addEventListener('click', async function () {
             const trackNumber = this.getAttribute('data-track');
@@ -662,18 +579,15 @@ window.track_settings_btns = async function(trackNumber){
             const binSize = parseFloat(binSizeInput.value);
             const sampleLength = parseFloat(sampleLengthInput.value);
             const markSize = parseFloat(markSizeInput.value);
-            const plotSpec = getCurrentViewSpec();
-            
+            const plotSpec = getCurrentViewSpec();   
             if (!isNaN(binSize)) {
                 plotSpec.tracks[trackNumber].data.binSize = binSize;
                 await updateURLParameters(`data.binSize${trackNumber}`, binSize);
-            }
-            
+            }   
             if (!isNaN(sampleLength)) {
                 plotSpec.tracks[trackNumber].data.sampleLength = sampleLength;
                 await updateURLParameters(`data.sampleLength${trackNumber}`, sampleLength);
-            }
-            
+            }   
             if (!isNaN(markSize)) {
                 plotSpec.tracks[trackNumber].size.value = markSize;
                 await updateURLParameters(`size.value${trackNumber}`, markSize);
@@ -681,14 +595,12 @@ window.track_settings_btns = async function(trackNumber){
             await GoslingPlotWithLocalData();
         });
     });
-
     document.querySelectorAll('.url-button').forEach(function (urlButton, trackNumber) {
         const urlInput = document.getElementById(`urlinput_${trackNumber}`);  
         urlButton.addEventListener('click', function () {
             URLfromServer(urlInput.value, trackNumber);
         });
     });
-
     for (let i = 0; i < trackNumber; i++) {
         let clear_settings_button = document.getElementById(`clear_settings_button${i}`);
         if (clear_settings_button) {
@@ -697,39 +609,31 @@ window.track_settings_btns = async function(trackNumber){
             });
         }
     }      
-    
     // Add event listener to the apply all button for the canvas
     document.querySelector('.apply-all-button').addEventListener('click', async function () {
         const currentView = window.currentView;
-        const currentCanvasState = window.canvas_states[currentView];
-        
+        const currentCanvasState = window.canvas_states[currentView];    
         // X-axis range
         const x_start = parseFloat(document.getElementById('x_range_start').value);
         const x_end = parseFloat(document.getElementById('x_range_end').value);
-        let x_interval = [x_start, x_end];
-        
+        let x_interval = [x_start, x_end];  
         if(isNaN(x_start) && isNaN(x_end)) {
             x_interval = [0, 200000];
         }
-        
         // Left Y-axis range
         const y_start_left = parseFloat(document.getElementById('y_start_left').value);
         const y_end_left = parseFloat(document.getElementById('y_end_left').value);
         let y_interval_left = [y_start_left, y_end_left];
-        
         if(isNaN(y_start_left) && isNaN(y_end_left)) {
             y_interval_left = [0, 1];
         }
-        
         // Right Y-axis range
         const y_start_right = parseFloat(document.getElementById('y_start_right').value);
         const y_end_right = parseFloat(document.getElementById('y_end_right').value);
         let y_interval_right = [y_start_right, y_end_right];
-    
         if(isNaN(y_start_right) && isNaN(y_end_right)) {
             y_interval_right = [0, 1];
         }
-    
         // Update the current view's settings
         currentCanvasState.view_control_settings.x_range = x_interval;
         currentCanvasState.view_control_settings.left_y_range = y_interval_left;
@@ -737,30 +641,40 @@ window.track_settings_btns = async function(trackNumber){
         currentCanvasState.view_control_settings.x_axis = document.getElementById('columnSelectorX_0').value;
         currentCanvasState.view_control_settings.left_y_axis = document.getElementById('columnSelectorYLeft').value;
         currentCanvasState.view_control_settings.right_y_axis = document.getElementById('columnSelectorYRight').value;
-    
         // Update plot spec and redraw
+
         const plotSpec = getCurrentViewSpec();
-        plotSpec.xDomain.interval = x_interval;
         
+        plotSpec.xDomain.interval = currentCanvasState.view_control_settings.x_range;
         const leftChecked = document.querySelectorAll('#checkbox-left-axis input[type="checkbox"]:checked');
         leftChecked.forEach(function (checkbox) {
             const trackIndex = parseInt(checkbox.value.split(' ')[1]) - 1;
-            plotSpec.tracks[trackIndex].y.domain = y_interval_left;
+            plotSpec.tracks[trackIndex].y.domain = currentCanvasState.view_control_settings.right_y_range;
+            plotSpec.tracks[trackIndex].y.field = document.getElementById('columnSelectorYLeft').options[currentCanvasState.view_control_settings.left_y_axis].textContent
+            plotSpec.tracks[trackIndex].y.axis = 'left'
+            plotSpec.tracks[trackIndex].x.field = document.getElementById('columnSelectorX_0').options[currentCanvasState.view_control_settings.x_axis].textContent
+            currentCanvasState.view_control_settings.checked_left = Array.from(leftChecked).map(checkbox => checkbox.id);
         });
-    
         const rightChecked = document.querySelectorAll('#checkbox-right-axis input[type="checkbox"]:checked');
         rightChecked.forEach(function (checkbox) {
             const trackIndex = parseInt(checkbox.value.split(' ')[1]) - 1;
-            plotSpec.tracks[trackIndex].y.domain = y_interval_right;
-        });
+            plotSpec.tracks[trackIndex].y.domain = currentCanvasState.view_control_settings.right_y_range;
+            plotSpec.tracks[trackIndex].y.field = document.getElementById('columnSelectorYRight').options[currentCanvasState.view_control_settings.right_y_axis].textContent
+            plotSpec.tracks[trackIndex].y.axis = 'right'
+            plotSpec.tracks[trackIndex].x.field = document.getElementById('columnSelectorX_0').options[currentCanvasState.view_control_settings.x_axis].textContent
+            currentCanvasState.view_control_settings.checked_right = Array.from(rightChecked).map(checkbox => checkbox.id);
+        });    
     
+        updateURLParameters("columnSelectorX_0", currentCanvasState.view_control_settings.x_axis);
+        updateURLParameters("columnSelectorYLeft", currentCanvasState.view_control_settings.left_y_axis);
+        updateURLParameters("columnSelectorYRight", currentCanvasState.view_control_settings.right_y_axis);
+        updateURLParameters("xDomain.interval", currentCanvasState.view_control_settings.x_range);
+        updateURLParameters("yDomain.left", currentCanvasState.view_control_settings.left_y_range);
+        updateURLParameters("yDomain.right", currentCanvasState.view_control_settings.right_y_range);
+
         await GoslingPlotWithLocalData();
-        updateURLParameters("xDomain.interval", x_interval);
-        updateURLParameters("yDomain.left", y_interval_left);
-        updateURLParameters("yDomain.right", y_interval_right);
     });
 }
-
 function generateViewControl(currentView){
     return`            
     <div id='canvas-container-${currentView}' class='canvas-container'>
