@@ -9,9 +9,9 @@ import { updateURLParameters } from './update_plot_specifications.js';
 import {exportingFigures} from './exporting_functionality.js';
 
 window.canvas_states = {
-    1: { trackCount: 1, tracks: [], view_control_settings: {x_axis: '', x_range: [0, 200000], left_y_axis: '', left_y_range: [0, 1], right_y_axis: '', right_y_range: [0, 1], checked_left : [], checked_right : []}},
-    2: { trackCount: 1, tracks: [], view_control_settings: {x_axis: '', x_range: [0, 200000], left_y_axis: '', left_y_range: [0, 1], right_y_axis: '', right_y_range: [0, 1], checked_left : [], checked_right : []}},
-    3: { trackCount: 1, tracks: [], view_control_settings: {x_axis: '', x_range: [0, 200000], left_y_axis: '', left_y_range: [0, 1], right_y_axis: '', right_y_range: [0, 1], checked_left : [], checked_right : []}}
+    1: { trackCount: 1, tracks: [],filenames:{}, view_control_settings: {x_axis: '', x_range: [0, 200000], left_y_axis: '', left_y_range: [0, 1], right_y_axis: '', right_y_range: [0, 1], checked_left : [], checked_right : []}},
+    2: { trackCount: 1, tracks: [],filenames:{}, view_control_settings: {x_axis: '', x_range: [0, 200000], left_y_axis: '', left_y_range: [0, 1], right_y_axis: '', right_y_range: [0, 1], checked_left : [], checked_right : []}},
+    3: { trackCount: 1, tracks: [],filenames:{}, view_control_settings: {x_axis: '', x_range: [0, 200000], left_y_axis: '', left_y_range: [0, 1], right_y_axis: '', right_y_range: [0, 1], checked_left : [], checked_right : []}}
 };
 
 window.currentView = 1
@@ -35,7 +35,7 @@ export async function all_buttons(container) {
             <div id="header" class="buttons-container">   
                 <select id="export-dropdown" class="dropdown-content">
                     <option value="" disabled selected>Export as</option>
-                    <option id="export-svg-button" value="json">JSON</option>
+                    <option id="export-json-button" value="json">JSON</option>
                     <option id="export-png-button" value="png">PNG</option>
                     <option id="export-html-button" value="html">HTML</option>
                 </select> 
@@ -198,7 +198,6 @@ function updateCanvasUI() {
 function addOrUpdateCanvasObject(canvasId) {
     const canvas_container = document.createElement('div');
     canvas_container.id = `canvas-container-${canvasId}-${currentView}`;
-    console.log(canvas_container)
     const newCanvasObject = {
         id: canvasId,
         title: `Canvas ${canvasId.slice(-1)}`,
@@ -241,7 +240,10 @@ function addCanvasBarToggle(barId, containerId) {
     if (clearAllSettingsButton) {
         clearAllSettingsButton.addEventListener('click', () => {
             // Clear FILENAMES object
-            window.FILENAMES = {};     
+            window.canvas_states[1].filenames = {};
+            window.canvas_states[2].filenames = {};
+            window.canvas_states[3].filenames = {};
+            
             // Clear other settings
             updateURLParameters("xDomain.interval", [0, 200000]);  
             // Reset canvas states
@@ -394,8 +396,8 @@ window.generateTracks = async function () {
         ${await generateTrackBinAndSampleInputs(i)}                                
     </div>`;
     const filenameElement = document.getElementById(`filename-display-${i}`);
-    if (filenameElement && window.FILENAMES[i]) {
-        filenameElement.textContent = `File: ${window.FILENAMES[i]}`;
+    if (filenameElement && window.canvas_states[window.canvas_num].filenames[i]) {
+        filenameElement.textContent = `File: ${window.canvas_states[window.canvas_num].filenames[i]}`;
     }
     }
     dataLoad.innerHTML += `<div id="container"></div>`;
@@ -444,7 +446,7 @@ window.showHideTracks = async function () {
  * @returns {string} - The HTML content for bin and sample inputs.
  */
 window.generateTrackBinAndSampleInputs = async function (trackNumber) {
-    const fileName = window.FILENAMES[trackNumber] || "No file selected";
+    const fileName = window.canvas_states[window.canvas_num].filenames[trackNumber] || "No file selected";
     return `
     <div class='bin-sample-container track-${trackNumber}'> 
         <div class="file-info">
@@ -504,13 +506,13 @@ async function deleteTrack(trackToDelete) {
     plotSpec.tracks.splice(trackToDelete, 1);
 
     // Remove the file name from FILENAMES object
-    delete window.FILENAMES[trackToDelete];
+    delete window.canvas_states[window.canvas_num].filenames[trackToDelete];
 
     // Shift the remaining file names
     for (let i = trackToDelete + 1; i < currentCanvasState.trackCount; i++) {
-        if (window.FILENAMES[i]) {
-            window.FILENAMES[i - 1] = window.FILENAMES[i];
-            delete window.FILENAMES[i];
+        if (window.canvas_states[window.canvas_num].filenames[i]) {
+            window.canvas_states[window.canvas_num].filenames[i - 1] = window.canvas_states[window.canvas_num].filenames[i];
+            delete window.canvas_states[window.canvas_num].filenames[i];
         }
     }
     // Update the track count
@@ -649,7 +651,7 @@ window.track_settings_btns = async function(trackNumber){
         const leftChecked = document.querySelectorAll('#checkbox-left-axis input[type="checkbox"]:checked');
         leftChecked.forEach(function (checkbox) {
             const trackIndex = parseInt(checkbox.value.split(' ')[1]) - 1;
-            plotSpec.tracks[trackIndex].y.domain = currentCanvasState.view_control_settings.right_y_range;
+            plotSpec.tracks[trackIndex].y.domain = currentCanvasState.view_control_settings.left_y_range;
             plotSpec.tracks[trackIndex].y.field = document.getElementById('columnSelectorYLeft').options[currentCanvasState.view_control_settings.left_y_axis].textContent
             plotSpec.tracks[trackIndex].y.axis = 'left'
             plotSpec.tracks[trackIndex].x.field = document.getElementById('columnSelectorX_0').options[currentCanvasState.view_control_settings.x_axis].textContent
@@ -664,7 +666,8 @@ window.track_settings_btns = async function(trackNumber){
             plotSpec.tracks[trackIndex].x.field = document.getElementById('columnSelectorX_0').options[currentCanvasState.view_control_settings.x_axis].textContent
             currentCanvasState.view_control_settings.checked_right = Array.from(rightChecked).map(checkbox => checkbox.id);
         });    
-    
+        
+        console.log(currentCanvasState.view_control_settings.left_y_range)
         updateURLParameters("columnSelectorX_0", currentCanvasState.view_control_settings.x_axis);
         updateURLParameters("columnSelectorYLeft", currentCanvasState.view_control_settings.left_y_axis);
         updateURLParameters("columnSelectorYRight", currentCanvasState.view_control_settings.right_y_axis);

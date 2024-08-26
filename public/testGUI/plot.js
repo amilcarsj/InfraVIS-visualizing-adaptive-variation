@@ -5,7 +5,11 @@ export function getCurrentViewSpec() {
   const currentCanvasId = `canvas${window.canvas_num}`;
   return window.plotSpecManager.getPlotSpecViewById(currentCanvasId);
 }
-window.FILENAMES = window.FILENAMES || {};
+
+if(window.canvas_num) {
+  window.canvas_states[window.canvas_num].filenames = window.canvas_states[window.canvas_num].filenames || {};
+}
+
 /**
  * Handle data from a local file input.
  * 
@@ -15,8 +19,8 @@ window.FILENAMES = window.FILENAMES || {};
 export async function URLfromFile(fileInputs, button_data_track_number) {
   try {
     const fileInput = fileInputs[button_data_track_number].files[0];
-    FILENAMES[button_data_track_number] = fileInput.name;
-    const extension = FILENAMES[button_data_track_number].substring(FILENAMES[button_data_track_number].lastIndexOf('.') + 1).toLowerCase();
+    window.canvas_states[window.canvas_num].filenames[button_data_track_number] = fileInput.name;
+    const extension = window.canvas_states[window.canvas_num].filenames[button_data_track_number].substring(window.canvas_states[window.canvas_num].filenames[button_data_track_number].lastIndexOf('.') + 1).toLowerCase();
     const viewSpec = getCurrentViewSpec();
     const current_track = viewSpec.tracks[button_data_track_number];
     const fileURL = URL.createObjectURL(fileInput);
@@ -24,7 +28,7 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
     // Update the filename display for this specific track
     const filenameElement = document.getElementById(`filename-display-${button_data_track_number}`);
     if (filenameElement) {
-      filenameElement.textContent = `File: ${FILENAMES[button_data_track_number]}`;
+      filenameElement.textContent = `File: ${window.canvas_states[window.canvas_num].filenames[button_data_track_number]}`;
     }
     
     if (fileURL) {
