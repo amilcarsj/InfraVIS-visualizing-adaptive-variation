@@ -29,3 +29,28 @@ The exported files will be available in the exports folder, as well as will be d
 
 Note: make sure to use a file from a url, since you wont be able to see the plot if you used a local file for PNG (this does not yeild for JSON or HTML exportation)
 
+## For Production
+create a `.env` file in the project’s root directory.
+Include the PORT and ALLOWED_ORIGINS variables.
+Update ALLOWED_ORIGINS to include the URL where the application will be hosted.
+Dependencies Installation:
+
+Run `npm install` to install all required dependencies.
+Starting the Application:
+
+Run npm start to start the server.
+Ensure the port specified in .env is open and accessible.
+Update the Host URL (if needed):
+
+If the application is being accessed from a domain other than https://export.uppmax.uu.se/, then you should update the ALLOWED_ORIGINS in the .env file to include the new domain or subdomain.
+Example Scenario:
+If the application is hosted at https://myapp.example.com, then you should:
+
+1. Modify the .env file like this:
+
+`PORT=3000
+ALLOWED_ORIGINS=https://myapp.example.com`
+
+2. Install dependencies with `npm install`.
+
+3. Start the server with `npm start`.

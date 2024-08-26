@@ -666,8 +666,6 @@ window.track_settings_btns = async function(trackNumber){
             plotSpec.tracks[trackIndex].x.field = document.getElementById('columnSelectorX_0').options[currentCanvasState.view_control_settings.x_axis].textContent
             currentCanvasState.view_control_settings.checked_right = Array.from(rightChecked).map(checkbox => checkbox.id);
         });    
-        
-        console.log(currentCanvasState.view_control_settings.left_y_range)
         updateURLParameters("columnSelectorX_0", currentCanvasState.view_control_settings.x_axis);
         updateURLParameters("columnSelectorYLeft", currentCanvasState.view_control_settings.left_y_axis);
         updateURLParameters("columnSelectorYRight", currentCanvasState.view_control_settings.right_y_axis);

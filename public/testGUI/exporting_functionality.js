@@ -127,7 +127,38 @@ export function exportingFigures() {
                 showMessage('Error during export: ' + error.message, '#ff0000');
             })
             .finally(hideLoading);
-        } else {
+        } else if (selectedValue === 'png') {
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ htmlContent }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.blob(); // Changed to blob() for binary data
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'plot.png';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                showMessage('PNG file downloaded successfully', '#02a102');
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                showMessage('Error during export: ' + error.message, '#ff0000');
+            })
+            .finally(hideLoading);
+        } else if (selectedValue === 'html') {
+            // HTML handling remains the same as before
             fetch(endpoint, {
                 method: 'POST',
                 headers: {
@@ -143,12 +174,12 @@ export function exportingFigures() {
             })
             .then(data => {
                 const a = document.createElement('a');
-                a.href = `/testGUI/exports/${selectedValue === 'png' ? data.png : data.html}`;
-                a.download = selectedValue === 'png' ? 'plot.png' : 'plot-container.html';
+                a.href = `/testGUI/exports/${data.html}`;
+                a.download = 'plot-container.html';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-                showMessage('File downloaded successfully', '#02a102');
+                showMessage('HTML file downloaded successfully', '#02a102');
             })
             .catch((error) => {
                 console.error('Error:', error);
