@@ -32,11 +32,12 @@
 
         import { URLfromFile, URLfromServer, GoslingPlotWithLocalData } from './testGUI/plot.js';
         import { trackTemplate } from './testGUI/track_spec.js';
-        
+        import {generateTracks} from './testGUI/track.js';
+
         document.addEventListener('DOMContentLoaded', async function () { 
             await overlay(overlay_container);
             await all_buttons(buttons_container);
-            await window.generateTracks();                   
+            await generateTracks();                   
         });
 
     </script>
