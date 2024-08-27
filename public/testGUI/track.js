@@ -9,13 +9,15 @@ export function resetTrackSettings (trackNumber) {
   document.getElementById(`binsize_${trackNumber}`).value = '';
   document.getElementById(`samplelength_${trackNumber}`).value = '';
   document.getElementById(`marksize_${trackNumber}`).value = '';
-  document.getElementById(`columnSelectorX_${trackNumber}`).selectedIndex = 0;
-  document.getElementById(`columnSelectorYLeft`).selectedIndex = 0;
-  document.getElementById(`columnSelectorYRight`).selectedIndex = 0;
   document.getElementById(`mark_${trackNumber}`).selectedIndex = 0;
   document.getElementById(`color_${trackNumber}`).selectedIndex = 0;
+
   // Reset other track-specific settings as needed
   const plotSpec = getCurrentViewSpec();
+  if(plotSpec.tracks[trackNumber].data.url !== '') {
+    document.getElementById(`filename-display-${trackNumber}`).textContent = 'No file selected';
+    window.canvas_states[window.canvas_num].filenames[trackNumber] = 'No file selected';
+  }
   plotSpec.tracks[trackNumber].data.url = ''
   plotSpec.tracks[trackNumber].data.binSize = 10;
   plotSpec.tracks[trackNumber].data.sampleLength = 1000;
@@ -196,7 +198,9 @@ export async function generateTrackBinAndSampleInputs (trackNumber) {
                       <option value="rect">rect</option>
                       <option value="text">text</option>
                       <option value="betweenLink">link</option>
-                      <option value="triangleRight">triangle</option>
+                      <option value="rule">rule</option>
+                      <option value="triangleRight">triangle right</option>
+                      <option value="triangleLeft">triangle left</option>
                   </select>
               </div>
           </div>
