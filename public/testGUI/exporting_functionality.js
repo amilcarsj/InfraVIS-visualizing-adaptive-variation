@@ -139,7 +139,7 @@ export function exportingFigures() {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                return response.blob(); // Changed to blob() for binary data
+                return response.blob();
             })
             .then(blob => {
                 const url = window.URL.createObjectURL(blob);
@@ -158,7 +158,6 @@ export function exportingFigures() {
             })
             .finally(hideLoading);
         } else if (selectedValue === 'html') {
-            // HTML handling remains the same as before
             fetch(endpoint, {
                 method: 'POST',
                 headers: {

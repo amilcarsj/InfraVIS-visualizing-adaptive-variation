@@ -21,8 +21,8 @@ app.use((req, res, next) => {
     "style-src 'self' 'unsafe-inline' https://esm.sh https://cdnjs.cloudflare.com; " +
     "img-src 'self' data:; " +
     "font-src 'self' https://cdnjs.cloudflare.com; " +
-    "connect-src 'self' https://esm.sh https://raw.githubusercontent.com; " +
-    "worker-src 'self' blob:;"
+    "connect-src 'self' https://esm.sh https://raw.githubusercontent.com blob:; " +
+    "worker-src 'self' blob:;" 
   );
   next();
 });

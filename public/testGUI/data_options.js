@@ -180,7 +180,7 @@ export async function all_buttons(container) {
     });
     // Add the toggle effect for the initial canvas container
     addCanvasBarToggle('canvas-bar-1', 'canvas-container-1');
-    updateCanvasUI();
+    // updateCanvasUI();
     exportingFigures();
 }
 
@@ -356,8 +356,11 @@ window.generateTracks = async function () {
     trackSelector.innerHTML += htmlContent;          
     // Updating colors
     for (let i = 0; i < trackCount; i++) {
-        const defaultColor = document.getElementById(`color_${i}`).value;
-        await updateURLParameters(`color.value${i}`, defaultColor);    
+        const defaultColor = document.getElementById(`color_${i}`);
+        if(defaultColor){
+            await updateURLParameters(`color.value${i}`, defaultColor.value);  
+        }
+          
           
     }
     // Updating axis-controllers
@@ -386,7 +389,7 @@ window.generateTracks = async function () {
         <div id="data-load" class="btn-row">
         <div class=file-container>
             <button class="plot-button" data-track="${i}"><i class="fa fa-upload" style="font-size:18px;"></i> Select file </button> 
-            <input type="file" class="file-input" style="display: none;">
+            <input type="file" class="file-input"  style="display: none;">
             <label for="urlinput_${i}" class='or-inbetween'>OR</label>
             <input type="url" id="urlinput_${i}" class="url-input" placeholder="Enter URL">
             <button class="url-button" data-track="${i}">Load</button>
@@ -397,7 +400,7 @@ window.generateTracks = async function () {
     </div>`;
     const filenameElement = document.getElementById(`filename-display-${i}`);
     if (filenameElement && window.canvas_states[window.canvas_num].filenames[i]) {
-        filenameElement.textContent = `File: ${window.canvas_states[window.canvas_num].filenames[i]}`;
+        filenameElement.textContent = `${window.canvas_states[window.canvas_num].filenames[i]}`;
     }
     }
     dataLoad.innerHTML += `<div id="container"></div>`;
@@ -450,7 +453,7 @@ window.generateTrackBinAndSampleInputs = async function (trackNumber) {
     return `
     <div class='bin-sample-container track-${trackNumber}'> 
         <div class="file-info">
-            <span id="filename-display-${trackNumber}">File: ${fileName}</span>
+            File: <span class='filename-display' id="filename-display-${trackNumber}">${fileName}</span>
         </div>
         <div class="btn-row" id ='inner-container'>
             <div class="left-side">

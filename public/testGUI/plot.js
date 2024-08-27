@@ -28,7 +28,7 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
     // Update the filename display for this specific track
     const filenameElement = document.getElementById(`filename-display-${button_data_track_number}`);
     if (filenameElement) {
-      filenameElement.textContent = `File: ${window.canvas_states[window.canvas_num].filenames[button_data_track_number]}`;
+      filenameElement.textContent = `${window.canvas_states[window.canvas_num].filenames[button_data_track_number]}`;
     }
     
     if (fileURL) {

@@ -62,6 +62,9 @@ html, body {
 .file-info{
     margin-left: 15px;
     font-weight: 600;
+    position: relative;
+    top: 10px;
+    
 }
 
 .canvas {
@@ -601,12 +604,11 @@ input[type='text'] {
     right: 15px;
 }
 
-#filename-display{
+.filename-display{
     position: relative;
     font-weight: 600;
     top: 5%;
-    right: 10%;
-    
+    color: rgb(29, 32, 192);
     
 }
 .delete-track-button{
