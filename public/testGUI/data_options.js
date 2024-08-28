@@ -30,7 +30,7 @@ export async function all_buttons(container) {
                 <button id="canvas1" class="canvas-button">Canvas 1</button>
                 <button id="canvas2" class="canvas-button">Canvas 2</button>
                 <button id="canvas3" class="canvas-button">Canvas 3</button>
-                <button id="add_canvas"> <i class="fa fa-plus"></i></button>
+                <button id="add_canvas" aria-label="Close"> <i class="fa fa-plus"></i></button>
             </div>  
             <div id="notification" style="display: none; color:white;border-radius: 5px ; padding: 10px; opacity:0.7; margin-top: 10px; position: absolute; top: 10px; left: 12%; transform: translateX(-50%); z-index: 1000;"></div>   
             <div id="header" class="buttons-container">   
@@ -70,7 +70,7 @@ export async function all_buttons(container) {
                 <button id='view1-btn' class='view-btn'> View 1 </button>
                 <button id='view2-btn' class='view-btn' style='display:none;'> View 2 </button>
                 <button id='view3-btn' class='view-btn' style='display:none;'> View 3 </button>
-                <button id="add_view"> <i class="fa fa-plus"></i></button>
+                <button id="add_view" aria-label="Close"> <i class="fa fa-plus"></i></button>
             </div>
             ${generateViewControl(window.currentView)}
             <div id="plot-container-1" class="plot-container"></div>
@@ -181,7 +181,6 @@ export async function all_buttons(container) {
     });
     // Add the toggle effect for the initial canvas container
     addCanvasBarToggle('canvas-bar-1', 'canvas-container-1');
-    // updateCanvasUI();
     exportingFigures();
 }
 

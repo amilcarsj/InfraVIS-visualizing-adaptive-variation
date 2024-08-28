@@ -220,7 +220,7 @@ export async function generateTrackBinAndSampleInputs (trackNumber) {
               </div>
               <div class="input-group"> 
                   <button class="apply-button" data-track="${trackNumber}">Apply</button>
-                  <button class="delete-track-button" data-track="${trackNumber}"><i class="fa fa-trash"></i></button>
+                  <button class="delete-track-button" data-track="${trackNumber}" aria-label="Close"><i class="fa fa-trash"></i></button>
               </div>
           </div>
       </div>

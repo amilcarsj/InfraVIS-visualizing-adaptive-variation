@@ -83,7 +83,6 @@ export async function handleOptions(data, button_data_track_number) {
         plotSpec.tracks[trackValue].tooltip[1].field = chosenColumnName;
         plotSpec.tracks[trackValue].tooltip[1].alt = chosenColumnName;
       }                
-      // await GoslingPlotWithLocalData();
       updateURLParameters("x.field", chosenColumnName);
     });
   });
@@ -104,8 +103,7 @@ export async function handleOptions(data, button_data_track_number) {
           const chosenmark = button.value;
           const plotSpec = getCurrentViewSpec();
           plotSpec.tracks[trackValue].mark = chosenmark;
-          // await GoslingPlotWithLocalData();
-          await updateURLParameters(`mark${trackValue}`, chosenmark);
+              await updateURLParameters(`mark${trackValue}`, chosenmark);
       });
   });
   
@@ -116,8 +114,7 @@ export async function handleOptions(data, button_data_track_number) {
           const chosencolor = button.value;
           const plotSpec = getCurrentViewSpec();
           plotSpec.tracks[trackValue].color.value = chosencolor;
-          // await GoslingPlotWithLocalData();
-          await updateURLParameters(`color.value${trackValue}`, chosencolor);
+              await updateURLParameters(`color.value${trackValue}`, chosencolor);
       });
   });
 
@@ -158,7 +155,6 @@ export async function handleOptions(data, button_data_track_number) {
       const chosenbinsize = parseFloat(inputField.value);
       const plotSpec = getCurrentViewSpec();
       plotSpec.tracks[trackValue].data.binSize = chosenbinsize;
-      // await GoslingPlotWithLocalData();
       const binSize = "data.binSize" + trackValue.toString();
       updateURLParameters(binSize, chosenbinsize);
     });
@@ -172,7 +168,6 @@ export async function handleOptions(data, button_data_track_number) {
       const chosensamplelength = parseFloat(inputField.value);
       const plotSpec = getCurrentViewSpec();
       plotSpec.tracks[trackValue].data.sampleLength = chosensamplelength;
-      // await GoslingPlotWithLocalData();
       const sampleLength = "data.sampleLength" + trackValue.toString();
       updateURLParameters(sampleLength, chosensamplelength);
     });
@@ -185,7 +180,6 @@ export async function handleOptions(data, button_data_track_number) {
       const inputField = document.getElementById(`marksize_${trackValue}`);
       const chosenmarksize = parseFloat(inputField.value);
       plotSpec.tracks[trackValue].size.value = chosenmarksize;
-      // await GoslingPlotWithLocalData();
       const markSize = "size.value" + trackValue.toString();            
       updateURLParameters(markSize, chosenmarksize);
     });
@@ -229,10 +223,9 @@ async function _eventsSelectedTracksPerYAxis(columnSelector, side, plotSpec) {
   const start = parseFloat(startValue);
   const end = parseFloat(endValue);
   const intervalArray = [start, end];
-
   const selectedValue = columnSelector.value;
   const chosenColumnName = columnSelector.options[selectedValue].textContent;
-
+  console.log(columnSelector.options)
   selectedOptions.forEach(function(trackValue) {
     plotSpec.tracks[trackValue - 1].data.value = chosenColumnName;            
     if (!(Number.isNaN(intervalArray[0]) || Number.isNaN(intervalArray[0]))){
