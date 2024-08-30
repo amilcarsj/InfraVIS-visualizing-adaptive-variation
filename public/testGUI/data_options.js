@@ -92,19 +92,22 @@ export async function all_buttons(container) {
         if(currentView === 1) {                       
             view2_btn.style.display = 'block';
             window.currentView = 2
-            view_control.innerHTML = 'View Controls 2'
+            view_control.innerHTML = 'View Controls B'
             updateViewSettings(2);
+            setActiveViews(view2_btn);
         } else if(currentView === 2) {
-            view_control.innerHTML = 'View Controls 3'
+            view_control.innerHTML = 'View Controls C'
             view3_btn.style.display = 'block';
             window.currentView = 3
             updateViewSettings(3);
+            setActiveViews(view3_btn);
             this.style.cursor = 'not-allowed';
             this.disabled = true;
         }    
     })
     // Set Canvas 1 as active by default
     canvas1.classList.add('active');
+    view1_btn.classList.add('active');
     // Adding canvases
     add_canvas.addEventListener('click', function () {
         if (displayed_canvas === 1) {
@@ -167,22 +170,25 @@ export async function all_buttons(container) {
     // Switching between views functionality
     const canvas_container_1 = document.getElementById('canvas-container-1');
     view1_btn.addEventListener('click', function () {
-        view_control.innerHTML = 'View Controls 1';
+        view_control.innerHTML = 'View Controls A';
         canvas_container_1.id = 'canvas-container-1';
         window.currentView = 1;
         updateViewSettings(1);
+        setActiveViews(view1_btn);
     });
     view2_btn.addEventListener('click', function () {
-        view_control.innerHTML = 'View Controls 2';
+        view_control.innerHTML = 'View Controls B';
         canvas_container_1.id = 'canvas-container-2';
         window.currentView = 2;
         updateViewSettings(2);
+        setActiveViews(view2_btn);
     });
     view3_btn.addEventListener('click', function () {
-        view_control.innerHTML = 'View Controls 3';
+        view_control.innerHTML = 'View Controls C';
         canvas_container_1.id = 'canvas-container-3';
         window.currentView = 3;
         updateViewSettings(3);
+        setActiveViews(view3_btn);
     });
     // Add the toggle effect for the initial canvas container
     addCanvasBarToggle('canvas-bar-1', 'canvas-container-1');
@@ -197,6 +203,12 @@ export function setActiveCanvas(activeCanvas) {
     const canvasButtons = document.querySelectorAll('.canvas-button');
     canvasButtons.forEach(button => button.classList.remove('active'));
     activeCanvas.classList.add('active');
+}
+
+export function setActiveViews(activeViews) {
+    const viewButtons = document.querySelectorAll('.view-btn');
+    viewButtons.forEach(button => button.classList.remove('active'));
+    activeViews.classList.add('active');
 }
 /**
  * To update the UI after each change.
@@ -390,7 +402,7 @@ export function generateViewControl(currentView){
     return`            
     <div id='canvas-container-${currentView}' class='canvas-container'>
                 <div id='canvas-bar-${currentView}' class='canvas_bar'>
-                    <h3 class = 'view-control'>View Controls ${currentView}</h3>
+                    <h3 class = 'view-control'>View Controls A </h3>
                 </div>
                 <div class="canvas_content hidden">
                     <div class="btn-row" id="global-variables">
