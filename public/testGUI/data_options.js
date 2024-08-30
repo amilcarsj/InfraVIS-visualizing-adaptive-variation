@@ -66,9 +66,9 @@ export async function all_buttons(container) {
         </div>
         <div class="right-section">
             <div class='bars'> 
-                <button id='view1-btn' class='view-btn'> View 1 </button>
-                <button id='view2-btn' class='view-btn' style='display:none;'> View 2 </button>
-                <button id='view3-btn' class='view-btn' style='display:none;'> View 3 </button>
+                <button id='view1-btn' class='view-btn'> View A </button>
+                <button id='view2-btn' class='view-btn' style='display:none;'> View B </button>
+                <button id='view3-btn' class='view-btn' style='display:none;'> View C </button>
                 <button id="add_view" aria-label="Close"> <i class="fa fa-plus"></i></button>
             </div>
             ${generateViewControl(window.currentView)}
