@@ -1,4 +1,5 @@
 export function exportingFigures() {
+    // The loading settings
     const loadingOverlay = document.createElement('div');
     loadingOverlay.id = 'loading-overlay';
     loadingOverlay.style.display = 'none';
@@ -12,10 +13,11 @@ export function exportingFigures() {
     loadingOverlay.innerHTML = '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 25px;">Downloading...</div>';
     document.body.appendChild(loadingOverlay);
 
+    // To dispaly loading
     const showLoading = () => {
         loadingOverlay.style.display = 'block';
     };
-
+    // To hide loading
     const hideLoading = () => {
         loadingOverlay.style.display = 'none';
     };
@@ -24,7 +26,7 @@ export function exportingFigures() {
         const selectedValue = event.target.value;
         const container = document.getElementById('plot-container-1');
         const notification = document.getElementById('notification');
-
+        // To show notification
         const showMessage = (message, color) => {
             notification.textContent = message;
             notification.style.backgroundColor = color;
@@ -41,7 +43,7 @@ export function exportingFigures() {
         }
 
         const svgElements = container.getElementsByTagName('svg');
-
+        // If there is no SVG created
         if (svgElements.length === 0) {
             console.error('No SVG elements found in the plot container');
             showMessage('No SVG elements found in the plot container', '#ff0000');
@@ -49,8 +51,9 @@ export function exportingFigures() {
         }
 
         const svgContent = container.innerHTML;
+        // to fetch the JSON of the SVG.
         const jsonSpec = window.plotSpecManager.exportPlotSpecAsJSON();
-
+        // The dependencies that are required for the SVG to be renderd
         const htmlContent = `
             <!DOCTYPE html>
             <html>
@@ -99,35 +102,7 @@ export function exportingFigures() {
 
         showLoading();
 
-        if (selectedValue === 'json') {
-            fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ jsonContent: jsonSpec }),
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                const a = document.createElement('a');
-                a.href = data.fileUrl;
-                a.download = 'plot.json';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                showMessage('JSON file downloaded successfully', '#02a102');
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                showMessage('Error during export: ' + error.message, '#ff0000');
-            })
-            .finally(hideLoading);
-        } else if (selectedValue === 'png') {
+         if (selectedValue === 'png') {
             fetch(endpoint, {
                 method: 'POST',
                 headers: {
@@ -157,7 +132,7 @@ export function exportingFigures() {
                 showMessage('Error during export: ' + error.message, '#ff0000');
             })
             .finally(hideLoading);
-        } else if (selectedValue === 'html') {
+        }else if (selectedValue === 'html') {
             fetch(endpoint, {
                 method: 'POST',
                 headers: {
@@ -169,16 +144,50 @@ export function exportingFigures() {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                return response.json();
+                return response.text();  // Expecting text content for HTML
             })
-            .then(data => {
+            .then(htmlContent => {
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = `/testGUI/exports/${data.html}`;
+                a.href = url;
                 a.download = 'plot-container.html';
                 document.body.appendChild(a);
                 a.click();
+                window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
                 showMessage('HTML file downloaded successfully', '#02a102');
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                showMessage('Error during export: ' + error.message, '#ff0000');
+            })
+            .finally(hideLoading);
+        } else if (selectedValue === 'json') {
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ jsonContent: jsonSpec }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(jsonContent => {
+                const blob = new Blob([JSON.stringify(jsonContent)], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'plot.json';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                showMessage('JSON file downloaded successfully', '#02a102');
             })
             .catch((error) => {
                 console.error('Error:', error);
@@ -188,6 +197,7 @@ export function exportingFigures() {
         }
     });
 
+    // To export the SVG as JSON
     document.getElementById('export-json-button').addEventListener('click', () => {
         const jsonSpec = window.plotSpecManager.exportPlotSpecAsJSON();
         showLoading();

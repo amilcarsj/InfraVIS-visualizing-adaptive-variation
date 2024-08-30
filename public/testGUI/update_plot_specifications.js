@@ -121,7 +121,6 @@ export async function handleOptions(data, button_data_track_number) {
   bcolor.addEventListener('change', async function () {
     const chosenBcolor = bcolor.value;
     plotSpec.style.background = chosenBcolor;
-    // await GoslingPlotWithLocalData();
     await updateURLParameters("background", bcolor.value);
   });
 
@@ -134,7 +133,7 @@ export async function handleOptions(data, button_data_track_number) {
       const end = parseFloat(endValue);    
       const intervalArray = [start, end];
       plotSpec.xDomain.interval = intervalArray;    
-      // await GoslingPlotWithLocalData();    
+    
       const xDomain = "xDomain.interval";
       updateURLParameters(xDomain, intervalArray);
     });
@@ -225,7 +224,6 @@ async function _eventsSelectedTracksPerYAxis(columnSelector, side, plotSpec) {
   const intervalArray = [start, end];
   const selectedValue = columnSelector.value;
   const chosenColumnName = columnSelector.options[selectedValue].textContent;
-  console.log(columnSelector.options)
   selectedOptions.forEach(function(trackValue) {
     plotSpec.tracks[trackValue - 1].data.value = chosenColumnName;            
     if (!(Number.isNaN(intervalArray[0]) || Number.isNaN(intervalArray[0]))){
@@ -235,8 +233,7 @@ async function _eventsSelectedTracksPerYAxis(columnSelector, side, plotSpec) {
     plotSpec.tracks[trackValue - 1].y.field = chosenColumnName;
     plotSpec.tracks[trackValue - 1].tooltip[0].field = chosenColumnName;
     plotSpec.tracks[trackValue - 1].tooltip[0].alt = chosenColumnName; 
-  });             
-  // await GoslingPlotWithLocalData();
+  });            
   if (side === 'right') {
     updateURLParameters("y.field1", chosenColumnName);
   } else {

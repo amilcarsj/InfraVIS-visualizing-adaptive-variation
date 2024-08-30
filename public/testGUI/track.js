@@ -3,16 +3,16 @@ import { updateURLParameters } from './update_plot_specifications.js';
 import {view_control_apply_changes} from './data_options.js'
 
 
-
+/**
+ * To reset the track settings to default.
+ * @param {int} trackNumber 
+ */
 export function resetTrackSettings (trackNumber) {
-  // Reset inputs and selectors to their default values
   document.getElementById(`binsize_${trackNumber}`).value = '';
   document.getElementById(`samplelength_${trackNumber}`).value = '';
   document.getElementById(`marksize_${trackNumber}`).value = '';
   document.getElementById(`mark_${trackNumber}`).selectedIndex = 0;
   document.getElementById(`color_${trackNumber}`).selectedIndex = 0;
-
-  // Reset other track-specific settings as needed
   const plotSpec = getCurrentViewSpec();
   if(plotSpec.tracks[trackNumber].data.url !== '') {
     document.getElementById(`filename-display-${trackNumber}`).textContent = 'No file selected';
@@ -33,7 +33,9 @@ export function resetTrackSettings (trackNumber) {
   GoslingPlotWithLocalData();
 }
 
-
+/**
+ * To keep track of the current track number.
+ */
 export async function updateTrackNumber () {
   const currentCanvasState = window.canvas_states[window.canvas_num];
   currentCanvasState.trackCount++;
@@ -78,8 +80,6 @@ export async function generateTracks () {
       if(defaultColor){
           await updateURLParameters(`color.value${i}`, defaultColor.value);  
       }
-        
-        
   }
   // Updating axis-controllers
   let axisFormLeft = document.getElementById('checkbox-left-axis');
@@ -226,6 +226,10 @@ export async function generateTrackBinAndSampleInputs (trackNumber) {
       </div>
   </div>`;
 }
+/**
+ * Delete the track based on its number.
+ * @param {int} trackToDelete the track number
+ */
 export async function deleteTrack (trackToDelete) {
   const currentCanvasState = window.canvas_states[window.canvas_num];
   // Remove the track from the plotSpec
@@ -253,7 +257,12 @@ export async function deleteTrack (trackToDelete) {
   updateURLParameters(`track${trackToDelete}`, null);
 }
 
+/**
+ * To update the track settings based on the selected ones by the user.
+ * @param {int} trackNumber 
+ */
 export async function track_settings_btns (trackNumber){
+  //  to load the file based on localfile.
   const fileInputs = document.querySelectorAll('.file-input');
   document.querySelectorAll('.plot-button').forEach(function (button, button_data_track_num) {
       button.addEventListener('click', function () {
@@ -265,12 +274,21 @@ export async function track_settings_btns (trackNumber){
           URLfromFile(fileInputs, button_data_track_num);
       });
   });
+  // to load the file based on URL.
+  document.querySelectorAll('.url-button').forEach(function (urlButton, trackNumber) {
+    const urlInput = document.getElementById(`urlinput_${trackNumber}`);  
+    urlButton.addEventListener('click', function () {
+        URLfromServer(urlInput.value, trackNumber);
+    });
+});
+  // delete button functionality.
   document.querySelectorAll('.delete-track-button').forEach(function (deleteButton) {
       deleteButton.addEventListener('click', async function () {
           const trackToDelete = parseInt(this.getAttribute('data-track'));
           await deleteTrack(trackToDelete);
       });
   });
+  // Update the mark.
   document.querySelectorAll('.mark').forEach(function (markSelector) {
       markSelector.addEventListener('change', async function () {
           const trackValue = this.getAttribute('data-track');
@@ -280,6 +298,7 @@ export async function track_settings_btns (trackNumber){
           await updateURLParameters(`mark${trackValue}`, chosenMark);
       });
   });
+  // Update the color.
   document.querySelectorAll('.color').forEach(function (colorSelector) {
       colorSelector.addEventListener('change', async function () {
           const trackValue = this.getAttribute('data-track');
@@ -290,6 +309,7 @@ export async function track_settings_btns (trackNumber){
           await updateURLParameters(`color.value${trackValue}`, chosenColor);
       });
   });
+  // Update the marksize.
   document.querySelectorAll('.marksize').forEach(function (sizeInput) {
       sizeInput.addEventListener('input', async function () {
           const trackValue = this.getAttribute('data-track');
@@ -300,6 +320,7 @@ export async function track_settings_btns (trackNumber){
           await updateURLParameters(`size.value${trackValue}`, chosenSize);
       });
   });
+  // THe apply button functionlaity to apply all the changes.
   document.querySelectorAll('.apply-button').forEach(function (applyButton) {
       applyButton.addEventListener('click', async function () {
           const trackNumber = this.getAttribute('data-track');
@@ -325,12 +346,7 @@ export async function track_settings_btns (trackNumber){
           await GoslingPlotWithLocalData();
       });
   });
-  document.querySelectorAll('.url-button').forEach(function (urlButton, trackNumber) {
-      const urlInput = document.getElementById(`urlinput_${trackNumber}`);  
-      urlButton.addEventListener('click', function () {
-          URLfromServer(urlInput.value, trackNumber);
-      });
-  });
+  // To clear all the  settings for the track
   for (let i = 0; i < trackNumber; i++) {
       let clear_settings_button = document.getElementById(`clear_settings_button${i}`);
       if (clear_settings_button) {

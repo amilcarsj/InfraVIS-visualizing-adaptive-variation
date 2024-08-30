@@ -21,7 +21,6 @@ window.object_2_created = false
 window.object_3_created = false
 window.trackCount = 5;
 window.displayed_canvas = 1
-window.track_for_views = 0
 export async function all_buttons(container) {
     container.innerHTML = `
     <div class="body-container">
@@ -87,9 +86,10 @@ export async function all_buttons(container) {
     const view1_btn = document.getElementById('view1-btn');
     const view2_btn = document.getElementById('view2-btn');
     const view3_btn = document.getElementById('view3-btn');
-    // Set Canvas 1 as active by default
+
+    //Adding views functionality
     add_view.addEventListener('click', function(){
-        if(currentView === 1) {
+        if(currentView === 1) {                       
             view2_btn.style.display = 'block';
             window.currentView = 2
             view_control.innerHTML = 'View Controls 2'
@@ -103,8 +103,9 @@ export async function all_buttons(container) {
             this.disabled = true;
         }    
     })
-    
+    // Set Canvas 1 as active by default
     canvas1.classList.add('active');
+    // Adding canvases
     add_canvas.addEventListener('click', function () {
         if (displayed_canvas === 1) {
             canvas2.style.display = 'block';
@@ -118,6 +119,7 @@ export async function all_buttons(container) {
             setActiveCanvas(canvas2);
             updateCanvasUI();
         }
+        // if there is alreadyt canvas 2
         else if (displayed_canvas === 2) {
             canvas3.style.display = 'block';
             window.canvas_num = 3;
@@ -132,12 +134,14 @@ export async function all_buttons(container) {
             this.disabled = true;
         }
     })
+    // Making canvas1 active
     canvas1.addEventListener('click', function () {
         setActiveCanvas(canvas1);
         window.canvas_num = 1;
         canvas_number.innerHTML = 'Canvas 1';
         updateCanvasUI();
     });
+    // Making canvas2 active
     canvas2.addEventListener('click', function () {
         setActiveCanvas(canvas2);
         window.canvas_num = 2;
@@ -148,6 +152,7 @@ export async function all_buttons(container) {
         }
         updateCanvasUI();
     });
+    // Making canvas3 active
     canvas3.addEventListener('click', function () {
         setActiveCanvas(canvas3);
         window.canvas_num = 3;
@@ -159,7 +164,7 @@ export async function all_buttons(container) {
         updateCanvasUI();
     });
 
-
+    // Switching between views functionality
     const canvas_container_1 = document.getElementById('canvas-container-1');
     view1_btn.addEventListener('click', function () {
         view_control.innerHTML = 'View Controls 1';
@@ -184,11 +189,18 @@ export async function all_buttons(container) {
     exportingFigures();
 }
 
+/**
+ * To change the active canvas, the canvas that is passed in as param will be active. 
+ * @param {activeCanvas} activeCanvas 
+ */
 export function setActiveCanvas(activeCanvas) {
     const canvasButtons = document.querySelectorAll('.canvas-button');
     canvasButtons.forEach(button => button.classList.remove('active'));
     activeCanvas.classList.add('active');
 }
+/**
+ * To update the UI after each change.
+ */
 export function updateCanvasUI() {
     const currentCanvasState = window.canvas_states[window.canvas_num];
     document.getElementById('trackCountSelector').value = currentCanvasState.trackCount;
@@ -220,6 +232,7 @@ export function addOrUpdateCanvasObject(canvasId) {
             window.plotSpecManager.createTrack(),
         ],
     };
+    // Generate new canvas with the new ID.
     window.plotSpecManager.addOrUpdateCanvasObject(canvasId, newCanvasObject);
     GoslingPlotWithLocalData();
 }
@@ -266,6 +279,10 @@ export function addCanvasBarToggle(barId, containerId) {
         });
     }
 }
+/**
+ * It will generate the default settings for the view control, when a new view is generated
+ * @param {view} view 
+ */
 export function updateViewSettings(view) {
     const settings = window.canvas_states[view].view_control_settings;
     // Update X-axis
@@ -291,9 +308,12 @@ export function updateViewSettings(view) {
     rightCheckboxes.forEach(checkbox => {
         checkbox.checked = settings.checked_right.includes(checkbox.id);
     });
-
+    view_control_apply_changes()
 }
 
+/**
+ * To fetch and preserve the settings for each view. 
+ */
 export function view_control_apply_changes () {
      // Add event listener to the apply all button for the canvas
      document.querySelector('.apply-all-button').addEventListener('click', async function () {
@@ -332,6 +352,7 @@ export function view_control_apply_changes () {
         const plotSpec = getCurrentViewSpec();
         
         plotSpec.xDomain.interval = currentCanvasState.view_control_settings.x_range;
+        // To update the checkboxes for left and right.
         const leftChecked = document.querySelectorAll('#checkbox-left-axis input[type="checkbox"]:checked');
         leftChecked.forEach(function (checkbox) {
             const trackIndex = parseInt(checkbox.value.split(' ')[1]) - 1;
@@ -360,6 +381,11 @@ export function view_control_apply_changes () {
         await GoslingPlotWithLocalData();
     });
 }
+/**
+ * To generate a new view with a paraemter currentview that works as an ID. 
+ * @param {int} currentView 
+ * @returns 
+ */
 export function generateViewControl(currentView){
     return`            
     <div id='canvas-container-${currentView}' class='canvas-container'>

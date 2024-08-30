@@ -56,18 +56,12 @@ app.get('/', (req, res) => {
 app.post('/save-html', async (req, res) => {
   try {
     const htmlContent = req.body.htmlContent;
-    const filePath = path.join(__dirname, 'public', '/testGUI/exports/plot-container.html');
-
-    await fs.promises.writeFile(filePath, htmlContent);
-
-    const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
-    const page = await browser.newPage();
-    await page.goto(`file://${filePath}`, { waitUntil: 'networkidle0' });
-    await browser.close();
-
-    res.download(filePath, 'plot-container.html');
+    
+    // Set content type to HTML
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Content-Disposition', 'attachment; filename=plot-container.html');
+    
+    res.send(htmlContent);
   } catch (error) {
     console.error('Error in /save-html:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -99,20 +93,46 @@ app.post('/save-json', (req, res) => {
   try {
     const jsonContent = req.body.jsonContent;
 
-    if (typeof jsonContent !== 'string') {
-      return res.status(400).json({ message: 'Invalid JSON content' });
+    // Attempt to parse the incoming JSON to ensure it's valid
+    let parsedJSON;
+    try {
+      parsedJSON = JSON.parse(jsonContent);
+    } catch (error) {
+      return res.status(400).json({ message: 'Invalid JSON format' });
     }
 
-    const jsonPath = path.join(__dirname, 'public', 'testGUI', 'exports', 'plot.json');
+    // Convert the JSON format to Gosling-compatible format
+    const goslingFormattedJSON = {
+      arrangement: "vertical",
+      views: parsedJSON.views.map(view => {
+        return {
+          layout: "linear",
+          alignment: view.alignment || "stack",
+          static: view.static || false,
+          width: view.width,
+          height: view.height,
+          // Filter out tracks that do not have loaded data
+          tracks: view.tracks
+            .filter(track => track.data && track.data.url && track.data.type)  // Ensure data is loaded
+            .map(track => ({
+              data: track.data,
+              mark: track.mark,
+              x: track.x,
+              xe: track.xe,
+              y: track.y,
+              stroke: track.stroke || { value: "black" },
+              strokeWidth: track.strokeWidth || { value: 0.3 },
+              style: track.style || { outlineWidth: 0 }
+            }))
+        };
+      })
+    };
 
-    fs.writeFile(jsonPath, jsonContent, 'utf8', (err) => {
-      if (err) {
-        console.error('Error writing JSON file:', err);
-        return res.status(500).json({ message: 'Failed to save JSON file' });
-      }
-      
-      res.download(jsonPath, 'plot.json');
-    });
+    // Set content type to JSON
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename=plot.json');
+
+    res.send(JSON.stringify(goslingFormattedJSON, null, 2));  // Ensure it is formatted nicely
   } catch (error) {
     console.error('Error in /save-json:', error);
     res.status(500).json({ error: 'Internal server error' });
