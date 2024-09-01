@@ -57,8 +57,14 @@ export async function URLfromServer(URL_input, button_data_track_number) {
     if (URL_input) {
       current_track.data.url = URL_input;
       const filename = URL_input.substring(URL_input.lastIndexOf('/') + 1);
+      window.canvas_states[window.canvas_num].filenames[button_data_track_number] =  URL_input;
       const extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
       const response = await fetch(URL_input);
+          // Update the filename display for this specific track
+    const filenameElement = document.getElementById(`filename-display-${button_data_track_number}`);
+    if (filenameElement) {
+      filenameElement.textContent = `${window.canvas_states[window.canvas_num].filenames[button_data_track_number]}`;
+    }
       if (!response.ok) {
         throw new Error('Network response was not ok.');
       }
@@ -66,7 +72,6 @@ export async function URLfromServer(URL_input, button_data_track_number) {
       await configureDataType(extension, current_track);
       await handleOptions(fileBlob, button_data_track_number);
       await checkURLParameters(current_track, button_data_track_number);            
-      await GoslingPlotWithLocalData();
     }
   } catch (error) {
     alert(error.message);

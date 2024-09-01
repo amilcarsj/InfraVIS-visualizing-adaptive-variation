@@ -30,7 +30,7 @@ export function resetTrackSettings (trackNumber) {
   updateURLParameters(`size.value${trackNumber}`, 0);
   updateURLParameters(`mark${trackNumber}`, 'point');
   updateURLParameters(`color.value${trackNumber}`, '#e41a1c');
-  GoslingPlotWithLocalData();
+  GoslingPlotWithLocalData(window.canvas_num);
 }
 
 /**
@@ -252,7 +252,7 @@ export async function deleteTrack (trackToDelete) {
   document.getElementById('trackCountSelector').value = currentCanvasState.trackCount;
   await generateTracks();
   // Update the plot
-  await GoslingPlotWithLocalData();
+  await GoslingPlotWithLocalData(window.canvas_num);
   // Update URL parameters
   updateURLParameters(`track${trackToDelete}`, null);
 }
@@ -305,7 +305,6 @@ export async function track_settings_btns (trackNumber){
           const chosenColor = this.value;
           const plotSpec = getCurrentViewSpec();
           plotSpec.tracks[trackValue].color.value = chosenColor;
-          await GoslingPlotWithLocalData();
           await updateURLParameters(`color.value${trackValue}`, chosenColor);
       });
   });
@@ -316,7 +315,6 @@ export async function track_settings_btns (trackNumber){
           const chosenSize = parseFloat(this.value);
           const plotSpec = getCurrentViewSpec();
           plotSpec.tracks[trackValue].size.value = chosenSize;
-          await GoslingPlotWithLocalData();
           await updateURLParameters(`size.value${trackValue}`, chosenSize);
       });
   });
@@ -343,7 +341,7 @@ export async function track_settings_btns (trackNumber){
               plotSpec.tracks[trackNumber].size.value = markSize;
               await updateURLParameters(`size.value${trackNumber}`, markSize);
           }
-          await GoslingPlotWithLocalData();
+          GoslingPlotWithLocalData(window.canvas_num);
       });
   });
   // To clear all the  settings for the track
@@ -355,5 +353,5 @@ export async function track_settings_btns (trackNumber){
           });
       }
   } 
-  view_control_apply_changes()    
+
 }

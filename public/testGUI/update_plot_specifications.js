@@ -1,14 +1,9 @@
-import { GoslingPlotWithLocalData } from './plot.js';
+import { getCurrentViewSpec } from './plot.js';
 import { PlotSpecManager } from './PlotSpecManager.js'; // Correct import
 
 window.plotSpecManager = new PlotSpecManager(); // Initialize PlotSpecManager globally
 
 const fileHeaders = new Map();
-
-function getCurrentViewSpec() {
-  const currentCanvasId = `canvas${window.canvas_num}`;
-  return window.plotSpecManager.getPlotSpecViewById(currentCanvasId);
-}
 
 
 /**

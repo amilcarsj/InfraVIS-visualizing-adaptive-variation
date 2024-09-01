@@ -88,6 +88,7 @@ export async function all_buttons(container) {
     const view3_btn = document.getElementById('view3-btn');
 
     //Adding views functionality
+    
     add_view.addEventListener('click', function(){
         if(currentView === 1) {                       
             view2_btn.style.display = 'block';
@@ -115,9 +116,15 @@ export async function all_buttons(container) {
             displayed_canvas = 2;
             window.canvas_num = 2;
             canvas_number.innerHTML = 'Canvas 2';
+            
             if (!window.object_2_created) {
                 addOrUpdateCanvasObject('canvas2');
                 window.object_2_created = true;
+                view2_btn.style.display = 'block';
+                window.currentView = 2
+                view_control.innerHTML = 'View Controls B'
+                updateViewSettings(2);
+                setActiveViews(view2_btn);
             }
             setActiveCanvas(canvas2);
             updateCanvasUI();
@@ -193,6 +200,7 @@ export async function all_buttons(container) {
     // Add the toggle effect for the initial canvas container
     addCanvasBarToggle('canvas-bar-1', 'canvas-container-1');
     exportingFigures();
+    view_control_apply_changes()
 }
 
 /**
@@ -246,7 +254,6 @@ export function addOrUpdateCanvasObject(canvasId) {
     };
     // Generate new canvas with the new ID.
     window.plotSpecManager.addOrUpdateCanvasObject(canvasId, newCanvasObject);
-    GoslingPlotWithLocalData();
 }
 // the toggle effect for the canvas bar
 export function addCanvasBarToggle(barId, containerId) {
@@ -320,7 +327,7 @@ export function updateViewSettings(view) {
     rightCheckboxes.forEach(checkbox => {
         checkbox.checked = settings.checked_right.includes(checkbox.id);
     });
-    view_control_apply_changes()
+    
 }
 
 /**
@@ -362,6 +369,7 @@ export function view_control_apply_changes () {
         // Update plot spec and redraw
 
         const plotSpec = getCurrentViewSpec();
+        console.log(canvas_states)
         
         plotSpec.xDomain.interval = currentCanvasState.view_control_settings.x_range;
         // To update the checkboxes for left and right.
@@ -389,7 +397,6 @@ export function view_control_apply_changes () {
         updateURLParameters("xDomain.interval", currentCanvasState.view_control_settings.x_range);
         updateURLParameters("yDomain.left", currentCanvasState.view_control_settings.left_y_range);
         updateURLParameters("yDomain.right", currentCanvasState.view_control_settings.right_y_range);
-
         await GoslingPlotWithLocalData();
     });
 }
