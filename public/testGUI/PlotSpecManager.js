@@ -68,7 +68,7 @@ class PlotSpecManager {
     return deepCopy(trackTemplate);
   }
 
-  addOrUpdateCanvasObject(canvasId, newCanvasObject) {
+  generateCanvas(canvasId, newCanvasObject) {
     const plotSpec = this.getPlotSpec();
     const existingViewIndex = plotSpec.views.findIndex(view => view.id === canvasId);
 

@@ -73,6 +73,7 @@ export async function all_buttons(container) {
             </div>
             ${generateViewControl(window.currentView)}
             <div id="plot-container-1" class="plot-container"></div>
+            
         </div>
     </div>
     `;
@@ -252,8 +253,9 @@ export function addOrUpdateCanvasObject(canvasId) {
             window.plotSpecManager.createTrack(),
         ],
     };
+    
     // Generate new canvas with the new ID.
-    window.plotSpecManager.addOrUpdateCanvasObject(canvasId, newCanvasObject);
+    window.plotSpecManager.generateCanvas(canvasId, newCanvasObject);
 }
 // the toggle effect for the canvas bar
 export function addCanvasBarToggle(barId, containerId) {
@@ -369,7 +371,6 @@ export function view_control_apply_changes () {
         // Update plot spec and redraw
 
         const plotSpec = getCurrentViewSpec();
-        console.log(canvas_states)
         
         plotSpec.xDomain.interval = currentCanvasState.view_control_settings.x_range;
         // To update the checkboxes for left and right.
@@ -390,7 +391,33 @@ export function view_control_apply_changes () {
             plotSpec.tracks[trackIndex].y.axis = 'right'
             plotSpec.tracks[trackIndex].x.field = document.getElementById('columnSelectorX_0').options[currentCanvasState.view_control_settings.x_axis].textContent
             currentCanvasState.view_control_settings.checked_right = Array.from(rightChecked).map(checkbox => checkbox.id);
-        });    
+        }); 
+        const xRangeSelect = document.getElementById('x_range_select');
+        const xRangeStart = document.getElementById('x_range_start');
+        const xRangeEnd = document.getElementById('x_range_end');
+    
+        xRangeSelect.addEventListener('change', () => {
+            const selectedOption = xRangeSelect.value;
+            let valueToCopy = '';
+    
+            if (selectedOption === 'start') {
+                valueToCopy = xRangeStart.value;
+            } else if (selectedOption === 'end') {
+                valueToCopy = xRangeEnd.value;
+            }
+    
+            if (valueToCopy) {
+                navigator.clipboard.writeText(valueToCopy)
+                    .then(() => {
+                        alert(`Copied ${selectedOption} value to clipboard: ${valueToCopy}`);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy text: ', err);
+                    });
+            } else {
+                alert('Please enter a value to copy.');
+            }
+        });
         updateURLParameters("columnSelectorX_0", currentCanvasState.view_control_settings.x_axis);
         updateURLParameters("columnSelectorYLeft", currentCanvasState.view_control_settings.left_y_axis);
         updateURLParameters("columnSelectorYRight", currentCanvasState.view_control_settings.right_y_axis);
@@ -419,6 +446,11 @@ export function generateViewControl(currentView){
                                     <label for="columnSelectorX_0">X-axis: </label>
                                     <select name="xcolumn" id="columnSelectorX_0" class="columnSelectorX"  data-track="0">
                                         <option value="" disabled selected></option>
+                                    </select>
+                                    <select id="x_range_select">
+                                        <option value = "" disabled selected>Copy</option>
+                                        <option value="start">Start X</option>
+                                        <option value="end">End X</option>
                                     </select>
                                 </div>
                                 <div class = 'column1'> 
