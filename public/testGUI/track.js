@@ -199,8 +199,8 @@ export async function generateTrackBinAndSampleInputs (trackNumber) {
                       <option value="text">text</option>
                       <option value="betweenLink">link</option>
                       <option value="rule">rule</option>
-                      <option value="triangleRight">triangle right</option>
-                      <option value="triangleLeft">triangle left</option>
+                      <option value="triangleRight">triangle R</option>
+                      <option value="triangleLeft">triangle L</option>
                   </select>
               </div>
           </div>

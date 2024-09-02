@@ -73,7 +73,7 @@ export async function all_buttons(container) {
             </div>
             ${generateViewControl(window.currentView)}
             <div id="plot-container-1" class="plot-container"></div>
-            
+
         </div>
     </div>
     `;
@@ -449,8 +449,8 @@ export function generateViewControl(currentView){
                                     </select>
                                     <select id="x_range_select">
                                         <option value = "" disabled selected>Copy</option>
-                                        <option value="start">Start X</option>
-                                        <option value="end">End X</option>
+                                        <option value="start"> X Start</option>
+                                        <option value="end"> X End</option>
                                     </select>
                                 </div>
                                 <div class = 'column1'> 
