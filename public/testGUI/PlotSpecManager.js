@@ -89,9 +89,4 @@ PlotSpecManager.prototype.exportPlotSpecAsJSON = function() {
   const jsonString = JSON.stringify(plotSpec, null, 2);
   return jsonString;
 }
-
-
-
-window.plotSpecManager = new PlotSpecManager();
-
 export { PlotSpecManager };

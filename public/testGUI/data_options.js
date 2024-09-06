@@ -4,23 +4,11 @@
  * @returns {Promise<void>} - A Promise that resolves after the container is populated.
  */
 
-import { URLfromFile, URLfromServer, GoslingPlotWithLocalData, getCurrentViewSpec } from './plot.js';
+import { GoslingPlotWithLocalData, getCurrentViewSpec } from './plot.js';
 import { updateURLParameters } from './update_plot_specifications.js';
 import {exportingFigures} from './exporting_functionality.js';
 import {generateTracks} from './track.js'
 
-window.canvas_states = {
-    1: { trackCount: 1, tracks: [],filenames:{}, view_control_settings: {x_axis: '', x_range: [0, 200000], left_y_axis: '', left_y_range: [0, 1], right_y_axis: '', right_y_range: [0, 1], checked_left : [], checked_right : []}},
-    2: { trackCount: 1, tracks: [],filenames:{}, view_control_settings: {x_axis: '', x_range: [0, 200000], left_y_axis: '', left_y_range: [0, 1], right_y_axis: '', right_y_range: [0, 1], checked_left : [], checked_right : []}},
-    3: { trackCount: 1, tracks: [],filenames:{}, view_control_settings: {x_axis: '', x_range: [0, 200000], left_y_axis: '', left_y_range: [0, 1], right_y_axis: '', right_y_range: [0, 1], checked_left : [], checked_right : []}}
-};
-
-window.currentView = 1
-window.canvas_num = 1;
-window.object_2_created = false
-window.object_3_created = false
-window.trackCount = 5;
-window.displayed_canvas = 1
 export async function all_buttons(container) {
     container.innerHTML = `
     <div class="body-container">
@@ -87,7 +75,7 @@ export async function all_buttons(container) {
     const view1_btn = document.getElementById('view1-btn');
     const view2_btn = document.getElementById('view2-btn');
     const view3_btn = document.getElementById('view3-btn');
-
+    const current_canvas = document.querySelector('.current-canvas')
     //Adding views functionality
     
     add_view.addEventListener('click', function(){
@@ -117,7 +105,7 @@ export async function all_buttons(container) {
             displayed_canvas = 2;
             window.canvas_num = 2;
             canvas_number.innerHTML = 'Canvas 2';
-            
+            current_canvas.innerHTML = 'Current Canvas 2'
             if (!window.object_2_created) {
                 addOrUpdateCanvasObject('canvas2');
                 window.object_2_created = true;
@@ -135,6 +123,7 @@ export async function all_buttons(container) {
             canvas3.style.display = 'block';
             window.canvas_num = 3;
             canvas_number.innerHTML = 'Canvas 3';
+            current_canvas.innerHTML = 'Current Canvas 3'
             if (!window.object_3_created) {
                 addOrUpdateCanvasObject('canvas3');
                 window.object_3_created = true
@@ -150,6 +139,7 @@ export async function all_buttons(container) {
         setActiveCanvas(canvas1);
         window.canvas_num = 1;
         canvas_number.innerHTML = 'Canvas 1';
+        current_canvas.innerHTML = 'Current Canvas 1'
         updateCanvasUI();
     });
     // Making canvas2 active
@@ -157,6 +147,7 @@ export async function all_buttons(container) {
         setActiveCanvas(canvas2);
         window.canvas_num = 2;
         canvas_number.innerHTML = 'Canvas 2';
+        current_canvas.innerHTML = 'Current Canvas 2'
         if (!window.object_2_created) {
             addOrUpdateCanvasObject('canvas2');
             window.object_2_created = true;
@@ -168,6 +159,7 @@ export async function all_buttons(container) {
         setActiveCanvas(canvas3);
         window.canvas_num = 3;
         canvas_number.innerHTML = 'Canvas 3';
+        current_canvas.innerHTML = 'Current Canvas 3'
         if (!window.object_3_created) {
             addOrUpdateCanvasObject('canvas3');
             window.object_3_created = true;
@@ -176,27 +168,25 @@ export async function all_buttons(container) {
     });
 
     // Switching between views functionality
-    const canvas_container_1 = document.getElementById('canvas-container-1');
     view1_btn.addEventListener('click', function () {
-        view_control.innerHTML = 'View Controls A';
-        canvas_container_1.id = 'canvas-container-1';
         window.currentView = 1;
-        updateViewSettings(1);
+        view_control.innerHTML = 'View Controls A'
         setActiveViews(view1_btn);
+        updateViewSettings(1);  // Load View 1 settings
     });
+    
     view2_btn.addEventListener('click', function () {
-        view_control.innerHTML = 'View Controls B';
-        canvas_container_1.id = 'canvas-container-2';
         window.currentView = 2;
-        updateViewSettings(2);
+        view_control.innerHTML = 'View Controls B'
         setActiveViews(view2_btn);
+        updateViewSettings(2);  // Load View 2 settings
     });
+    
     view3_btn.addEventListener('click', function () {
-        view_control.innerHTML = 'View Controls C';
-        canvas_container_1.id = 'canvas-container-3';
         window.currentView = 3;
-        updateViewSettings(3);
+        view_control.innerHTML = 'View Controls C'
         setActiveViews(view3_btn);
+        updateViewSettings(3);  // Load View 3 settings
     });
     // Add the toggle effect for the initial canvas container
     addCanvasBarToggle('canvas-bar-1', 'canvas-container-1');
@@ -305,31 +295,55 @@ export function addCanvasBarToggle(barId, containerId) {
  * @param {view} view 
  */
 export function updateViewSettings(view) {
+    resetViewSettings();  // Reset fields before loading new settings
     const settings = window.canvas_states[view].view_control_settings;
     // Update X-axis
-    document.getElementById('x_range_start').value = settings.x_range[0];
-    document.getElementById('x_range_end').value = settings.x_range[1];
-    document.getElementById('columnSelectorX_0').value = settings.x_axis;
-    // Update Left Y-axis
-    document.getElementById('y_start_left').value = settings.left_y_range[0];
-    document.getElementById('y_end_left').value = settings.left_y_range[1];
-    document.getElementById('columnSelectorYLeft').value = settings.left_y_axis;
-    // Update Right Y-axis
-    document.getElementById('y_start_right').value = settings.right_y_range[0];
-    document.getElementById('y_end_right').value = settings.right_y_range[1];
-    document.getElementById('columnSelectorYRight').value = settings.right_y_axis;
+    document.getElementById('x_range_start').value = settings.x_range[0] || '';
+    document.getElementById('x_range_end').value = settings.x_range[1] || '';
+    document.getElementById('columnSelectorX_0').value = settings.x_axis || '';
 
+    // Update Left Y-axis
+    document.getElementById('y_start_left').value = settings.left_y_range[0] || '';
+    document.getElementById('y_end_left').value = settings.left_y_range[1] || '';
+    document.getElementById('columnSelectorYLeft').value = settings.left_y_axis || '';
+
+    // Update Right Y-axis
+    document.getElementById('y_start_right').value = settings.right_y_range[0] || '';
+    document.getElementById('y_end_right').value = settings.right_y_range[1] || '';
+    document.getElementById('columnSelectorYRight').value = settings.right_y_axis || '';
+
+    // Restore checked boxes for left axis
     const leftCheckboxes = document.querySelectorAll('#checkbox-left-axis input[type="checkbox"]');
     leftCheckboxes.forEach(checkbox => {
         checkbox.checked = settings.checked_left.includes(checkbox.id);
     });
 
-    // Restore right axis checked boxes
+    // Restore checked boxes for right axis
     const rightCheckboxes = document.querySelectorAll('#checkbox-right-axis input[type="checkbox"]');
     rightCheckboxes.forEach(checkbox => {
         checkbox.checked = settings.checked_right.includes(checkbox.id);
     });
-    
+
+}
+export function resetViewSettings() {
+    // Reset all input fields to default or blank
+    document.getElementById('x_range_start').value = '';
+    document.getElementById('x_range_end').value = '';
+    document.getElementById('columnSelectorX_0').value = '';
+
+    document.getElementById('y_start_left').value = '';
+    document.getElementById('y_end_left').value = '';
+    document.getElementById('columnSelectorYLeft').value = '';
+
+    document.getElementById('y_start_right').value = '';
+    document.getElementById('y_end_right').value = '';
+    document.getElementById('columnSelectorYRight').value = '';
+
+    const leftCheckboxes = document.querySelectorAll('#checkbox-left-axis input[type="checkbox"]');
+    leftCheckboxes.forEach(checkbox => checkbox.checked = false);
+
+    const rightCheckboxes = document.querySelectorAll('#checkbox-right-axis input[type="checkbox"]');
+    rightCheckboxes.forEach(checkbox => checkbox.checked = false);
 }
 
 /**
@@ -337,7 +351,7 @@ export function updateViewSettings(view) {
  */
 export function view_control_apply_changes () {
      // Add event listener to the apply all button for the canvas
-     document.querySelector('.apply-all-button').addEventListener('click', async function () {
+     document.querySelector('.apply-all-button').addEventListener('click', async function () {     
         const currentView = window.currentView;
         const currentCanvasState = window.canvas_states[currentView];    
         // X-axis range
@@ -369,9 +383,7 @@ export function view_control_apply_changes () {
         currentCanvasState.view_control_settings.left_y_axis = document.getElementById('columnSelectorYLeft').value;
         currentCanvasState.view_control_settings.right_y_axis = document.getElementById('columnSelectorYRight').value;
         // Update plot spec and redraw
-
         const plotSpec = getCurrentViewSpec();
-        
         plotSpec.xDomain.interval = currentCanvasState.view_control_settings.x_range;
         // To update the checkboxes for left and right.
         const leftChecked = document.querySelectorAll('#checkbox-left-axis input[type="checkbox"]:checked');
@@ -395,7 +407,6 @@ export function view_control_apply_changes () {
         const xRangeSelect = document.getElementById('x_range_select');
         const xRangeStart = document.getElementById('x_range_start');
         const xRangeEnd = document.getElementById('x_range_end');
-    
         xRangeSelect.addEventListener('change', () => {
             const selectedOption = xRangeSelect.value;
             let valueToCopy = '';
@@ -409,13 +420,15 @@ export function view_control_apply_changes () {
             if (valueToCopy) {
                 navigator.clipboard.writeText(valueToCopy)
                     .then(() => {
-                        alert(`Copied ${selectedOption} value to clipboard: ${valueToCopy}`);
+                        const msg = document.querySelector('.copy_range_msg')
+                        msg.style.display = 'block'
+                        setTimeout(()=>{
+                            msg.style.display = 'none'
+                        },2000)
                     })
                     .catch(err => {
                         console.error('Failed to copy text: ', err);
                     });
-            } else {
-                alert('Please enter a value to copy.');
             }
         });
         updateURLParameters("columnSelectorX_0", currentCanvasState.view_control_settings.x_axis);
@@ -432,16 +445,18 @@ export function view_control_apply_changes () {
  * @param {int} currentView 
  * @returns 
  */
-export function generateViewControl(currentView){
+export function generateViewControl(currentView){   
     return`            
     <div id='canvas-container-${currentView}' class='canvas-container'>
                 <div id='canvas-bar-${currentView}' class='canvas_bar'>
-                    <h3 class = 'view-control'>View Controls A </h3>
+                    <span class = 'view-control'>View Controls A </span>
+                    <span class = 'current-canvas'> </span>
                 </div>
                 <div class="canvas_content hidden">
                     <div class="btn-row" id="global-variables">
                         <h2 class='x_axis_h2'>X axis</h2>
                             <div class="column-container">
+                                 <span class='copy_range_msg'>Range Copied</span>
                                 <div class='x-axis-select'>
                                     <label for="columnSelectorX_0">X-axis: </label>
                                     <select name="xcolumn" id="columnSelectorX_0" class="columnSelectorX"  data-track="0">
@@ -452,6 +467,7 @@ export function generateViewControl(currentView){
                                         <option value="start"> X Start</option>
                                         <option value="end"> X End</option>
                                     </select>
+
                                 </div>
                                 <div class = 'column1'> 
                                     <label for="x_range_start">X-range:</label>
@@ -503,10 +519,6 @@ export function generateViewControl(currentView){
                                 <div class="y-checkbox-option">    
                                     <input class="y-checkbox-option" type="checkbox" id="track1-right" name="option" value="Track 1">
                                     <label for="track1-right">Track 1</label><br>
-                                </div>
-                                <div class="y-checkbox-option">    
-                                    <input class="y-checkbox-option" type="checkbox" id="track2-right" name="option" value="Track 2">
-                                    <label for="track2-right">Track 2</label><br>                    
                                 </div>
                             </form>
                             <div class="column-container">

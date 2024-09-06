@@ -251,10 +251,34 @@ body {
     border-bottom: 2px solid black;
     
 }
+.copy_range_msg {
+    color: rgb(101, 155, 20);
+    font-size: 15px;
+    font-weight: 1000;
+    position: absolute; /* Changed from relative to absolute */
+    left: 140px;
+    top: 0; /* Adjust this as needed to position it correctly */
+    display: none;
+    padding: 0;
+    margin: 0;
+    z-index: 100; /* Add this if it needs to be on top of other elements */
+}
 #view2-btn, #view3-btn{
     display: none;
 }
-
+.view-control{
+    position: relative;
+    display: inline-block;
+    font-size: 20px;
+    font-weight: 600;
+}
+.current-canvas{
+    position: relative;
+    display: inline-block;
+    font-size: 20px;
+    font-weight: 600;
+    left: 50%;
+}
 .plot-container {
     width: 30%;
     position: relative;
@@ -590,8 +614,8 @@ input[type='text'] {
     padding: 5px;
 }
 #export-dropdown{
-    position: relative;
-    left: 70%;
+    position: absolute;
+    left: 25%;
     top: 15%;
     display: inline-block;
     border: none;
@@ -629,12 +653,17 @@ input[type='text'] {
     box-shadow: none;
 }
 
+
+
 @media only screen and (max-width: 1880px) {
     .url-button{
         position: relative;
         display: block;
         left: 73%;
         bottom: 45px;
+    }
+    #export-dropdown{
+        left: 25%;
     }
 
 }
@@ -804,6 +833,9 @@ input[type='text'] {
     .interval-input {
         font-size: 15px;
     }
+    #export-dropdown{
+        left: 40%;
+    }
 }
 
 
@@ -859,4 +891,10 @@ input[type='text'] {
         width: 70%;
     }
 
+}
+
+@media only screen and (max-width: 980px) {
+    #export-dropdown {
+        top: 12%;
+    }
 }

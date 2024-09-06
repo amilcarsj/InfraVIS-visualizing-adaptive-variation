@@ -1,7 +1,5 @@
 import { URLfromFile, URLfromServer, GoslingPlotWithLocalData, getCurrentViewSpec } from './plot.js';
 import { updateURLParameters } from './update_plot_specifications.js';
-import {view_control_apply_changes} from './data_options.js'
-
 
 /**
  * To reset the track settings to default.

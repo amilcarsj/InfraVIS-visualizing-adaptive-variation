@@ -24,7 +24,6 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
     const viewSpec = getCurrentViewSpec();
     const current_track = viewSpec.tracks[button_data_track_number];
     const fileURL = URL.createObjectURL(fileInput);
-
     // Update the filename display for this specific track
     const filenameElement = document.getElementById(`filename-display-${button_data_track_number}`);
     if (filenameElement) {
@@ -132,7 +131,6 @@ async function checkURLParameters(track, track_nr) {
     if (url.searchParams.size > 0) {
       const generateParamName = param => `${param}${track_nr}`;
       const plotSpec = getCurrentViewSpec();
-
       track.data.column = track.x.field = track.tooltip[1].field = track.tooltip[1].alt = urlSearch.get(generateParamName("x.field")) || track.data.column;
       track.data.value = track.y.field = track.tooltip[0].field = track.tooltip[0].alt = urlSearch.get(generateParamName("y.field")) || track.data.value;
       track.mark = urlSearch.get(generateParamName("mark")) || track.mark;

@@ -20,6 +20,11 @@ A simple GUI was developed for easy use of the Gosling grammar using data provid
 ## Gene catalog
 A collection of scripts involved in the creation of visualizations of adaptive variation within Northern krill. The script can generate a large catalogue of plots for candidate genes linked to ecological adaptation, and the scripts are customized for these genes. However the code can be adapted to fit other use cases. 
 
+## View Control
+Regarding the views, you can create max 3 different views.
+You can use those views with different fields, and it will reflect the canvas that is currently active.
+Each view control can have its own settings and options.
+
 
 ## How it works!
 You can upload file either locally from your machine or from a url, the file has to be CSV or TSV format.

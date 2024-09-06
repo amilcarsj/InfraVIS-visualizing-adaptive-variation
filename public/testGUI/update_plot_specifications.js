@@ -1,6 +1,19 @@
 import { getCurrentViewSpec } from './plot.js';
 import { PlotSpecManager } from './PlotSpecManager.js'; // Correct import
 
+window.canvas_states = {
+  1: { trackCount: 1, tracks: [],filenames:{}, view_control_settings: {x_axis: '', x_range: [0, 200000], left_y_axis: '', left_y_range: [0, 1], right_y_axis: '', right_y_range: [0, 1], checked_left : [], checked_right : []}},
+  2: { trackCount: 1, tracks: [],filenames:{}, view_control_settings: {x_axis: '', x_range: [0, 200000], left_y_axis: '', left_y_range: [0, 1], right_y_axis: '', right_y_range: [0, 1], checked_left : [], checked_right : []}},
+  3: { trackCount: 1, tracks: [],filenames:{}, view_control_settings: {x_axis: '', x_range: [0, 200000], left_y_axis: '', left_y_range: [0, 1], right_y_axis: '', right_y_range: [0, 1], checked_left : [], checked_right : []}}
+};
+
+window.currentView = 1
+window.canvas_num = 1;
+window.object_2_created = false
+window.object_3_created = false
+window.trackCount = 5;
+window.displayed_canvas = 1
+
 window.plotSpecManager = new PlotSpecManager(); // Initialize PlotSpecManager globally
 
 const fileHeaders = new Map();
@@ -14,8 +27,10 @@ const fileHeaders = new Map();
  */
 export async function handleOptions(data, button_data_track_number) {
   const plotSpec = getCurrentViewSpec(); // Get the current plot spec
+  
   const columnSelectorsX = document.querySelectorAll(`.columnSelectorX`);
   const columnSelectorsY = document.querySelectorAll(`.columnSelectorY`);
+  
   let header = []; // Declare header outside the if-else blocks
   // Check if the provided data is a file or a URL
   if (data instanceof File) {
@@ -63,6 +78,7 @@ export async function handleOptions(data, button_data_track_number) {
         optionY.value = index;
         optionY.textContent = column;
         columnSelectorY.appendChild(optionY);
+        
       });
     });
   }
@@ -74,7 +90,7 @@ export async function handleOptions(data, button_data_track_number) {
       const chosenColumnName = columnSelectorX.options[selectedValue].textContent;
       for (let trackValue = 0; trackValue < trackCountValue; trackValue++) {
         plotSpec.tracks[trackValue].data.column = chosenColumnName;
-        plotSpec.tracks[trackValue].x.field = chosenColumnName;
+        // plotSpec.tracks[trackValue].x.field = chosenColumnName;
         plotSpec.tracks[trackValue].tooltip[1].field = chosenColumnName;
         plotSpec.tracks[trackValue].tooltip[1].alt = chosenColumnName;
       }                
@@ -225,7 +241,7 @@ async function _eventsSelectedTracksPerYAxis(columnSelector, side, plotSpec) {
       plotSpec.tracks[trackValue - 1].y.domain = intervalArray;
     }            
     plotSpec.tracks[trackValue - 1].y.axis = side;
-    plotSpec.tracks[trackValue - 1].y.field = chosenColumnName;
+    // plotSpec.tracks[trackValue - 1].y.field = chosenColumnName;
     plotSpec.tracks[trackValue - 1].tooltip[0].field = chosenColumnName;
     plotSpec.tracks[trackValue - 1].tooltip[0].alt = chosenColumnName; 
   });            
