@@ -614,8 +614,8 @@ input[type='text'] {
     padding: 5px;
 }
 #export-dropdown{
-    position: absolute;
-    left: 25%;
+    position: relative;
+    left: 70%;
     top: 15%;
     display: inline-block;
     border: none;
@@ -653,7 +653,11 @@ input[type='text'] {
     box-shadow: none;
 }
 
-
+@media only screen and (max-width: 2180px) {
+    #export-dropdown{
+        top: 10%;
+    }
+}
 
 @media only screen and (max-width: 1880px) {
     .url-button{
@@ -663,7 +667,7 @@ input[type='text'] {
         bottom: 45px;
     }
     #export-dropdown{
-        left: 25%;
+        top: 10%;
     }
 
 }
@@ -833,9 +837,6 @@ input[type='text'] {
     .interval-input {
         font-size: 15px;
     }
-    #export-dropdown{
-        left: 40%;
-    }
 }
 
 
@@ -892,9 +893,14 @@ input[type='text'] {
     }
 
 }
+@media only screen and (max-width: 1080px) {
+    #export-dropdown{
+        top: 13%;
+    }
+}
 
-@media only screen and (max-width: 980px) {
-    #export-dropdown {
-        top: 12%;
+@media only screen and (max-width:600px) {
+    #export-dropdown{
+        top: 7%;
     }
 }
