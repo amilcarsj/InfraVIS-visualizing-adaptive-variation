@@ -32,22 +32,20 @@ export async function handleOptions(data, button_data_track_number) {
   const columnSelectorsY = document.querySelectorAll(`.columnSelectorY`);
   
   let header = []; // Declare header outside the if-else blocks
+
   // Check if the provided data is a file or a URL
   if (data instanceof File) {
     // Data is a local file, use FileReader to extract header
     header = await extractHeader(data, button_data_track_number, plotSpec);
-    // Proceed with handling the extracted header...
   } else if (data instanceof Blob) {
     // Data is a Blob (assumed to be from a server)
     header = await extractHeaderFromServer(data, button_data_track_number, plotSpec);
-    // Proceed with handling the extracted header...
   } else {
     let msg = document.getElementById(`msg-load-track-${button_data_track_number}`);
     msg.textContent = "Invalid data type. Expected File or Blob.";
     msg.className = "error-msg";
     console.error("Invalid data type. Expected File or Blob.");
   }
-  // Creating the dropdown menu for each track
 
   if (!fileHeaders.has(button_data_track_number)) {
     fileHeaders.set(button_data_track_number, new Set());
@@ -78,9 +76,12 @@ export async function handleOptions(data, button_data_track_number) {
         optionY.value = index;
         optionY.textContent = column;
         columnSelectorY.appendChild(optionY);
-        
       });
     });
+
+    // Update the tooltip for each track dynamically based on the available columns
+    updateDynamicTooltips(plotSpec, header, button_data_track_number);
+  
   }
 
   columnSelectorsX.forEach(columnSelectorX => {
@@ -329,4 +330,31 @@ export async function updateURLParameters(parameter, value) {
   var url = new window.URL(document.location);
   url.searchParams.set(parameter, value);
   history.pushState({}, '', url);
+}
+
+/**
+ * Function to update tooltips dynamically based on available columns in the data file.
+ * @param {Object} plotSpec - The current plot specification object.
+ * @param {Array} header - List of column headers extracted from the data file.
+ * @param {number} button_data_track_number - Button data track number.
+ */
+function updateDynamicTooltips(plotSpec, header, button_data_track_number) {
+  const trackCount = plotSpec.tracks.length;
+
+  for (let i = 0; i < trackCount; i++) {
+    // Initialize tooltips as an empty array
+    plotSpec.tracks[i].tooltip = [];
+
+    // Dynamically add each header to the tooltip
+    header.forEach((column) => {
+      plotSpec.tracks[i].tooltip.push({
+        field: column,
+        type: 'nominal',  // Assuming all columns are nominal; adjust as needed
+        alt: column
+      });
+    });
+
+    // Example: Update URL parameters for the new tooltips (optional)
+    updateURLParameters(`tooltip${i}`, plotSpec.tracks[i].tooltip);
+  }
 }
