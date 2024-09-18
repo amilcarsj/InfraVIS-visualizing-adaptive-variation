@@ -18,24 +18,84 @@ if(window.canvas_num) {
  */
 export async function URLfromFile(fileInputs, button_data_track_number) {
   try {
-    const fileInput = fileInputs[button_data_track_number].files[0];
-    window.canvas_states[window.canvas_num].filenames[button_data_track_number] = fileInput.name;
-    const extension = window.canvas_states[window.canvas_num].filenames[button_data_track_number].substring(window.canvas_states[window.canvas_num].filenames[button_data_track_number].lastIndexOf('.') + 1).toLowerCase();
-    const viewSpec = getCurrentViewSpec();
-    const current_track = viewSpec.tracks[button_data_track_number];
-    const fileURL = URL.createObjectURL(fileInput);
-    // Update the filename display for this specific track
-    const filenameElement = document.getElementById(`filename-display-${button_data_track_number}`);
-    if (filenameElement) {
-      filenameElement.textContent = `${window.canvas_states[window.canvas_num].filenames[button_data_track_number]}`;
-    }
-    
-    if (fileURL) {
-      current_track.data.url = fileURL;
-      await configureDataType(extension, current_track);
-      await handleOptions(fileInput, button_data_track_number);
-      await checkURLParameters(current_track, button_data_track_number);
-      console.log('File loaded successfully');
+    const files = Array.from(fileInputs[button_data_track_number].files);
+    const isCanvas0 = window.canvas_num === 0;
+
+    if (isCanvas0) {
+      if (files.length !== 2) {
+        throw new Error('Canvas 0 requires exactly 2 files: one .gz and one .tbi.');
+      }
+
+      const gzFile = files.find(file => file.name.toLowerCase().endsWith('.gz'));
+      const tbiFile = files.find(file => file.name.toLowerCase().endsWith('.tbi'));
+
+      if (!gzFile || !tbiFile) {
+        throw new Error('Canvas 0 requires both .gz and .tbi files.');
+      }
+
+      // Store filenames as an object for canvas0
+      window.canvas_states[window.canvas_num].filenames[button_data_track_number] = {
+        data: gzFile.name,
+        index: tbiFile.name
+      };
+
+      // Update the filename display
+      const filenameElement = document.getElementById(`filename-display-${button_data_track_number}`);
+      if (filenameElement) {
+        filenameElement.textContent = `${gzFile.name}, ${tbiFile.name}`;
+      }
+
+      const gzURL = URL.createObjectURL(gzFile);
+      const tbiURL = URL.createObjectURL(tbiFile);
+
+      const viewSpec = getCurrentViewSpec();
+      const current_track = viewSpec.tracks[button_data_track_number];
+
+      if (gzURL && tbiURL) {
+        current_track.data = current_track.data || {};
+        current_track.data.url = gzURL;
+        current_track.data.indexUrl = tbiURL;
+
+        await configureDataType('gz', current_track); // Configure based on .gz
+        await handleOptions(gzFile, button_data_track_number);
+        await checkURLParameters(current_track, button_data_track_number);
+        console.log('Files loaded successfully for Canvas 0');
+      }
+    } else {
+      if (files.length !== 1) {
+        throw new Error('Only one file (.csv or .tsv) can be uploaded for this canvas.');
+      }
+
+      const file = files[0];
+      const extension = file.name.split('.').pop().toLowerCase();
+
+      if (!['csv', 'tsv'].includes(extension)) {
+        throw new Error('Only .csv and .tsv files are allowed for Canvas 1, 2, 3, etc.');
+      }
+
+      // Store filename as a string for other canvases
+      window.canvas_states[window.canvas_num].filenames[button_data_track_number] = file.name;
+
+      // Update the filename display
+      const filenameElement = document.getElementById(`filename-display-${button_data_track_number}`);
+      if (filenameElement) {
+        filenameElement.textContent = file.name;
+      }
+
+      const fileURL = URL.createObjectURL(file);
+      const viewSpec = getCurrentViewSpec();
+      const current_track = viewSpec.tracks[button_data_track_number];
+
+      if (fileURL) {
+        current_track.data = {
+          url: fileURL
+        };
+
+        await configureDataType(extension, current_track);
+        await handleOptions(file, button_data_track_number);
+        await checkURLParameters(current_track, button_data_track_number);
+        console.log('File loaded successfully for Canvas ' + window.canvas_num);
+      }
     }
   } catch (error) {
     console.error(error);
@@ -51,26 +111,118 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
  */
 export async function URLfromServer(URL_input, button_data_track_number) {
   try {
+    const isCanvas0 = window.canvas_num === 0;
     const viewSpec = getCurrentViewSpec();
     const current_track = viewSpec.tracks[button_data_track_number];
+
     if (URL_input) {
-      current_track.data.url = URL_input;
-      const filename = URL_input.substring(URL_input.lastIndexOf('/') + 1);
-      window.canvas_states[window.canvas_num].filenames[button_data_track_number] =  URL_input;
-      const extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-      const response = await fetch(URL_input);
-          // Update the filename display for this specific track
-    const filenameElement = document.getElementById(`filename-display-${button_data_track_number}`);
-    if (filenameElement) {
-      filenameElement.textContent = `${window.canvas_states[window.canvas_num].filenames[button_data_track_number]}`;
-    }
-      if (!response.ok) {
-        throw new Error('Network response was not ok.');
+      let urls = [];
+      if (isCanvas0) {
+        // Expecting two URLs separated by a comma
+        urls = URL_input.split(',').map(url => url.trim());
+        if (urls.length !== 2) {
+          throw new Error('Canvas 0 requires exactly 2 URLs: one .gz and one .tbi.');
+        }
+      } else {
+        urls = [URL_input.trim()];
       }
-      const fileBlob = await response.blob();
-      await configureDataType(extension, current_track);
-      await handleOptions(fileBlob, button_data_track_number);
-      await checkURLParameters(current_track, button_data_track_number);            
+
+      if (isCanvas0) {
+        const gzURL = urls.find(url => url.toLowerCase().endsWith('.gz'));
+        const tbiURL = urls.find(url => url.toLowerCase().endsWith('.tbi'));
+
+        if (!gzURL || !tbiURL) {
+          throw new Error('Canvas 0 requires both .gz and .tbi URLs.');
+        }
+
+        window.canvas_states[window.canvas_num].filenames[button_data_track_number] = {
+          data: gzURL.split('/').pop(),
+          index: tbiURL.split('/').pop()
+        };
+
+        current_track.data = {
+          url: gzURL,
+          indexUrl: tbiURL
+        };
+
+        // Update the filename display
+        const filenameElement = document.getElementById(`filename-display-${button_data_track_number}`);
+        if (filenameElement) {
+          filenameElement.textContent = `${window.canvas_states[window.canvas_num].filenames[button_data_track_number].data}, ${window.canvas_states[window.canvas_num].filenames[button_data_track_number].index}`;
+        }
+
+        // Validate extensions
+        const gzExtension = gzURL.split('.').pop().toLowerCase();
+        const tbiExtension = tbiURL.split('.').pop().toLowerCase();
+
+        if (gzExtension !== 'gz' || tbiExtension !== 'tbi') {
+          throw new Error('Canvas 0 requires one .gz and one .tbi URL.');
+        }
+      } else {
+        const fileURL = urls[0];
+        const filename = fileURL.split('/').pop();
+        const extension = filename.split('.').pop().toLowerCase();
+
+        if (!['csv', 'tsv'].includes(extension)) {
+          throw new Error('Only .csv and .tsv files are allowed for Canvas 1, 2, 3, etc.');
+        }
+
+        window.canvas_states[window.canvas_num].filenames[button_data_track_number] = filename;
+
+        current_track.data = {
+          url: fileURL
+        };
+
+        // Update the filename display
+        const filenameElement = document.getElementById(`filename-display-${button_data_track_number}`);
+        if (filenameElement) {
+          filenameElement.textContent = filename;
+        }
+      }
+
+      // Fetch and process files
+      for (let i = 0; i < urls.length; i++) {
+        const url = urls[i];
+        const filename = url.split('/').pop();
+        const extension = filename.split('.').pop().toLowerCase();
+
+        if (isCanvas0) {
+          if (i === 0 && extension !== 'gz') {
+            throw new Error('First URL must be a .gz file.');
+          }
+          if (i === 1 && extension !== 'tbi') {
+            throw new Error('Second URL must be a .tbi file.');
+          }
+        } else {
+          if (!['csv', 'tsv'].includes(extension)) {
+            throw new Error('Only .csv and .tsv files are allowed for this canvas.');
+          }
+        }
+
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Network response was not ok for URL: ${url}`);
+        }
+        const fileBlob = await response.blob();
+
+        if (isCanvas0) {
+          // For canvas0, handle .gz and .tbi separately
+          if (extension === 'gz') {
+            await configureDataType('gz', current_track);
+            await handleOptions(fileBlob, button_data_track_number);
+          } else if (extension === 'tbi') {
+            // Assuming handleOptions can process index files if necessary
+            // If not, you might need to adjust this accordingly
+            // For example, associate the index file with the data file
+          }
+        } else {
+          await configureDataType(extension, current_track);
+          await handleOptions(fileBlob, button_data_track_number);
+        }
+      }
+
+      await checkURLParameters(current_track, button_data_track_number);
+      console.log('URL-based files loaded successfully');
     }
   } catch (error) {
     alert(error.message);
@@ -84,20 +236,23 @@ export async function URLfromServer(URL_input, button_data_track_number) {
  * @param {object} track - Track object.
  */
 async function configureDataType(extension, track) {
-  const validExtensions = ['tsv', 'csv'];
+  const isCanvas0 = window.canvas_num === 0;
+  
   if (!track.data || typeof track.data !== 'object') {
     track.data = {};
   }
-  if (validExtensions.includes(extension)) {
-    if (extension === 'tsv') {
-      track.data.type = 'csv';
-      track.data.separator = '\t';
-    } else if (extension === 'csv') {
-      track.data.type = 'csv';
-      track.data.separator = ',';
-    }
+
+  if (isCanvas0) {
+    // For indexed data, data.type might need to be specified as per Gosling.js requirements
+    // Assuming 'bed' type for this example; adjust as necessary
+    track.data.type = 'bed'; // Change 'bed' to the appropriate type if different
   } else {
-    throw new Error('Invalid file extension. Only .tsv and .csv files are allowed.');
+    const validExtensions = ['tsv', 'csv'];
+    if (!validExtensions.includes(extension)) {
+      throw new Error('Invalid file extension. Only .tsv and .csv files are allowed.');
+    }
+    track.data.type = 'csv';
+    track.data.separator = extension === 'tsv' ? '\t' : ',';
   }
 }
 

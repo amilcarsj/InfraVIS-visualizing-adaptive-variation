@@ -36,32 +36,62 @@ class PlotSpecManager {
   }
 
   createNewPlotSpec() {
-    return {
-      views: [
-        {
-          id: "canvas1",
-          title: "Canvas 1",
-          static: false,
-          xDomain: { interval: [0, 200000] },
-          alignment: "overlay",
-          width: 900,
-          height: 200,
-          assembly: "unknown",
-          linkingId: "detail",
-          style: {
-            background: "#D3D3D3",
-            backgroundOpacity: 0.1,
-          },
-          tracks: [
-            this.createTrack(),
-            this.createTrack(),
-            this.createTrack(),
-            this.createTrack(),
-            this.createTrack(),
-          ]
-        }
-      ]
-    };
+    if (window.canvas_num == 0) {
+      return {
+        views: [
+          {
+            id: "canvas0",
+            title: "Gene",
+            static: false,
+            xDomain: { interval: [0, 200000] },
+            alignment: "overlay",
+            width: 900,
+            height: 150,
+            assembly: "unknown",
+            linkingId: "detail",
+            style: {
+              background: "#D3D3D3",
+              backgroundOpacity: 0.1,
+            },
+            tracks: [
+              this.createTrack(),
+              this.createTrack(),
+              this.createTrack(),
+              this.createTrack(),
+              this.createTrack(),
+            ]
+          }
+        ]
+      };
+    } else {
+      return {
+        views: [
+          {
+            id: "canvas1",
+            title: "Canvas 1",
+            static: false,
+            xDomain: { interval: [0, 200000] },
+            alignment: "overlay",
+            width: 900,
+            height: 200,
+            assembly: "unknown",
+            linkingId: "detail",
+            style: {
+              background: "#D3D3D3",
+              backgroundOpacity: 0.1,
+            },
+            tracks: [
+              this.createTrack(),
+              this.createTrack(),
+              this.createTrack(),
+              this.createTrack(),
+              this.createTrack(),
+            ]
+          }
+        ]
+      };
+    }
+
   }
 
   createTrack() {

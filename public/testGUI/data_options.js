@@ -14,6 +14,7 @@ export async function all_buttons(container) {
     <div class="body-container">
         <div class="left-section">
             <div class="canvas"> 
+                <button id="canvas0" class="canvas-button">Canvas 0</button>
                 <button id="canvas1" class="canvas-button">Canvas 1</button>
                 <button id="canvas2" class="canvas-button">Canvas 2</button>
                 <button id="canvas3" class="canvas-button">Canvas 3</button>
@@ -28,7 +29,7 @@ export async function all_buttons(container) {
                     <option id="export-html-button" value="html">HTML</option>
                 </select> 
                 <div class="btn-row">
-                    <h2 class='canvas_number'>Canvas 1</h2>
+                    <h2 class='canvas_number'>Canvas 0</h2>
                     <h2>Track Controls</h2>
                     <span id="clear_url_button" class="clear_all_settings"><u>  Clear All </u></span>                   
                     <button id='add_track_button' class="add_track_button"><i class="fa fa-plus-circle" style="font-size:24px;"></i>Add Track</button>
@@ -65,6 +66,7 @@ export async function all_buttons(container) {
         </div>
     </div>
     `;
+    const canvas0 = document.getElementById('canvas0');
     const canvas1 = document.getElementById('canvas1');
     const canvas2 = document.getElementById('canvas2');
     const canvas3 = document.getElementById('canvas3');
@@ -95,11 +97,29 @@ export async function all_buttons(container) {
             this.disabled = true;
         }    
     })
-    // Set Canvas 1 as active by default
-    canvas1.classList.add('active');
+    // Set Canvas 0 as active by default
+    canvas0.classList.add('active');
     view1_btn.classList.add('active');
     // Adding canvases
     add_canvas.addEventListener('click', function () {
+        if (displayed_canvas === 0) {
+            canvas2.style.display = 'block';
+            displayed_canvas = 1;
+            window.canvas_num = 1;
+            canvas_number.innerHTML = 'Canvas 1';
+            current_canvas.innerHTML = 'Current Canvas 1'
+            if (!window.object_1_created) {
+                addOrUpdateCanvasObject('canvas1');
+                window.object_1_created = true;
+                view2_btn.style.display = 'block';
+                window.currentView = 1
+                view_control.innerHTML = 'View Controls A'
+                updateViewSettings(1);
+                setActiveViews(view1_btn);
+            }
+            setActiveCanvas(canvas1);
+            updateCanvasUI();
+        }
         if (displayed_canvas === 1) {
             canvas2.style.display = 'block';
             displayed_canvas = 2;
@@ -118,10 +138,11 @@ export async function all_buttons(container) {
             setActiveCanvas(canvas2);
             updateCanvasUI();
         }
-        // if there is alreadyt canvas 2
+        // if there is already canvas 2
         else if (displayed_canvas === 2) {
             canvas3.style.display = 'block';
             window.canvas_num = 3;
+            displayed_canvas = 3;
             canvas_number.innerHTML = 'Canvas 3';
             current_canvas.innerHTML = 'Current Canvas 3'
             if (!window.object_3_created) {
@@ -134,12 +155,24 @@ export async function all_buttons(container) {
             this.disabled = true;
         }
     })
+
+    canvas0.addEventListener('click', function () {
+        setActiveCanvas(canvas0);
+        window.canvas_num = 0;
+        canvas_number.innerHTML = 'Canvas 0';
+        current_canvas.innerHTML = 'Current Canvas 0'
+        updateCanvasUI();
+    });
     // Making canvas1 active
     canvas1.addEventListener('click', function () {
         setActiveCanvas(canvas1);
         window.canvas_num = 1;
         canvas_number.innerHTML = 'Canvas 1';
         current_canvas.innerHTML = 'Current Canvas 1'
+        if (!window.object_1_created) {
+            addOrUpdateCanvasObject('canvas1');
+            window.object_1_created = true;
+        }
         updateCanvasUI();
     });
     // Making canvas2 active
@@ -455,6 +488,10 @@ export function generateViewControl(currentView){
                 <div class="canvas_content hidden">
                     <div class="btn-row" id="global-variables">
                         <h2 class='x_axis_h2'>X axis</h2>
+                            <label class="chromosome" for="chromosome">Chromosome </label>
+                                <select name="chromosome" id="chromosome" class="chromosome" data-track="0">
+                                <option  value="" disabled selected></option>
+                            </select>
                             <div class="column-container">
                                  <span class='copy_range_msg'>Range Copied</span>
                                 <div class='x-axis-select'>
