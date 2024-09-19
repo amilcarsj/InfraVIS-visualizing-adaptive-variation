@@ -1,5 +1,6 @@
-import { getCurrentViewSpec } from './plot.js';
+import { getCurrentViewSpec, GoslingPlotWithLocalData } from './plot.js';
 import { PlotSpecManager } from './PlotSpecManager.js'; // Correct import
+
 
 window.canvas_states = {
   0: { trackCount: 1, tracks: [],filenames:{}, view_control_settings: {x_axis: '', x_range: [0, 200000], left_y_axis: '', left_y_range: [0, 1], right_y_axis: '', right_y_range: [0, 1], checked_left : [], checked_right : []}},
@@ -29,24 +30,31 @@ const fileHeaders = new Map();
  */
 export async function handleOptions(data, button_data_track_number) {
   const plotSpec = getCurrentViewSpec(); // Get the current plot spec
-  
+
   const columnSelectorsX = document.querySelectorAll(`.columnSelectorX`);
   const columnSelectorsY = document.querySelectorAll(`.columnSelectorY`);
-  
-  let header = []; // Declare header outside the if-else blocks
+
+  let header = [];
+  let geneData = [];
 
   // Check if the provided data is a file or a URL
   if (data instanceof File) {
-    // Data is a local file, use FileReader to extract header
-    header = await extractHeader(data, button_data_track_number, plotSpec);
+    if (window.canvas_num == 0) {
+      const geneHeaderResult = await extractGeneHeader(data);
+      header = geneHeaderResult.header;
+      geneData = geneHeaderResult.data;
+      
+    } else {
+      header = await extractHeader(data, button_data_track_number, plotSpec);
+    }
   } else if (data instanceof Blob) {
-    // Data is a Blob (assumed to be from a server)
     header = await extractHeaderFromServer(data, button_data_track_number, plotSpec);
   } else {
     let msg = document.getElementById(`msg-load-track-${button_data_track_number}`);
     msg.textContent = "Invalid data type. Expected File or Blob.";
     msg.className = "error-msg";
     console.error("Invalid data type. Expected File or Blob.");
+    return; // Exit the function early
   }
 
   if (!fileHeaders.has(button_data_track_number)) {
@@ -218,6 +226,9 @@ export async function handleOptions(data, button_data_track_number) {
       await _eventsSelectedTracksPerYAxis(columnSelectorR, 'right', plotSpec);
     });
   });
+  if (window.canvas_num ==0){
+    await GoslingPlotWithLocalData()
+  }
 
   let msg = document.getElementById(`msg-load-track-${button_data_track_number}`);
   msg.textContent = "File loaded successfully";
@@ -281,6 +292,102 @@ function arraysEqual(arr1, arr2) {
   return true;
 }
 
+/**
+ * Parse a GFF file and extract its header, including specific attributes.
+ * 
+ * @param {File} file - Local GFF file (gzipped).
+ * @returns {Promise<Object>} - Promise resolving to an object containing header and data.
+ */
+async function extractGeneHeader(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      try {
+        // Read the file as an ArrayBuffer for binary data
+        const compressedData = new Uint8Array(reader.result);
+
+        // Decompress using pako
+        const decompressedData = pako.ungzip(compressedData, { to: 'string' });
+
+        const lines = decompressedData.split('\n');
+
+        // Define the GFF3 standard headers
+        const standardHeader = [
+          'seqid',
+          'source',
+          'type',
+          'start',
+          'end',
+          'score',
+          'strand',
+          'phase',
+          'attributes'
+        ];
+
+        // Define additional headers extracted from attributes
+        const additionalHeaders = ['gene_biotype', 'Name'];
+
+        // Combine standard and additional headers
+        const header = [...standardHeader, ...additionalHeaders];
+
+        const data = [];
+        let skippedLines = 0;
+
+        for (let line of lines) {
+          // Skip empty lines and comments
+          if (line.trim() === '' || line.startsWith('#')) {
+            continue;
+          }
+
+          const row = line.split('\t');
+
+          // Ensure the row has the correct number of columns
+          if (row.length === 9) {
+            const entry = {};
+            standardHeader.forEach((col, index) => {
+              entry[col] = row[index];
+            });
+
+            // Parse the attributes column
+            const attributes = row[8].split(';').reduce((acc, attribute) => {
+              const [key, value] = attribute.split('=');
+              if (key && value) {
+                acc[key] = value;
+              }
+              return acc;
+            }, {});
+
+            // Extract specific attributes
+            additionalHeaders.forEach(attr => {
+              entry[attr] = attributes[attr] || 'unknown';
+            });
+
+            data.push(entry);
+          } else {
+            console.warn('Skipping malformed line:', line);
+            skippedLines++;
+          }
+        }
+
+        if (skippedLines > 0) {
+          console.warn(`Skipped ${skippedLines} malformed lines.`);
+        }
+
+        resolve({ header, data });
+      } catch (error) {
+        reject(new Error('Error decompressing or parsing GFF file'));
+      }
+    };
+
+    reader.onerror = () => {
+      reject(new Error('Error reading GFF file'));
+    };
+
+    // Read the file as an ArrayBuffer for binary data
+    reader.readAsArrayBuffer(file);
+  });
+}
 /**
  * Extract the header from a local file using FileReader.
  * 

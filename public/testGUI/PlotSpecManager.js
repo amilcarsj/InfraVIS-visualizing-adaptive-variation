@@ -1,4 +1,5 @@
 import { trackTemplate } from './track_spec.js';
+import { gene_template } from './gene_spec.js';
 
 function deepCopy(obj) {
   if (typeof obj !== 'object' || obj === null) {
@@ -43,22 +44,22 @@ class PlotSpecManager {
             id: "canvas0",
             title: "Gene",
             static: false,
-            xDomain: { interval: [0, 200000] },
+            xDomain: { interval: [69651, 437352] },
             alignment: "overlay",
             width: 900,
             height: 150,
-            assembly: "unknown",
+            assembly: [["seq_s_6130", 4641652]], // Updated to match gene_spec.js
             linkingId: "detail",
             style: {
               background: "#D3D3D3",
               backgroundOpacity: 0.1,
             },
             tracks: [
-              this.createTrack(),
-              this.createTrack(),
-              this.createTrack(),
-              this.createTrack(),
-              this.createTrack(),
+              this.createGeneTrack(0),
+              this.createGeneTrack(1),
+              this.createGeneTrack(2),
+              this.createGeneTrack(3),
+              this.createGeneTrack(4),
             ]
           }
         ]
@@ -91,11 +92,25 @@ class PlotSpecManager {
         ]
       };
     }
-
   }
 
   createTrack() {
     return deepCopy(trackTemplate);
+  }
+
+  /**
+   * Creates a gene track by copying a specific track from gene_template
+   * @param {number} index - Index of the track to copy
+   * @returns {Object} - A single track object
+   */
+  createGeneTrack(index) {
+    // Ensure that gene_template.views[0].tracks[index] exists
+    if (gene_template.views && gene_template.views[0] && gene_template.views[0].tracks && gene_template.views[0].tracks[index]) {
+      return deepCopy(gene_template.views[0].tracks[index]);
+    } else {
+      console.error(`Track index ${index} does not exist in gene_template.`);
+      return {};
+    }
   }
 
   generateCanvas(canvasId, newCanvasObject) {

@@ -36,7 +36,7 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
       // Store filenames as an object for canvas0
       window.canvas_states[window.canvas_num].filenames[button_data_track_number] = {
         data: gzFile.name,
-        index: tbiFile.name
+        index: tbiFile.name,
       };
 
       // Update the filename display
@@ -48,15 +48,20 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
       const gzURL = URL.createObjectURL(gzFile);
       const tbiURL = URL.createObjectURL(tbiFile);
 
-      const viewSpec = getCurrentViewSpec();
-      const current_track = viewSpec.tracks[button_data_track_number];
+      const plotSpec = getCurrentViewSpec();
+      const current_track = plotSpec.tracks[button_data_track_number];
+
+      if (!current_track) {
+        console.error(`Track number ${button_data_track_number} does not exist in plotSpec.`);
+        return;
+      }
 
       if (gzURL && tbiURL) {
         current_track.data = current_track.data || {};
         current_track.data.url = gzURL;
         current_track.data.indexUrl = tbiURL;
 
-        await configureDataType('gz', current_track); // Configure based on .gz
+        await configureDataType('gff', current_track); 
         await handleOptions(gzFile, button_data_track_number);
         await checkURLParameters(current_track, button_data_track_number);
         console.log('Files loaded successfully for Canvas 0');
@@ -83,13 +88,22 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
       }
 
       const fileURL = URL.createObjectURL(file);
-      const viewSpec = getCurrentViewSpec();
-      const current_track = viewSpec.tracks[button_data_track_number];
+      const plotSpec = getCurrentViewSpec();
+      const current_track = plotSpec.tracks[button_data_track_number]; // Adjust based on your plotSpec structure
+
+      if (!current_track) {
+        console.error(`Track number ${button_data_track_number} does not exist in plotSpec.`);
+        return;
+      }
+
+      console.log(`Current Track before updates:`, current_track);
 
       if (fileURL) {
         current_track.data = {
-          url: fileURL
+          url: fileURL,
         };
+
+        console.log(`Configured data URL for Track ${button_data_track_number}:`, current_track.data);
 
         await configureDataType(extension, current_track);
         await handleOptions(file, button_data_track_number);
@@ -102,6 +116,7 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
     alert(error.message);
   }
 }
+
 
 /**
  * Handle data from a server URL input.
@@ -243,9 +258,8 @@ async function configureDataType(extension, track) {
   }
 
   if (isCanvas0) {
-    // For indexed data, data.type might need to be specified as per Gosling.js requirements
-    // Assuming 'bed' type for this example; adjust as necessary
-    track.data.type = 'bed'; // Change 'bed' to the appropriate type if different
+    track.data.type = 'gff'; // Correct data type for GFF
+    track.data.indexUrl = track.data.indexUrl || ''; // Ensure indexUrl exists
   } else {
     const validExtensions = ['tsv', 'csv'];
     if (!validExtensions.includes(extension)) {
@@ -279,31 +293,76 @@ export async function GoslingPlotWithLocalData() {
  * @param {object} track - Track object.
  * @param {number} track_nr - Track number.
  */
-async function checkURLParameters(track, track_nr) {
-  var url = new window.URL(document.location);
+export async function checkURLParameters(track, track_nr) {
+  const url = new window.URL(document.location);
   try {
     const urlSearch = url.searchParams;
-    if (url.searchParams.size > 0) {
-      const generateParamName = param => `${param}${track_nr}`;
+    if (urlSearch.size > 0) {
+      const generateParamName = (param) => `${param}${track_nr}`;
       const plotSpec = getCurrentViewSpec();
-      track.data.column = track.x.field = track.tooltip[1].field = track.tooltip[1].alt = urlSearch.get(generateParamName("x.field")) || track.data.column;
-      track.data.value = track.y.field = track.tooltip[0].field = track.tooltip[0].alt = urlSearch.get(generateParamName("y.field")) || track.data.value;
-      track.mark = urlSearch.get(generateParamName("mark")) || track.mark;
-      track.size.value = parseInt(urlSearch.get(generateParamName("size.value"))) || track.size.value;
-      track.color.value = urlSearch.get(generateParamName("color.value")) || track.color.value;
+
+      // Safeguard for tooltip array
+      if (!Array.isArray(track.tooltip)) {
+        track.tooltip = [];
+      }
+
+      // Ensure tooltip has at least two elements
+      while (track.tooltip.length < 2) {
+        track.tooltip.push({});
+      }
+
+      // Safely set properties only if they exist
+      if (track.x) {
+        const xField = urlSearch.get(generateParamName("x.field")) || track.data.column;
+        track.x.field = xField;
+        track.tooltip[1].field = xField;
+        track.tooltip[1].alt = xField;
+        track.data.column = xField;
+      }
+
+      if (track.y) {
+        const yField = urlSearch.get(generateParamName("y.field")) || track.data.value;
+        track.y.field = yField;
+        track.tooltip[0].field = yField;
+        track.tooltip[0].alt = yField;
+        track.data.value = yField;
+      }
+
+      if (track.mark !== undefined) {
+        track.mark = urlSearch.get(generateParamName("mark")) || track.mark;
+      }
+
+      if (track.size) {
+        const sizeValue = parseInt(urlSearch.get(generateParamName("size.value"))) || track.size.value;
+        track.size.value = sizeValue;
+      }
+
+      if (track.color) {
+        track.color.value = urlSearch.get(generateParamName("color.value")) || track.color.value;
+      }
+
       track.data.binSize = urlSearch.get(generateParamName("data.binSize")) || track.data.binSize;
       track.data.sampleLength = urlSearch.get(generateParamName("sampleLength")) || track.data.sampleLength;
 
-      // Iterate over all tracks in plotSpec
+      // Iterate over all tracks in plotSpec and update y.domain if applicable
       for (let i = 0; i < plotSpec.tracks.length; i++) {
-        const track = plotSpec.tracks[i];
-        track.y.domain = urlSearch.has("y.domain") ? urlSearch.get("y.domain").split(",").map(Number) : track.y.domain;
+        const currentTrack = plotSpec.tracks[i];
+        if (currentTrack.y) { // Only update if y exists
+          currentTrack.y.domain = urlSearch.has("y.domain")
+            ? urlSearch.get("y.domain").split(",").map(Number)
+            : currentTrack.y.domain;
+        }
       }
-      
-      plotSpec.xDomain.interval = urlSearch.has("xDomain.interval") ? urlSearch.get("xDomain.interval").split(",").map(Number) : plotSpec.xDomain.interval;
+
+      // Update xDomain.interval
+      plotSpec.xDomain.interval = urlSearch.has("xDomain.interval")
+        ? urlSearch.get("xDomain.interval").split(",").map(Number)
+        : plotSpec.xDomain.interval;
+
+      // Update background style
       plotSpec.style.background = urlSearch.get("background") || plotSpec.style.background;
-    } 
+    }
   } catch (error) {
-    console.error(error);
+    console.error("Error in checkURLParameters:", error);
   }
 }
