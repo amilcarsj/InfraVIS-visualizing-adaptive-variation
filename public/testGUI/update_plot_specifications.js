@@ -38,6 +38,13 @@ export async function handleOptions(data, button_data_track_number) {
   let geneData = [];
 
   // Check if the provided data is a file or a URL
+  if (window.canvas_num !== 0) {
+    // For non-GFF data, set the URL for the current track
+    const fileURL = URL.createObjectURL(data);
+    plotSpec.tracks[button_data_track_number].data.url = fileURL;
+    // Remove indexUrl for non-GFF data
+    delete plotSpec.tracks[button_data_track_number].data.indexUrl;
+  }
   if (data instanceof File) {
     if (window.canvas_num === 0) {
       // GFF data
@@ -106,12 +113,16 @@ export async function handleOptions(data, button_data_track_number) {
       const trackCountValue = document.getElementById("trackCountSelector").value;            
       const selectedValue = columnSelectorX.value;
       const chosenColumnName = columnSelectorX.options[selectedValue].textContent;
+  
       for (let trackValue = 0; trackValue < trackCountValue; trackValue++) {
         plotSpec.tracks[trackValue].data.column = chosenColumnName;
-        // plotSpec.tracks[trackValue].x.field = chosenColumnName;
-        plotSpec.tracks[trackValue].tooltip[1].field = chosenColumnName;
-        plotSpec.tracks[trackValue].tooltip[1].alt = chosenColumnName;
+  
+        if (window.canvas_num !== 0) { // Only modify tooltips for non-GFF data
+          plotSpec.tracks[trackValue].tooltip[1].field = chosenColumnName;
+          plotSpec.tracks[trackValue].tooltip[1].alt = chosenColumnName;
+        }
       }                
+  
       updateURLParameters("x.field", chosenColumnName);
     });
   });
@@ -256,15 +267,40 @@ async function _eventsSelectedTracksPerYAxis(columnSelector, side, plotSpec) {
   const intervalArray = [start, end];
   const selectedValue = columnSelector.value;
   const chosenColumnName = columnSelector.options[selectedValue].textContent;
+  
   selectedOptions.forEach(function(trackValue) {
-    plotSpec.tracks[trackValue - 1].data.value = chosenColumnName;            
-    if (!(Number.isNaN(intervalArray[0]) || Number.isNaN(intervalArray[0]))){
-      plotSpec.tracks[trackValue - 1].y.domain = intervalArray;
-    }            
-    plotSpec.tracks[trackValue - 1].y.axis = side;
-    // plotSpec.tracks[trackValue - 1].y.field = chosenColumnName;
-    plotSpec.tracks[trackValue - 1].tooltip[0].field = chosenColumnName;
-    plotSpec.tracks[trackValue - 1].tooltip[0].alt = chosenColumnName; 
+    console.log('Function called with side:', side);
+    console.log('Plot spec:', plotSpec);
+    const trackIndex = trackValue - 1;
+    console.log('Processing track index:', trackIndex);
+    if (plotSpec.tracks[trackIndex]) {
+      console.log('Track found:', plotSpec.tracks[trackIndex]);
+      if (window.canvas_num !== 0) {
+        // For non-GFF data
+        plotSpec.tracks[trackIndex].data.value = chosenColumnName;            
+        if (!(Number.isNaN(intervalArray[0]) || Number.isNaN(intervalArray[1]))) {
+          plotSpec.tracks[trackIndex].y.domain = intervalArray;
+        }            
+        plotSpec.tracks[trackIndex].y.axis = side;
+        plotSpec.tracks[trackIndex].y.field = chosenColumnName;
+        
+        // Ensure tooltip is an array before modifying it
+        if (!Array.isArray(plotSpec.tracks[trackIndex].tooltip)) {
+          plotSpec.tracks[trackIndex].tooltip = [];
+        }
+        if (plotSpec.tracks[trackIndex].tooltip[0]) {
+          plotSpec.tracks[trackIndex].tooltip[0].field = chosenColumnName;
+          plotSpec.tracks[trackIndex].tooltip[0].alt = chosenColumnName;
+        } else {
+          plotSpec.tracks[trackIndex].tooltip[0] = { field: chosenColumnName, alt: chosenColumnName };
+        }
+      } else {
+        // For GFF data, we don't need to modify these properties
+        console.log("GFF data: Not modifying y-axis properties");
+      }
+    } else {
+      console.warn(`Track ${trackIndex} does not exist in the plot specification.`);
+    }
   });            
   if (side === 'right') {
     updateURLParameters("y.field1", chosenColumnName);
@@ -272,7 +308,6 @@ async function _eventsSelectedTracksPerYAxis(columnSelector, side, plotSpec) {
     updateURLParameters("y.field0", chosenColumnName);
   }        
 }
-
 /**
  * Clear options from a select element.
  * 
@@ -311,15 +346,10 @@ async function extractGeneHeader(file) {
 
     reader.onload = () => {
       try {
-        // Read the file as an ArrayBuffer for binary data
         const compressedData = new Uint8Array(reader.result);
-
-        // Decompress using pako
         const decompressedData = pako.ungzip(compressedData, { to: 'string' });
-
         const lines = decompressedData.split('\n');
 
-        // Define the GFF3 standard headers
         const standardHeader = [
           'seqid',
           'source',
@@ -332,43 +362,45 @@ async function extractGeneHeader(file) {
           'attributes'
         ];
 
-        // Define additional headers extracted from attributes
-        const additionalHeaders = ['gene_biotype', 'Name'];
-
-        // Combine standard and additional headers
+        const additionalHeaders = ['gene_biotype', 'Name', 'ID'];
         const header = [...standardHeader, ...additionalHeaders];
 
         const data = [];
         let skippedLines = 0;
 
         for (let line of lines) {
-          // Skip empty lines and comments
           if (line.trim() === '' || line.startsWith('#')) {
             continue;
           }
 
           const row = line.split('\t');
 
-          // Ensure the row has the correct number of columns
           if (row.length === 9) {
             const entry = {};
             standardHeader.forEach((col, index) => {
               entry[col] = row[index];
             });
 
-            // Parse the attributes column
             const attributes = row[8].split(';').reduce((acc, attribute) => {
-              const [key, value] = attribute.split('=');
+              const [key, ...rest] = attribute.split('=');
+              const value = rest.join('=').trim(); // Handle multiple '='
               if (key && value) {
-                acc[key.trim()] = value.trim();
+                acc[key.trim()] = value;
               }
               return acc;
             }, {});
-            
-            // Extract specific attributes
+
             additionalHeaders.forEach(attr => {
               entry[attr] = attributes[attr] || 'unknown';
             });
+
+            if (entry['Name'] && entry['Name'].startsWith('ID=')) {
+              entry['Name'] = entry['Name'].split('=')[1];
+            }
+
+            if (entry['ID'] && entry['ID'].startsWith('ID=')) {
+              entry['ID'] = entry['ID'].split('=')[1];
+            }
 
             data.push(entry);
           } else {
@@ -391,10 +423,10 @@ async function extractGeneHeader(file) {
       reject(new Error('Error reading GFF file'));
     };
 
-    // Read the file as an ArrayBuffer for binary data
     reader.readAsArrayBuffer(file);
   });
 }
+
 /**
  * Extract the header from a local file using FileReader.
  * 
@@ -459,10 +491,16 @@ function updateDynamicTooltips(plotSpec, header, button_data_track_number) {
 
   for (let i = 0; i < trackCount; i++) {
     if (window.canvas_num === 0) {
-      // For GFF data, use predefined tooltips
+      // For GFF data, include all relevant fields in tooltips
       plotSpec.tracks[i].tooltip = [
+        { field: "seqid", type: "nominal", alt: "Chromosome" },
+        { field: "start", type: "quantitative", alt: "Start" },
+        { field: "end", type: "quantitative", alt: "End" },
+        { field: "strand", type: "nominal", alt: "Strand" },
+        { field: "type", type: "nominal", alt: "Feature Type" },
         { field: "gene_biotype", type: "nominal", alt: "Gene Biotype" },
-        { field: "Name", type: "nominal", alt: "Gene Name" }
+        { field: "Name", type: "nominal", alt: "Gene Name" },
+        { field: "ID", type: "nominal", alt: "Gene ID" }
       ];
     } else {
       // For CSV/TSV data, use dynamic tooltips

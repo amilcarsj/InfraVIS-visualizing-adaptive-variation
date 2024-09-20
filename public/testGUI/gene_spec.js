@@ -1,12 +1,12 @@
 const gene_template = {
   "spacing": 0,
   "layout": "linear",
-  "assembly": [["seq_s_6130", 4641652]],
+  "assembly": [["", 4641652]],
   "style": { "enableSmoothPath": true },
   "views": [
     {
       "id": "canvas0",
-      "xDomain": { "chromosome": "seq_s_6130", "interval": [69651, 437352] },
+      "xDomain": { "chromosome": "", "interval": [69651, 437352] },
       "alignment": "overlay",
       "data": {
         "url": "",
@@ -14,7 +14,8 @@ const gene_template = {
         "type": "gff",
         "attributesToFields": [
           { "attribute": "gene_biotype", "defaultValue": "unknown" },
-          { "attribute": "Name", "defaultValue": "unknown" }
+          { "attribute": "Name", "defaultValue": "unknown" },
+          { "attribute": "ID", "defaultValue": "unknown" }
         ]
       },
       "color": {

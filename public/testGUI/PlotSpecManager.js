@@ -111,14 +111,26 @@ class PlotSpecManager {
       if (!track.data) {
         track.data = {
           type: "gff",
-          url: "", // This will be set later
-          indexUrl: "", // This will be set later
+          url: "",
+          indexUrl: "",
           attributesToFields: [
             { attribute: "gene_biotype", defaultValue: "unknown" },
-            { attribute: "Name", defaultValue: "unknown" }
+            { attribute: "Name", defaultValue: "unknown" },
+            { attribute: "ID", defaultValue: "unknown" } // Added ID attribute
           ]
         };
       }
+      // Update tooltip configuration
+      track.tooltip = [
+        { field: "seqid", type: "nominal", alt: "Chromosome" },
+        { field: "start", type: "quantitative", alt: "Start" },
+        { field: "end", type: "quantitative", alt: "End" },
+        { field: "strand", type: "nominal", alt: "Strand" },
+        { field: "type", type: "nominal", alt: "Feature Type" },
+        { field: "gene_biotype", type: "nominal", alt: "Gene Biotype" },
+        { field: "Name", type: "nominal", alt: "Gene Name" },
+        { field: "ID", type: "nominal", alt: "Gene ID" }
+      ];
       
       return track;
     } else {

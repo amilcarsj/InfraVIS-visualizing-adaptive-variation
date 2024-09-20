@@ -268,8 +268,16 @@ export async function GoslingPlotWithLocalData() {
     // Check if URLs are set for all tracks
     plotSpec.views.forEach(view => {
       view.tracks.forEach((track, index) => {
-        if (!track.data.url || !track.data.indexUrl) {
-          console.error(`URL or indexURL is not set for track ${index} in view ${view.id}`);
+        if (window.canvas_num === 0) {
+          // For GFF data
+          if (!track.data.url || !track.data.indexUrl) {
+            console.warn(`URL or indexURL is not set for track ${index} in view ${view.id}`);
+          }
+        } else {
+          // For non-GFF data
+          if (!track.data.url) {
+            console.warn(`URL is not set for track ${index} in view ${view.id}`);
+          }
         }
       });
     });
