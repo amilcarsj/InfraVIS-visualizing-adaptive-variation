@@ -49,23 +49,17 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
       const tbiURL = URL.createObjectURL(tbiFile);
 
       const plotSpec = getCurrentViewSpec();
-      const current_track = plotSpec.tracks[button_data_track_number];
+      
+      // Set the URLs for all tracks
+      plotSpec.tracks.forEach(track => {
+        track.data.url = gzURL;
+        track.data.indexUrl = tbiURL;
+      });
 
-      if (!current_track) {
-        console.error(`Track number ${button_data_track_number} does not exist in plotSpec.`);
-        return;
-      }
-
-      if (gzURL && tbiURL) {
-        current_track.data = current_track.data || {};
-        current_track.data.url = gzURL;
-        current_track.data.indexUrl = tbiURL;
-
-        await configureDataType('gff', current_track); 
-        await handleOptions(gzFile, button_data_track_number);
-        await checkURLParameters(current_track, button_data_track_number);
-        console.log('Files loaded successfully for Canvas 0');
-      }
+      await configureDataType('gff', plotSpec.tracks[0]); 
+      await handleOptions(gzFile, button_data_track_number);
+      await checkURLParameters(plotSpec.tracks[0], button_data_track_number);
+      console.log('Files loaded successfully for Canvas 0');
     } else {
       if (files.length !== 1) {
         throw new Error('Only one file (.csv or .tsv) can be uploaded for this canvas.');
@@ -95,16 +89,10 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
         console.error(`Track number ${button_data_track_number} does not exist in plotSpec.`);
         return;
       }
-
-      console.log(`Current Track before updates:`, current_track);
-
       if (fileURL) {
         current_track.data = {
           url: fileURL,
         };
-
-        console.log(`Configured data URL for Track ${button_data_track_number}:`, current_track.data);
-
         await configureDataType(extension, current_track);
         await handleOptions(file, button_data_track_number);
         await checkURLParameters(current_track, button_data_track_number);
@@ -275,15 +263,24 @@ async function configureDataType(extension, track) {
  */
 export async function GoslingPlotWithLocalData() {
   try {
-    const plotSpec = window.plotSpecManager.getPlotSpec(); // Get the current plot spec
+    const plotSpec = window.plotSpecManager.getPlotSpec();
+    
+    // Check if URLs are set for all tracks
+    plotSpec.views.forEach(view => {
+      view.tracks.forEach((track, index) => {
+        if (!track.data.url || !track.data.indexUrl) {
+          console.error(`URL or indexURL is not set for track ${index} in view ${view.id}`);
+        }
+      });
+    });
     const container = document.getElementById(`plot-container-1`);
     if (container) {
-      await embed(container, plotSpec); // Embed the updated plotSpec in the appropriate container
+      await embed(container, plotSpec);
     } else {
       console.error('Unsupported canvas number');
     }
   } catch (error) {
-    console.error(error);
+    console.error('Error in GoslingPlotWithLocalData:', error);
   }
 }
 

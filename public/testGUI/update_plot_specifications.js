@@ -39,11 +39,18 @@ export async function handleOptions(data, button_data_track_number) {
 
   // Check if the provided data is a file or a URL
   if (data instanceof File) {
-    if (window.canvas_num == 0) {
+    if (window.canvas_num === 0) {
+      // GFF data
       const geneHeaderResult = await extractGeneHeader(data);
       header = geneHeaderResult.header;
       geneData = geneHeaderResult.data;
       
+      // Ensure URLs are set for all tracks
+      plotSpec.tracks.forEach(track => {
+        if (!track.data.url || !track.data.indexUrl) {
+          console.error('URL or indexURL is not set for a track');
+        }
+      });
     } else {
       header = await extractHeader(data, button_data_track_number, plotSpec);
     }
@@ -353,11 +360,11 @@ async function extractGeneHeader(file) {
             const attributes = row[8].split(';').reduce((acc, attribute) => {
               const [key, value] = attribute.split('=');
               if (key && value) {
-                acc[key] = value;
+                acc[key.trim()] = value.trim();
               }
               return acc;
             }, {});
-
+            
             // Extract specific attributes
             additionalHeaders.forEach(attr => {
               entry[attr] = attributes[attr] || 'unknown';
@@ -451,19 +458,19 @@ function updateDynamicTooltips(plotSpec, header, button_data_track_number) {
   const trackCount = plotSpec.tracks.length;
 
   for (let i = 0; i < trackCount; i++) {
-    // Initialize tooltips as an empty array
-    plotSpec.tracks[i].tooltip = [];
-
-    // Dynamically add each header to the tooltip
-    header.forEach((column) => {
-      plotSpec.tracks[i].tooltip.push({
+    if (window.canvas_num === 0) {
+      // For GFF data, use predefined tooltips
+      plotSpec.tracks[i].tooltip = [
+        { field: "gene_biotype", type: "nominal", alt: "Gene Biotype" },
+        { field: "Name", type: "nominal", alt: "Gene Name" }
+      ];
+    } else {
+      // For CSV/TSV data, use dynamic tooltips
+      plotSpec.tracks[i].tooltip = header.map(column => ({
         field: column,
-        type: 'nominal',  // Assuming all columns are nominal; adjust as needed
+        type: 'nominal',
         alt: column
-      });
-    });
-
-    // Example: Update URL parameters for the new tooltips (optional)
-    updateURLParameters(`tooltip${i}`, plotSpec.tracks[i].tooltip);
+      }));
+    }
   }
 }

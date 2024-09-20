@@ -104,9 +104,23 @@ class PlotSpecManager {
    * @returns {Object} - A single track object
    */
   createGeneTrack(index) {
-    // Ensure that gene_template.views[0].tracks[index] exists
     if (gene_template.views && gene_template.views[0] && gene_template.views[0].tracks && gene_template.views[0].tracks[index]) {
-      return deepCopy(gene_template.views[0].tracks[index]);
+      const track = deepCopy(gene_template.views[0].tracks[index]);
+      
+      // Ensure data configuration is correct
+      if (!track.data) {
+        track.data = {
+          type: "gff",
+          url: "", // This will be set later
+          indexUrl: "", // This will be set later
+          attributesToFields: [
+            { attribute: "gene_biotype", defaultValue: "unknown" },
+            { attribute: "Name", defaultValue: "unknown" }
+          ]
+        };
+      }
+      
+      return track;
     } else {
       console.error(`Track index ${index} does not exist in gene_template.`);
       return {};
