@@ -7,7 +7,7 @@
 import { GoslingPlotWithLocalData, getCurrentViewSpec } from './plot.js';
 import { updateURLParameters } from './update_plot_specifications.js';
 import {exportingFigures} from './exporting_functionality.js';
-import {generateTracks} from './track.js'
+import {generateTracks, updateTrackNumber} from './track.js'
 
 export async function all_buttons(container) {
     container.innerHTML = `
@@ -32,7 +32,7 @@ export async function all_buttons(container) {
                     <h2 class='canvas_number'>Canvas 0</h2>
                     <h2>Track Controls</h2>
                     <span id="clear_url_button" class="clear_all_settings"><u>  Clear All </u></span>                   
-                    <button id='add_track_button' class="add_track_button"><i class="fa fa-plus-circle" style="font-size:24px;"></i>Add Track</button>
+                    <button id='add_track_button' class="add_track_button"><i class="fa fa-plus-circle" style="font-size:24px;" type="button"></i>Add Track</button>
                     <label for="trackCountSelector"></label>
                     <select id="trackCountSelector" class='trackCountSelector' onchange="generateTracks()">
                         <option value="1" selected>1 Track</option>
@@ -61,7 +61,10 @@ export async function all_buttons(container) {
                 <button id="add_view" aria-label="Close"> <i class="fa fa-plus"></i></button>
             </div>
             ${generateViewControl(window.currentView)}
-            <div id="plot-container-1" class="plot-container"></div>
+            <div id="plot-container-0" class="plot-container"></div>
+            <div id="plot-container-1" class="plot-container" "></div>
+            <div id="plot-container-2" class="plot-container" "></div>
+            <div id="plot-container-3" class="plot-container" "></div>
 
         </div>
     </div>
@@ -79,7 +82,18 @@ export async function all_buttons(container) {
     const view3_btn = document.getElementById('view3-btn');
     const current_canvas = document.querySelector('.current-canvas')
     //Adding views functionality
-    
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const addTrackButton = document.getElementById('add_track_button');
+    if (addTrackButton) {
+      addTrackButton.addEventListener('click', function (event) {
+        event.preventDefault();
+        updateTrackNumber();
+      });
+    } else {
+      console.error('Add Track button not found in the DOM.');
+    }
     add_view.addEventListener('click', function(){
         if(currentView === 1) {                       
             view2_btn.style.display = 'block';
@@ -100,6 +114,7 @@ export async function all_buttons(container) {
     // Set Canvas 0 as active by default
     canvas0.classList.add('active');
     view1_btn.classList.add('active');
+
     // Adding canvases
     add_canvas.addEventListener('click', function () {
         if (displayed_canvas === 0) {
@@ -156,49 +171,55 @@ export async function all_buttons(container) {
         }
     })
 
-    canvas0.addEventListener('click', function () {
-        setActiveCanvas(canvas0);
-        window.canvas_num = 0;
-        canvas_number.innerHTML = 'Canvas 0';
-        current_canvas.innerHTML = 'Current Canvas 0'
-        updateCanvasUI();
-    });
-    // Making canvas1 active
-    canvas1.addEventListener('click', function () {
-        setActiveCanvas(canvas1);
-        window.canvas_num = 1;
-        canvas_number.innerHTML = 'Canvas 1';
-        current_canvas.innerHTML = 'Current Canvas 1'
-        if (!window.object_1_created) {
-            addOrUpdateCanvasObject('canvas1');
-            window.object_1_created = true;
-        }
-        updateCanvasUI();
-    });
-    // Making canvas2 active
-    canvas2.addEventListener('click', function () {
-        setActiveCanvas(canvas2);
-        window.canvas_num = 2;
-        canvas_number.innerHTML = 'Canvas 2';
-        current_canvas.innerHTML = 'Current Canvas 2'
-        if (!window.object_2_created) {
-            addOrUpdateCanvasObject('canvas2');
-            window.object_2_created = true;
-        }
-        updateCanvasUI();
-    });
-    // Making canvas3 active
-    canvas3.addEventListener('click', function () {
-        setActiveCanvas(canvas3);
-        window.canvas_num = 3;
-        canvas_number.innerHTML = 'Canvas 3';
-        current_canvas.innerHTML = 'Current Canvas 3'
-        if (!window.object_3_created) {
-            addOrUpdateCanvasObject('canvas3');
-            window.object_3_created = true;
-        }
-        updateCanvasUI();
-    });
+canvas0.addEventListener('click', function () {
+    setActiveCanvas(canvas0);
+    window.canvas_num = 0;
+    canvas_number.innerHTML = 'Canvas 0';
+    current_canvas.innerHTML = 'Current Canvas 0';
+    if (!window.object_0_created) {
+        addOrUpdateCanvasObject(0, 'canvas0');
+        window.object_0_created = true;
+    }
+    // No need to call updateCanvasUI here since we don't want to hide other canvases
+    // Instead, we only need to generate tracks for the active canvas
+    generateTracks();
+});
+
+canvas1.addEventListener('click', function () {
+    setActiveCanvas(canvas1);
+    window.canvas_num = 1;
+    canvas_number.innerHTML = 'Canvas 1';
+    current_canvas.innerHTML = 'Current Canvas 1';
+    if (!window.object_1_created) {
+        addOrUpdateCanvasObject(1, 'canvas1');
+        window.object_1_created = true;
+    }
+    generateTracks();
+});
+
+canvas2.addEventListener('click', function () {
+    setActiveCanvas(canvas2);
+    window.canvas_num = 2;
+    canvas_number.innerHTML = 'Canvas 2';
+    current_canvas.innerHTML = 'Current Canvas 2';
+    if (!window.object_2_created) {
+        addOrUpdateCanvasObject(2, 'canvas2');
+        window.object_2_created = true;
+    }
+    generateTracks();
+});
+
+canvas3.addEventListener('click', function () {
+    setActiveCanvas(canvas3);
+    window.canvas_num = 3;
+    canvas_number.innerHTML = 'Canvas 3';
+    current_canvas.innerHTML = 'Current Canvas 3';
+    if (!window.object_3_created) {
+        addOrUpdateCanvasObject(3, 'canvas3');
+        window.object_3_created = true;
+    }
+    generateTracks();
+});
 
     // Switching between views functionality
     view1_btn.addEventListener('click', function () {
@@ -245,18 +266,26 @@ export function setActiveViews(activeViews) {
 /**
  * To update the UI after each change.
  */
-export function updateCanvasUI() {
+function updateCanvasUI() {
+    const plotContainers = document.querySelectorAll('.plot-container');
+    plotContainers.forEach((container, index) => {
+        // Display the container if the canvas has been created
+        if (window[`object_${index}_created`]) {
+            container.style.display = 'block';
+        } 
+    });
+
     const currentCanvasState = window.canvas_states[window.canvas_num];
     document.getElementById('trackCountSelector').value = currentCanvasState.trackCount;
     generateTracks();
 }
 // Add or update a canvas object with the given ID
-export function addOrUpdateCanvasObject(canvasId) {
+export function addOrUpdateCanvasObject(canvasNum, canvasId) {
     const canvas_container = document.createElement('div');
     canvas_container.id = `canvas-container-${canvasId}-${currentView}`;
     const newCanvasObject = {
         id: canvasId,
-        title: `Canvas ${canvasId.slice(-1)}`,
+        title: `Canvas ${canvasNum}`,
         static: false,
         xDomain: { interval: [0, 200000] },
         alignment: "overlay",
@@ -276,9 +305,11 @@ export function addOrUpdateCanvasObject(canvasId) {
             window.plotSpecManager.createTrack(),
         ],
     };
+    if (!window.plotSpecManager.getPlotSpec(canvasNum)) {
+        window.plotSpecManager.createNewPlotSpec(canvasNum);
+      }
     
-    // Generate new canvas with the new ID.
-    window.plotSpecManager.generateCanvas(canvasId, newCanvasObject);
+      window.plotSpecManager.generateCanvas(canvasNum, canvasId, newCanvasObject);
 }
 // the toggle effect for the canvas bar
 export function addCanvasBarToggle(barId, containerId) {
@@ -488,10 +519,6 @@ export function generateViewControl(currentView){
                 <div class="canvas_content hidden">
                     <div class="btn-row" id="global-variables">
                         <h2 class='x_axis_h2'>X axis</h2>
-                            <label class="chromosome" for="chromosome">Chromosome </label>
-                                <select name="chromosome" id="chromosome" class="chromosome" data-track="0">
-                                <option  value="" disabled selected></option>
-                            </select>
                             <div class="column-container">
                                  <span class='copy_range_msg'>Range Copied</span>
                                 <div class='x-axis-select'>

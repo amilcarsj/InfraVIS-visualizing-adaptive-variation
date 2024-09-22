@@ -22,26 +22,31 @@ function deepCopy(obj) {
 
 class PlotSpecManager {
   constructor() {
-    this.plotSpecs = {
-      1: this.createNewPlotSpec(),
-    };
+    this.plotSpecs = {}; // Store plotSpecs per canvas number
   }
 
-  getPlotSpec() {
-    return this.plotSpecs[1];
+  getPlotSpec(canvasNum) {
+    if (!this.plotSpecs[canvasNum]) {
+      this.createNewPlotSpec(canvasNum);
+    }
+    return this.plotSpecs[canvasNum];
   }
 
-  getPlotSpecViewById(viewId) {
-    const plotSpec = this.getPlotSpec();
-    return plotSpec.views.find(view => view.id === viewId);
+  getPlotSpecViewById(canvasNum, viewId) {
+    const plotSpec = this.getPlotSpec(canvasNum);
+    if (plotSpec) {
+      return plotSpec.views.find(view => view.id === viewId);
+    }
+    return null;
   }
 
-  createNewPlotSpec() {
-    if (window.canvas_num == 0) {
-      return {
+  createNewPlotSpec(canvasNum) {
+    let newPlotSpec;
+    if (canvasNum === 0) {
+      newPlotSpec = {
         views: [
           {
-            id: "canvas0",
+            id: `canvas${canvasNum}`,
             title: "Gene",
             static: false,
             xDomain: { interval: [69651, 437352] },
@@ -65,11 +70,11 @@ class PlotSpecManager {
         ]
       };
     } else {
-      return {
+      newPlotSpec = {
         views: [
           {
-            id: "canvas1",
-            title: "Canvas 1",
+            id: `canvas${canvasNum}`,
+            title: `canvas${canvasNum}`,
             static: false,
             xDomain: { interval: [0, 200000] },
             alignment: "overlay",
@@ -92,6 +97,8 @@ class PlotSpecManager {
         ]
       };
     }
+    this.plotSpecs[canvasNum] = newPlotSpec;
+    return newPlotSpec;
   }
 
   createTrack() {
@@ -139,25 +146,33 @@ class PlotSpecManager {
     }
   }
 
-  generateCanvas(canvasId, newCanvasObject) {
-    const plotSpec = this.getPlotSpec();
+  generateCanvas(canvasNum, canvasId, newCanvasObject) {
+    let plotSpec = this.getPlotSpec(canvasNum);
+  
+    if (!plotSpec) {
+      plotSpec = this.createNewPlotSpec(canvasNum);
+    }
+  
     const existingViewIndex = plotSpec.views.findIndex(view => view.id === canvasId);
-
+  
     if (existingViewIndex !== -1) {
-      plotSpec.views[existingViewIndex] = newCanvasObject;
+      // Update the tracks array if needed
+      plotSpec.views[existingViewIndex].tracks = newCanvasObject.tracks;
+      plotSpec.views[existingViewIndex] = { ...plotSpec.views[existingViewIndex], ...newCanvasObject };
     } else {
       plotSpec.views.push(newCanvasObject);
     }
   }
 
-  resetInstance() {
-    this.plotSpecs[1] = this.createNewPlotSpec();
+  resetInstance(canvasNum) {
+    this.plotSpecs[canvasNum] = this.createNewPlotSpec(canvasNum);
   }
 }
 
-PlotSpecManager.prototype.exportPlotSpecAsJSON = function() {
-  const plotSpec = this.getPlotSpec();
+PlotSpecManager.prototype.exportPlotSpecAsJSON = function (canvasNum) {
+  const plotSpec = this.getPlotSpec(canvasNum);
   const jsonString = JSON.stringify(plotSpec, null, 2);
   return jsonString;
-}
+};
+
 export { PlotSpecManager };

@@ -3,10 +3,24 @@ import { handleOptions } from './update_plot_specifications.js';
 
 export function getCurrentViewSpec() {
   const currentCanvasId = `canvas${window.canvas_num}`;
-  return window.plotSpecManager.getPlotSpecViewById(currentCanvasId);
+  const plotSpec = window.plotSpecManager.getPlotSpec(window.canvas_num);
+
+  if (!plotSpec) {
+    console.error(`PlotSpec not found for canvas ${window.canvas_num}.`);
+    return null;
+  }
+
+  const viewSpec = plotSpec.views.find(view => view.id === currentCanvasId);
+
+  if (!viewSpec) {
+    console.error(`ViewSpec not found for canvas ID ${currentCanvasId}.`);
+    return null;
+  }
+
+  return viewSpec; // Return the specific viewSpec for the active canvas
 }
 
-if(window.canvas_num) {
+if (window.canvas_num !== undefined) {
   window.canvas_states[window.canvas_num].filenames = window.canvas_states[window.canvas_num].filenames || {};
 }
 
@@ -16,7 +30,7 @@ if(window.canvas_num) {
  * @param {FileList} fileInputs - List of file inputs.
  * @param {number} button_data_track_number - Button data track number.
  */
-export async function URLfromFile(fileInputs, button_data_track_number) {
+export async function URLfromFile(fileInputs, button_data_track_number, canvasNum){
   try {
     const files = Array.from(fileInputs[button_data_track_number].files);
     const isCanvas0 = window.canvas_num === 0;
@@ -57,7 +71,7 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
       });
 
       await configureDataType('gff', plotSpec.tracks[0]); 
-      await handleOptions(gzFile, button_data_track_number);
+      await handleOptions(gzFile, button_data_track_number , canvasNum);
       await checkURLParameters(plotSpec.tracks[0], button_data_track_number);
       console.log('Files loaded successfully for Canvas 0');
     } else {
@@ -94,7 +108,7 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
           url: fileURL,
         };
         await configureDataType(extension, current_track);
-        await handleOptions(file, button_data_track_number);
+        await handleOptions(file, button_data_track_number , canvasNum);
         await checkURLParameters(current_track, button_data_track_number);
         console.log('File loaded successfully for Canvas ' + window.canvas_num);
       }
@@ -212,7 +226,7 @@ export async function URLfromServer(URL_input, button_data_track_number) {
           // For canvas0, handle .gz and .tbi separately
           if (extension === 'gz') {
             await configureDataType('gz', current_track);
-            await handleOptions(fileBlob, button_data_track_number);
+            await handleOptions(fileBlob, button_data_track_number  , canvasNum );
           } else if (extension === 'tbi') {
             // Assuming handleOptions can process index files if necessary
             // If not, you might need to adjust this accordingly
@@ -220,7 +234,7 @@ export async function URLfromServer(URL_input, button_data_track_number) {
           }
         } else {
           await configureDataType(extension, current_track);
-          await handleOptions(fileBlob, button_data_track_number);
+          await handleOptions(fileBlob, button_data_track_number , canvasNum);
         }
       }
 
@@ -263,25 +277,24 @@ async function configureDataType(extension, track) {
  */
 export async function GoslingPlotWithLocalData() {
   try {
-    const plotSpec = window.plotSpecManager.getPlotSpec();
-    
+    const plotSpec = window.plotSpecManager.getPlotSpec(window.canvas_num);
+
     // Check if URLs are set for all tracks
-    plotSpec.views.forEach(view => {
+    plotSpec.views.forEach((view) => {
       view.tracks.forEach((track, index) => {
         if (window.canvas_num === 0) {
-          // For GFF data
           if (!track.data.url || !track.data.indexUrl) {
             console.warn(`URL or indexURL is not set for track ${index} in view ${view.id}`);
           }
         } else {
-          // For non-GFF data
           if (!track.data.url) {
             console.warn(`URL is not set for track ${index} in view ${view.id}`);
           }
         }
       });
     });
-    const container = document.getElementById(`plot-container-1`);
+
+    const container = document.getElementById(`plot-container-${window.canvas_num}`);
     if (container) {
       await embed(container, plotSpec);
     } else {

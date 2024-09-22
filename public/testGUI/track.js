@@ -5,159 +5,157 @@ import { updateURLParameters } from './update_plot_specifications.js';
  * To reset the track settings to default.
  * @param {int} trackNumber 
  */
-export function resetTrackSettings (trackNumber) {
+export function resetTrackSettings(trackNumber) {
   document.getElementById(`binsize_${trackNumber}`).value = '';
   document.getElementById(`samplelength_${trackNumber}`).value = '';
   document.getElementById(`marksize_${trackNumber}`).value = '';
   document.getElementById(`mark_${trackNumber}`).selectedIndex = 0;
   document.getElementById(`color_${trackNumber}`).selectedIndex = 0;
   const plotSpec = getCurrentViewSpec();
-  if(plotSpec.tracks[trackNumber].data.url !== '') {
+
+  if (plotSpec && plotSpec.tracks[trackNumber] && plotSpec.tracks[trackNumber].data.url !== '') {
     document.getElementById(`filename-display-${trackNumber}`).textContent = 'No file selected';
     window.canvas_states[window.canvas_num].filenames[trackNumber] = 'No file selected';
   }
-  plotSpec.tracks[trackNumber].data.url = ''
-  plotSpec.tracks[trackNumber].data.binSize = 10;
-  plotSpec.tracks[trackNumber].data.sampleLength = 1000;
-  plotSpec.tracks[trackNumber].size.value = 3;
-  plotSpec.tracks[trackNumber].mark = 'point';
-  plotSpec.tracks[trackNumber].color.value = '#e41a1c';
+
+  if (plotSpec && plotSpec.tracks[trackNumber]) {
+    plotSpec.tracks[trackNumber].data.url = '';
+    plotSpec.tracks[trackNumber].data.binSize = 10;
+    plotSpec.tracks[trackNumber].data.sampleLength = 1000;
+    plotSpec.tracks[trackNumber].size.value = 3;
+    plotSpec.tracks[trackNumber].mark = 'point';
+    plotSpec.tracks[trackNumber].color.value = '#e41a1c';
+  }
+
   // Apply changes and update the UI
   updateURLParameters(`data.binSize${trackNumber}`, 0);
   updateURLParameters(`data.sampleLength${trackNumber}`, 0);
   updateURLParameters(`size.value${trackNumber}`, 0);
   updateURLParameters(`mark${trackNumber}`, 'point');
   updateURLParameters(`color.value${trackNumber}`, '#e41a1c');
-  GoslingPlotWithLocalData(window.canvas_num);
+  GoslingPlotWithLocalData();
 }
 
 /**
  * To keep track of the current track number.
  */
-export async function updateTrackNumber () {
+export async function updateTrackNumber() {
+  console.log('updateTrackNumber called');
   const currentCanvasState = window.canvas_states[window.canvas_num];
   currentCanvasState.trackCount++;
-  if (currentCanvasState.trackCount > 5) currentCanvasState.trackCount = 5;
-  else {
-      document.getElementById("trackCountSelector").value = currentCanvasState.trackCount;
-      generateTracks();
+  if (currentCanvasState.trackCount > 5) {
+    currentCanvasState.trackCount = 5;
+  } else {
+    document.getElementById('trackCountSelector').value = currentCanvasState.trackCount;
+    await generateTracks();
   }
 }
 
-
-
 // Generate track elements based on the selected track count
-export async function generateTracks () {
-    let currentCanvasState = window.canvas_states[window.canvas_num];
-    const trackCount = currentCanvasState.trackCount;
-    const container = document.getElementById("container");
-    let htmlContent = '';
-    // Render buttons containers
-    for (let i = 0; i < trackCount; i++) { 
-        htmlContent += `
-            <div id="track${i}" class="track-container">      
-                ${await generateTrackBinAndSampleInputs(i)}                                            
-            </div>
-        `; 
+export async function generateTracks() {
+  let currentCanvasState = window.canvas_states[window.canvas_num];
+  const trackCount = currentCanvasState.trackCount;
+  const container = document.getElementById("container");
+  let htmlContent = '';
+  // Render buttons containers
+  for (let i = 0; i < trackCount; i++) {
+    htmlContent += `
+      <div id="track${i}" class="track-container">      
+          ${await generateTrackBinAndSampleInputs(i)}                                            
+      </div>
+    `;
+  }
+  container.innerHTML = '';    
+  container.innerHTML += htmlContent;        
+  // Render detailing track options
+  htmlContent = '';
+  for (let i = 0; i < trackCount; i++) {
+    htmlContent += `<option value="${i}">Track ${i + 1}</option>`;
+  } 
+  const trackSelector = document.getElementById("trackSelector");
+  trackSelector.innerHTML = '';
+  trackSelector.innerHTML += htmlContent;          
+  // Updating colors
+  for (let i = 0; i < trackCount; i++) {
+    const defaultColor = document.getElementById(`color_${i}`);
+    if (defaultColor) {
+      await updateURLParameters(`color.value${i}`, defaultColor.value);  
     }
-    container.innerHTML = '';    
-    container.innerHTML += htmlContent;        
-    // Render detailing track options
-    htmlContent = '';
-    for (let i = 0; i < trackCount; i++) {
-        
-        htmlContent += `<option value="${i}">Track ${i + 1}</option>`;
-        
-    } 
-    const trackSelector = document.getElementById("trackSelector");
-    trackSelector.innerHTML = '';
-    trackSelector.innerHTML += htmlContent;          
-    // Updating colors
-    for (let i = 0; i < trackCount; i++) {
-        const defaultColor = document.getElementById(`color_${i}`);
-        if(defaultColor){
-            await updateURLParameters(`color.value${i}`, defaultColor.value);  
-        }
-    }
-    // Updating axis-controllers
-    let axisFormLeft = document.getElementById('checkbox-left-axis');
-    let axisFormRight = document.getElementById('checkbox-right-axis');
-    let dataLoad = document.getElementById('data-load');
-    axisFormLeft.innerHTML = '';
-    axisFormRight.innerHTML = '';
-    dataLoad.innerHTML = ''; 
-    for (let i = 0; i < trackCount; i++) {  
-        axisFormLeft.innerHTML += `
-        <div class="y-checkbox-option">    
-            <input class="y-checkbox-option" type="checkbox" id="track${i}-left" name="option" value="Track ${i + 1}" checked>
-            <label for="track${i}-left">Track ${i + 1}</label><br>
-        </div>`;
-        axisFormRight.innerHTML += `<div class="y-checkbox-option">    
+  }
+  // Updating axis-controllers
+  let axisFormLeft = document.getElementById('checkbox-left-axis');
+  let axisFormRight = document.getElementById('checkbox-right-axis');
+  let dataLoad = document.getElementById('data-load');
+  axisFormLeft.innerHTML = '';
+  axisFormRight.innerHTML = '';
+  dataLoad.innerHTML = ''; 
+  for (let i = 0; i < trackCount; i++) {  
+    axisFormLeft.innerHTML += `
+      <div class="y-checkbox-option">    
+          <input class="y-checkbox-option" type="checkbox" id="track${i}-left" name="option" value="Track ${i + 1}" checked>
+          <label for="track${i}-left">Track ${i + 1}</label><br>
+      </div>`;
+    axisFormRight.innerHTML += `
+      <div class="y-checkbox-option">    
         <input class="y-checkbox-option" type="checkbox" id="track${i}-right" name="option" value="Track ${i + 1}">
         <label for="track${i}-right">Track ${i + 1}</label><br>
-        </div>`;
-        dataLoad.innerHTML += `
-        <div id="track${i}" class="track-container">
-            <div class="btn-row">
-                <h2>Track ${i + 1}</h2>        
-                <span id="clear_settings_button${i}" class="clear_settings_button">Clear settings <i class="fa fa-times-circle" style="font-size:18px;"></i></span>
-            </div>
-        <div id="data-load" class="btn-row">
-        <div class=file-container>
-            <button class="plot-button" data-track="${i}"><i class="fa fa-upload" style="font-size:18px;"></i> Select file </button> 
-            <input type="file" class="file-input"   multiple accept=".csv, .tsv, .gz, .tbi, .gff" style="display: none;">
-            <label for="urlinput_${i}" class='or-inbetween'>OR</label>
-            <input type="url" id="urlinput_${i}" class="url-input" placeholder="Enter URL">
-            <button class="url-button" data-track="${i}">Load</button>
-            <label class="success-msg" id="msg-load-track-${i}"></label>
-        </div>
-        </div>
-        ${await generateTrackBinAndSampleInputs(i)}                                
+      </div>`;
+    dataLoad.innerHTML += `
+      <div id="track${i}" class="track-container">
+          <div class="btn-row">
+              <h2>Track ${i + 1}</h2>        
+              <span id="clear_settings_button${i}" class="clear_settings_button">Clear settings <i class="fa fa-times-circle" style="font-size:18px;"></i></span>
+          </div>
+      <div id="data-load" class="btn-row">
+      <div class="file-container">
+          <button class="plot-button" data-track="${i}"><i class="fa fa-upload" style="font-size:18px;"></i> Select file </button> 
+          <input type="file" class="file-input" multiple accept=".csv, .tsv, .gz, .tbi, .gff" style="display: none;">
+          <label for="urlinput_${i}" class="or-inbetween">OR</label>
+          <input type="url" id="urlinput_${i}" class="url-input" placeholder="Enter URL">
+          <button class="url-button" data-track="${i}">Load</button>
+          <label class="success-msg" id="msg-load-track-${i}"></label>
+      </div>
+      </div>
+      ${await generateTrackBinAndSampleInputs(i)}                                
     </div>`;
-    }
-    dataLoad.innerHTML += `<div id="container"></div>`;
-    // Get all checkboxes
-    const leftCheckboxes = document.querySelectorAll('#checkbox-left-axis input[type="checkbox"]');
-    const rightCheckboxes = document.querySelectorAll('#checkbox-right-axis input[type="checkbox"]');
-    // Add event listeners to left checkboxes
-    leftCheckboxes.forEach(leftCheckbox => {
-        leftCheckbox.addEventListener('change', function () {
-            const correspondingCheckbox = document.getElementById(this.id.replace('-left', '-right'));
-            correspondingCheckbox.checked = !this.checked;            
-        });
+  }
+  dataLoad.innerHTML += `<div id="container"></div>`;
+  // Get all checkboxes
+  const leftCheckboxes = document.querySelectorAll('#checkbox-left-axis input[type="checkbox"]');
+  const rightCheckboxes = document.querySelectorAll('#checkbox-right-axis input[type="checkbox"]');
+  // Add event listeners to left checkboxes
+  leftCheckboxes.forEach(leftCheckbox => {
+    leftCheckbox.addEventListener('change', function () {
+      const correspondingCheckbox = document.getElementById(this.id.replace('-left', '-right'));
+      correspondingCheckbox.checked = !this.checked;            
     });
-    // Add event listeners to right checkboxes
-    rightCheckboxes.forEach(rightCheckbox => {
-        rightCheckbox.addEventListener('change', function () {
-            const correspondingCheckbox = document.getElementById(this.id.replace('-right', '-left'));
-            correspondingCheckbox.checked = !this.checked;            
-        });
+  });
+  // Add event listeners to right checkboxes
+  rightCheckboxes.forEach(rightCheckbox => {
+    rightCheckbox.addEventListener('change', function () {
+      const correspondingCheckbox = document.getElementById(this.id.replace('-right', '-left'));
+      correspondingCheckbox.checked = !this.checked;            
     });
-    await new Promise(resolve => setTimeout(resolve, 0));
-    await track_settings_btns(trackCount);  
-    await showHideTracks();
+  });
+  await new Promise(resolve => setTimeout(resolve, 0));
+  await track_settings_btns(trackCount);  
+  await showHideTracks();
 }
 
-
-// Ensure the Add Track button triggers the track count update
-window.onload = function () {
-  document.getElementById('add_track_button').addEventListener('click', updateTrackNumber);
-}
 // Show or hide tracks based on the selected track
-export async function showHideTracks () {
+export async function showHideTracks() {
   const currentCanvasState = window.canvas_states[window.canvas_num];
   const trackCount = currentCanvasState.trackCount;
   const selected = document.getElementById('trackSelector').value;
   for (let i = 0; i < trackCount; i++) {
-      let trackContainer = document.getElementById(`track${i}`);
-      if (trackContainer) {
-          if (i == selected) {
-              trackContainer.style.display = 'block';
-          } 
-      }
+    let trackContainer = document.getElementById(`track${i}`);
+    if (trackContainer) {
+      if (i == selected) {
+        trackContainer.style.display = 'block';
+      } 
+    }
   }
 }
-
 
 /**
  * Generates HTML for input fields related to bin size and sample length for a track.
@@ -165,25 +163,25 @@ export async function showHideTracks () {
  * @returns {string} - The HTML content for bin and sample inputs.
  */
 export async function generateTrackBinAndSampleInputs(trackNumber) {
-    const isCanvas0 = window.canvas_num === 0;
-    const fileNames = window.canvas_states[window.canvas_num].filenames[trackNumber];
-  
-    let displayName = "No file selected";
-  
-    if (isCanvas0 && fileNames && typeof fileNames === 'object') {
-      const dataName = fileNames.data || "Missing .gz";
-      const indexName = fileNames.index || "Missing .tbi";
-      displayName = `${dataName}, ${indexName}`;
-    } else if (!isCanvas0 && typeof fileNames === 'string') {
-      displayName = fileNames;
-    }
-  
-    return `
+  const isCanvas0 = window.canvas_num === 0;
+  const fileNames = window.canvas_states[window.canvas_num].filenames[trackNumber];
+
+  let displayName = "No file selected";
+
+  if (isCanvas0 && fileNames && typeof fileNames === 'object') {
+    const dataName = fileNames.data || "Missing .gz";
+    const indexName = fileNames.index || "Missing .tbi";
+    displayName = `${dataName}, ${indexName}`;
+  } else if (!isCanvas0 && typeof fileNames === 'string') {
+    displayName = fileNames;
+  }
+
+  return `
     <div class='bin-sample-container track-${trackNumber}'> 
         <div class="file-info">
             File: <span class='filename-display' id="filename-display-${trackNumber}">${displayName}</span>
         </div>
-        <div class="btn-row" id ='inner-container'>
+        <div class="btn-row" id="inner-container">
             <div class="left-side">
                 <div class="input-group">
                     <label for="binsize_${trackNumber}">Bin size</label>
@@ -196,7 +194,7 @@ export async function generateTrackBinAndSampleInputs(trackNumber) {
                 <div class="input-group"> 
                     <label for="mark_${trackNumber}">Marker type</label>
                     <select name="mark" id="mark_${trackNumber}" class="mark" data-track="${trackNumber}">
-                        <option> </option>
+                        <option></option>
                         <option value="point">point</option>
                         <option value="line">line</option>
                         <option value="area">area</option>
@@ -232,26 +230,29 @@ export async function generateTrackBinAndSampleInputs(trackNumber) {
             </div>
         </div>
     </div>`;
-  }
+}
+
 /**
  * Delete the track based on its number.
  * @param {int} trackToDelete the track number
  */
-export async function deleteTrack (trackToDelete) {
+export async function deleteTrack(trackToDelete) {
   const currentCanvasState = window.canvas_states[window.canvas_num];
   // Remove the track from the plotSpec
   const plotSpec = getCurrentViewSpec();
-  plotSpec.tracks.splice(trackToDelete, 1);
+  if (plotSpec && plotSpec.tracks) {
+    plotSpec.tracks.splice(trackToDelete, 1);
+  }
 
   // Remove the file name from FILENAMES object
   delete window.canvas_states[window.canvas_num].filenames[trackToDelete];
 
   // Shift the remaining file names
   for (let i = trackToDelete + 1; i < currentCanvasState.trackCount; i++) {
-      if (window.canvas_states[window.canvas_num].filenames[i]) {
-          window.canvas_states[window.canvas_num].filenames[i - 1] = window.canvas_states[window.canvas_num].filenames[i];
-          delete window.canvas_states[window.canvas_num].filenames[i];
-      }
+    if (window.canvas_states[window.canvas_num].filenames[i]) {
+      window.canvas_states[window.canvas_num].filenames[i - 1] = window.canvas_states[window.canvas_num].filenames[i];
+      delete window.canvas_states[window.canvas_num].filenames[i];
+    }
   }
   // Update the track count
   currentCanvasState.trackCount--;
@@ -259,7 +260,7 @@ export async function deleteTrack (trackToDelete) {
   document.getElementById('trackCountSelector').value = currentCanvasState.trackCount;
   await generateTracks();
   // Update the plot
-  await GoslingPlotWithLocalData(window.canvas_num);
+  await GoslingPlotWithLocalData();
   // Update URL parameters
   updateURLParameters(`track${trackToDelete}`, null);
 }
@@ -269,115 +270,125 @@ export async function deleteTrack (trackToDelete) {
  * @param {int} trackNumber 
  */
 export async function track_settings_btns(trackNumber) {
-    // Load files based on local file input
-    const fileInputs = document.querySelectorAll('.file-input');
-    
-    // Trigger file input on plot button click
-    document.querySelectorAll('.plot-button').forEach(function (button, button_data_track_num) {
-      button.addEventListener('click', function () {
-        fileInputs[button_data_track_num].click();
-      });
-    });
+  // Load files based on local file input
+  const fileInputs = document.querySelectorAll('.file-input');
   
-    // Handle file selection
-    fileInputs.forEach(function (fileInput, button_data_track_num) {
-      fileInput.addEventListener('change', function () {
-        const isCanvas0 = window.canvas_num === 0;
-        if (isCanvas0) {
-          fileInput.setAttribute('multiple', '');
-          fileInput.setAttribute('accept', '.gz, .tbi');
-        } else {
-          fileInput.removeAttribute('multiple');
-          fileInput.setAttribute('accept', '.csv, .tsv');
-        }
-        URLfromFile(fileInputs, button_data_track_num);
-      });
+  // Trigger file input on plot button click
+  document.querySelectorAll('.plot-button').forEach(function (button, button_data_track_num) {
+    button.addEventListener('click', function () {
+      fileInputs[button_data_track_num].click();
     });
-  
-    // Load files based on URL input
-    document.querySelectorAll('.url-button').forEach(function (urlButton, trackNumber) {
-      const urlInput = document.getElementById(`urlinput_${trackNumber}`);  
-      urlButton.addEventListener('click', function () {
-        URLfromServer(urlInput.value, trackNumber);
-      });
+  });
+
+  // Handle file selection
+  fileInputs.forEach(function (fileInput, button_data_track_num) {
+    fileInput.addEventListener('change', function () {
+      const isCanvas0 = window.canvas_num === 0;
+      if (isCanvas0) {
+        fileInput.setAttribute('multiple', '');
+        fileInput.setAttribute('accept', '.gz, .tbi');
+      } else {
+        fileInput.removeAttribute('multiple');
+        fileInput.setAttribute('accept', '.csv, .tsv');
+      }
+      URLfromFile(fileInputs, button_data_track_num, window.canvas_num);
     });
-  
-    // Delete button functionality
-    document.querySelectorAll('.delete-track-button').forEach(function (deleteButton) {
-      deleteButton.addEventListener('click', async function () {
-        const trackToDelete = parseInt(this.getAttribute('data-track'));
-        await deleteTrack(trackToDelete);
-      });
+  });
+
+  // Load files based on URL input
+  document.querySelectorAll('.url-button').forEach(function (urlButton, trackNumber) {
+    const urlInput = document.getElementById(`urlinput_${trackNumber}`);  
+    urlButton.addEventListener('click', function () {
+      URLfromServer(urlInput.value, trackNumber);
     });
-  
-    // Update the mark
-    document.querySelectorAll('.mark').forEach(function (markSelector) {
-      markSelector.addEventListener('change', async function () {
-        const trackValue = this.getAttribute('data-track');
-        const chosenMark = this.value;
-        const plotSpec = getCurrentViewSpec();
+  });
+
+  // Delete button functionality
+  document.querySelectorAll('.delete-track-button').forEach(function (deleteButton) {
+    deleteButton.addEventListener('click', async function () {
+      const trackToDelete = parseInt(this.getAttribute('data-track'));
+      await deleteTrack(trackToDelete);
+    });
+  });
+
+  // Update the mark
+  document.querySelectorAll('.mark').forEach(function (markSelector) {
+    markSelector.addEventListener('change', async function () {
+      const trackValue = this.getAttribute('data-track');
+      const chosenMark = this.value;
+      const plotSpec = getCurrentViewSpec();
+      if (plotSpec && plotSpec.tracks[trackValue]) {
         plotSpec.tracks[trackValue].mark = chosenMark;
         await updateURLParameters(`mark${trackValue}`, chosenMark);
-      });
+      }
     });
-  
-    // Update the color
-    document.querySelectorAll('.color').forEach(function (colorSelector) {
-      colorSelector.addEventListener('change', async function () {
-        const trackValue = this.getAttribute('data-track');
-        const chosenColor = this.value;
-        const plotSpec = getCurrentViewSpec();
+  });
+
+  // Update the color
+  document.querySelectorAll('.color').forEach(function (colorSelector) {
+    colorSelector.addEventListener('change', async function () {
+      const trackValue = this.getAttribute('data-track');
+      const chosenColor = this.value;
+      const plotSpec = getCurrentViewSpec();
+      if (plotSpec && plotSpec.tracks[trackValue]) {
         plotSpec.tracks[trackValue].color.value = chosenColor;
         await updateURLParameters(`color.value${trackValue}`, chosenColor);
-      });
+      }
     });
-  
-    // Update the mark size
-    document.querySelectorAll('.marksize').forEach(function (sizeInput) {
-      sizeInput.addEventListener('input', async function () {
-        const trackValue = this.getAttribute('data-track');
-        const chosenSize = parseFloat(this.value);
-        const plotSpec = getCurrentViewSpec();
+  });
+
+  // Update the mark size
+  document.querySelectorAll('.marksize').forEach(function (sizeInput) {
+    sizeInput.addEventListener('input', async function () {
+      const trackValue = this.getAttribute('data-track');
+      const chosenSize = parseFloat(this.value);
+      const plotSpec = getCurrentViewSpec();
+      if (plotSpec && plotSpec.tracks[trackValue]) {
         plotSpec.tracks[trackValue].size.value = chosenSize;
         await updateURLParameters(`size.value${trackValue}`, chosenSize);
-      });
+      }
     });
-  
-    // Apply button functionality
-    document.querySelectorAll('.apply-button').forEach(function (applyButton) {
-      applyButton.addEventListener('click', async function () {
-        const trackNumber = this.getAttribute('data-track');
-        const binSizeInput = document.getElementById(`binsize_${trackNumber}`);
-        const sampleLengthInput = document.getElementById(`samplelength_${trackNumber}`);
-        const markSizeInput = document.getElementById(`marksize_${trackNumber}`);
-        const binSize = parseFloat(binSizeInput.value);
-        const sampleLength = parseFloat(sampleLengthInput.value);
-        const markSize = parseFloat(markSizeInput.value);
-        const plotSpec = getCurrentViewSpec();   
+  });
+
+  // Apply button functionality
+  document.querySelectorAll('.apply-button').forEach(function (applyButton) {
+    applyButton.addEventListener('click', async function () {
+      const trackNumber = this.getAttribute('data-track');
+      const binSizeInput = document.getElementById(`binsize_${trackNumber}`);
+      const sampleLengthInput = document.getElementById(`samplelength_${trackNumber}`);
+      const markSizeInput = document.getElementById(`marksize_${trackNumber}`);
+      const binSize = parseFloat(binSizeInput.value);
+      const sampleLength = parseFloat(sampleLengthInput.value);
+      const markSize = parseFloat(markSizeInput.value);
+      const plotSpec = getCurrentViewSpec();
+      const viewSpec = plotSpec.views.find(view => view.id === `canvas${activeCanvasNum}`);
+      if (viewSpec && viewSpec.tracks[trackNumber]) {
+      if (plotSpec && plotSpec.tracks[trackNumber]) {
         if (!isNaN(binSize)) {
           plotSpec.tracks[trackNumber].data.binSize = binSize;
           await updateURLParameters(`data.binSize${trackNumber}`, binSize);
-        }   
+        }
         if (!isNaN(sampleLength)) {
           plotSpec.tracks[trackNumber].data.sampleLength = sampleLength;
           await updateURLParameters(`data.sampleLength${trackNumber}`, sampleLength);
-        }   
+        }
         if (!isNaN(markSize)) {
           plotSpec.tracks[trackNumber].size.value = markSize;
           await updateURLParameters(`size.value${trackNumber}`, markSize);
         }
-        GoslingPlotWithLocalData(window.canvas_num);
-      });
-    });
-  
-    // Clear settings functionality
-    for (let i = 0; i < trackNumber; i++) {
-      let clear_settings_button = document.getElementById(`clear_settings_button${i}`);
-      if (clear_settings_button) {
-        clear_settings_button.addEventListener('click', function () {
-          resetTrackSettings(i);
-        });
+        GoslingPlotWithLocalData();
       }
     }
+    });
+  });
+
+  // Clear settings functionality
+  for (let i = 0; i < trackNumber; i++) {
+    let clear_settings_button = document.getElementById(`clear_settings_button${i}`);
+    if (clear_settings_button) {
+      clear_settings_button.addEventListener('click', function () {
+        resetTrackSettings(i);
+      });
+    }
   }
-  
+}
