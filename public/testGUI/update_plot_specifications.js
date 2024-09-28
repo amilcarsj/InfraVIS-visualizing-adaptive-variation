@@ -10,11 +10,10 @@ window.canvas_states = {
 };
 
 window.currentView = 1
-window.canvas_num  = 0;
-window.object_0_created = false;
-window.object_1_created = false;
-window.object_2_created = false;
-window.object_3_created = false;
+window.canvas_num = 0;
+window.object_1_created = false
+window.object_2_created = false
+window.object_3_created = false
 window.trackCount = 5;
 window.displayed_canvas = 1
 
@@ -29,69 +28,41 @@ const fileHeaders = new Map();
  * @param {File|Blob} data - Data object, either a local file or a Blob from a server.
  * @param {number} button_data_track_number - Button data track number.
  */
-export async function handleOptions(data, button_data_track_number, canvasNum) {
-  const plotSpec = window.plotSpecManager.getPlotSpec(canvasNum);
-
-  if (!plotSpec) {
-    console.error(`PlotSpec not found for canvas ${canvasNum}.`);
-    return;
-  }
-
-  // Find the view with the matching canvas ID
-  const viewSpec = plotSpec.views.find(view => view.id === `canvas${canvasNum}`);
-
-  if (!viewSpec) {
-    console.error(`ViewSpec not found for canvas ID canvas${canvasNum}.`);
-    return;
-  }
-
-  if (!viewSpec.tracks) {
-    console.error(`Tracks not found in viewSpec for canvas ${canvasNum}.`);
-    return;
-  }
-
- 
+export async function handleOptions(data, button_data_track_number) {
+  const plotSpec = getCurrentViewSpec(); // Get the current plot spec
 
   const columnSelectorsX = document.querySelectorAll(`.columnSelectorX`);
   const columnSelectorsY = document.querySelectorAll(`.columnSelectorY`);
 
   let header = [];
   let geneData = [];
-  if (!plotSpec) {
-    console.error(`PlotSpec not found for canvas ${canvasNum}.`);
-    return;
-  }
 
-  if (!viewSpec.tracks) {
-    console.error(`Tracks not found in plotSpec for canvas ${canvasNum}.`);
-    return;
-  }
   // Check if the provided data is a file or a URL
-  if (canvasNum !== 0) {
+  if (window.canvas_num !== 0) {
     // For non-GFF data, set the URL for the current track
     const fileURL = URL.createObjectURL(data);
-    viewSpec.tracks[button_data_track_number].data.url = fileURL;
+    plotSpec.tracks[button_data_track_number].data.url = fileURL;
     // Remove indexUrl for non-GFF data
-    delete viewSpec.tracks[button_data_track_number].data.indexUrl;
+    delete plotSpec.tracks[button_data_track_number].data.indexUrl;
   }
   if (data instanceof File) {
-    if (canvasNum  === 0) {
+    if (window.canvas_num === 0) {
       // GFF data
       const geneHeaderResult = await extractGeneHeader(data);
       header = geneHeaderResult.header;
       geneData = geneHeaderResult.data;
       
       // Ensure URLs are set for all tracks
-      viewSpec.tracks.forEach(track => {
+      plotSpec.tracks.forEach(track => {
         if (!track.data.url || !track.data.indexUrl) {
           console.error('URL or indexURL is not set for a track');
         }
       });
     } else {
-      header = await extractHeader(data, button_data_track_number, viewSpec.tracks);
+      header = await extractHeader(data, button_data_track_number, plotSpec);
     }
   } else if (data instanceof Blob) {
-    header = await extractHeaderFromServer(data, button_data_track_number, viewSpec.tracks);
+    header = await extractHeaderFromServer(data, button_data_track_number, plotSpec);
   } else {
     let msg = document.getElementById(`msg-load-track-${button_data_track_number}`);
     msg.textContent = "Invalid data type. Expected File or Blob.";
@@ -133,7 +104,7 @@ export async function handleOptions(data, button_data_track_number, canvasNum) {
     });
 
     // Update the tooltip for each track dynamically based on the available columns
-    updateDynamicTooltips(viewSpec.tracks, header, canvasNum);
+    updateDynamicTooltips(plotSpec, header, button_data_track_number);
   
   }
 
@@ -144,11 +115,11 @@ export async function handleOptions(data, button_data_track_number, canvasNum) {
       const chosenColumnName = columnSelectorX.options[selectedValue].textContent;
   
       for (let trackValue = 0; trackValue < trackCountValue; trackValue++) {
-        viewSpec.tracks[trackValue].data.column = chosenColumnName;
+        plotSpec.tracks[trackValue].data.column = chosenColumnName;
   
-        if (canvasNum  !== 0) { // Only modify tooltips for non-GFF data
-          viewSpec.tracks[trackValue].tooltip[1].field = chosenColumnName;
-          viewSpec.tracks[trackValue].tooltip[1].alt = chosenColumnName;
+        if (window.canvas_num !== 0) { // Only modify tooltips for non-GFF data
+          plotSpec.tracks[trackValue].tooltip[1].field = chosenColumnName;
+          plotSpec.tracks[trackValue].tooltip[1].alt = chosenColumnName;
         }
       }                
   
@@ -158,11 +129,11 @@ export async function handleOptions(data, button_data_track_number, canvasNum) {
 
   let columnSelectorL = document.getElementById('columnSelectorYLeft');
   columnSelectorL.addEventListener('change', async function () {
-    await _eventsSelectedTracksPerYAxis(columnSelectorL, 'left', viewSpec, canvasNum);
+    await _eventsSelectedTracksPerYAxis(columnSelectorL, 'left', plotSpec);
   });
   let columnSelectorR = document.getElementById('columnSelectorYRight');
   columnSelectorR.addEventListener('change', async function () {
-    await _eventsSelectedTracksPerYAxis(columnSelectorR, 'right', viewSpec, canvasNum);
+    await _eventsSelectedTracksPerYAxis(columnSelectorR, 'right', plotSpec);
   });
 
   const markButtons = document.querySelectorAll('.mark');
@@ -170,7 +141,8 @@ export async function handleOptions(data, button_data_track_number, canvasNum) {
       button.addEventListener('change', async function () {
           const trackValue = button.getAttribute('data-track');
           const chosenmark = button.value;
-          viewSpec.tracks[trackValue].mark = chosenmark;
+          const plotSpec = getCurrentViewSpec();
+          plotSpec.tracks[trackValue].mark = chosenmark;
               await updateURLParameters(`mark${trackValue}`, chosenmark);
       });
   });
@@ -180,14 +152,15 @@ export async function handleOptions(data, button_data_track_number, canvasNum) {
       button.addEventListener('change', async function () {
           const trackValue = button.getAttribute('data-track');
           const chosencolor = button.value;
-          viewSpec.tracks[trackValue].color.value = chosencolor;
+          const plotSpec = getCurrentViewSpec();
+          plotSpec.tracks[trackValue].color.value = chosencolor;
               await updateURLParameters(`color.value${trackValue}`, chosencolor);
       });
   });
 
   bcolor.addEventListener('change', async function () {
     const chosenBcolor = bcolor.value;
-    viewSpec.style.background = chosenBcolor;
+    plotSpec.style.background = chosenBcolor;
     await updateURLParameters("background", bcolor.value);
   });
 
@@ -199,7 +172,7 @@ export async function handleOptions(data, button_data_track_number, canvasNum) {
       const start = parseFloat(startValue);
       const end = parseFloat(endValue);    
       const intervalArray = [start, end];
-      viewSpec.xDomain.interval = intervalArray;    
+      plotSpec.xDomain.interval = intervalArray;    
     
       const xDomain = "xDomain.interval";
       updateURLParameters(xDomain, intervalArray);
@@ -208,8 +181,8 @@ export async function handleOptions(data, button_data_track_number, canvasNum) {
   const y_interval_buttons = document.querySelectorAll('.y_interval_button');
   y_interval_buttons.forEach((button, i) => {
     button.addEventListener('click', async function () {
-      _eventsSelectedTracksPerYAxis(columnSelectorL, 'left', viewSpec, canvasNum);
-      _eventsSelectedTracksPerYAxis(columnSelectorR, 'right', viewSpec, canvasNum);
+      _eventsSelectedTracksPerYAxis(columnSelectorL, 'left', plotSpec);
+      _eventsSelectedTracksPerYAxis(columnSelectorR, 'right', plotSpec);
     });
   });
 
@@ -219,7 +192,8 @@ export async function handleOptions(data, button_data_track_number, canvasNum) {
       const trackValue = button.getAttribute('data-track');
       const inputField = document.getElementById(`binsize_${trackValue}`);
       const chosenbinsize = parseFloat(inputField.value);
-      viewSpec.tracks[trackValue].data.binSize = chosenbinsize;
+      const plotSpec = getCurrentViewSpec();
+      plotSpec.tracks[trackValue].data.binSize = chosenbinsize;
       const binSize = "data.binSize" + trackValue.toString();
       updateURLParameters(binSize, chosenbinsize);
     });
@@ -231,7 +205,8 @@ export async function handleOptions(data, button_data_track_number, canvasNum) {
       const trackValue = button.getAttribute('data-track');
       const inputField = document.getElementById(`samplelength_${trackValue}`);
       const chosensamplelength = parseFloat(inputField.value);
-      viewSpec.tracks[trackValue].data.sampleLength = chosensamplelength;
+      const plotSpec = getCurrentViewSpec();
+      plotSpec.tracks[trackValue].data.sampleLength = chosensamplelength;
       const sampleLength = "data.sampleLength" + trackValue.toString();
       updateURLParameters(sampleLength, chosensamplelength);
     });
@@ -243,7 +218,7 @@ export async function handleOptions(data, button_data_track_number, canvasNum) {
       const trackValue = button.getAttribute('data-track');
       const inputField = document.getElementById(`marksize_${trackValue}`);
       const chosenmarksize = parseFloat(inputField.value);
-      viewSpec.tracks[trackValue].size.value = chosenmarksize;
+      plotSpec.tracks[trackValue].size.value = chosenmarksize;
       const markSize = "size.value" + trackValue.toString();            
       updateURLParameters(markSize, chosenmarksize);
     });
@@ -253,23 +228,23 @@ export async function handleOptions(data, button_data_track_number, canvasNum) {
   let checkboxesL = formL.querySelectorAll('input[type="checkbox"]');
   checkboxesL.forEach(function(checkbox) {
     checkbox.addEventListener('click', async function() {
-      await _eventsSelectedTracksPerYAxis(columnSelectorL, 'left', viewSpec, canvasNum);
+      await _eventsSelectedTracksPerYAxis(columnSelectorL, 'left', plotSpec);
     });
     checkbox.addEventListener('change', async function() {
-      await _eventsSelectedTracksPerYAxis(columnSelectorL, 'left', viewSpec, canvasNum);
+      await _eventsSelectedTracksPerYAxis(columnSelectorL, 'left', plotSpec);
     });
   });
   let formR = document.getElementById(`checkbox-right-axis`);
   let checkboxesR = formR.querySelectorAll('input[type="checkbox"]');
   checkboxesR.forEach(function(checkbox) {
     checkbox.addEventListener('click', async function() {
-      await _eventsSelectedTracksPerYAxis(columnSelectorR, 'right', viewSpec, canvasNum);
+      await _eventsSelectedTracksPerYAxis(columnSelectorR, 'right', plotSpec);
     });
     checkbox.addEventListener('change', async function() {
-      await _eventsSelectedTracksPerYAxis(columnSelectorR, 'right', viewSpec, canvasNum);
+      await _eventsSelectedTracksPerYAxis(columnSelectorR, 'right', plotSpec);
     });
   });
-  if (canvasNum  ==0){
+  if (window.canvas_num ==0){
     await GoslingPlotWithLocalData()
   }
 
@@ -278,7 +253,7 @@ export async function handleOptions(data, button_data_track_number, canvasNum) {
   msg.className = "success-msg";
 }
 
-async function _eventsSelectedTracksPerYAxis(columnSelector, side, viewSpec, canvasNum) {    
+async function _eventsSelectedTracksPerYAxis(columnSelector, side, plotSpec) {    
   const form = document.getElementById(`checkbox-${side}-axis`);
   const checkboxes = form.querySelectorAll('input[type="checkbox"]:checked');
   const selectedOptions = [];
@@ -295,25 +270,25 @@ async function _eventsSelectedTracksPerYAxis(columnSelector, side, viewSpec, can
   
   selectedOptions.forEach(function(trackValue) {
     const trackIndex = trackValue - 1;
-    if (viewSpec.tracks[trackIndex]) {
-      if (canvasNum  !== 0) {
+    if (plotSpec.tracks[trackIndex]) {
+      if (window.canvas_num !== 0) {
         // For non-GFF data
-        viewSpec.tracks[trackIndex].data.value = chosenColumnName;            
+        plotSpec.tracks[trackIndex].data.value = chosenColumnName;            
         if (!(Number.isNaN(intervalArray[0]) || Number.isNaN(intervalArray[1]))) {
-          viewSpec.tracks[trackIndex].y.domain = intervalArray;
+          plotSpec.tracks[trackIndex].y.domain = intervalArray;
         }            
-        viewSpec.tracks[trackIndex].y.axis = side;
-        viewSpec.tracks[trackIndex].y.field = chosenColumnName;
+        // plotSpec.tracks[trackIndex].y.axis = side;
+        // plotSpec.tracks[trackIndex].y.field = chosenColumnName;
         
         // Ensure tooltip is an array before modifying it
-        if (!Array.isArray(viewSpec.tracks[trackIndex].tooltip)) {
-          viewSpec.tracks[trackIndex].tooltip = [];
+        if (!Array.isArray(plotSpec.tracks[trackIndex].tooltip)) {
+          plotSpec.tracks[trackIndex].tooltip = [];
         }
-        if (viewSpec.tracks[trackIndex].tooltip[0]) {
-          viewSpec.tracks[trackIndex].tooltip[0].field = chosenColumnName;
-          viewSpec.tracks[trackIndex].tooltip[0].alt = chosenColumnName;
+        if (plotSpec.tracks[trackIndex].tooltip[0]) {
+          plotSpec.tracks[trackIndex].tooltip[0].field = chosenColumnName;
+          plotSpec.tracks[trackIndex].tooltip[0].alt = chosenColumnName;
         } else {
-          viewSpec.tracks[trackIndex].tooltip[0] = { field: chosenColumnName, alt: chosenColumnName };
+          plotSpec.tracks[trackIndex].tooltip[0] = { field: chosenColumnName, alt: chosenColumnName };
         }
       } else {
         // For GFF data, we don't need to modify these properties
@@ -372,7 +347,7 @@ async function extractGeneHeader(file) {
         const lines = decompressedData.split('\n');
 
         const standardHeader = [
-          'Chromosome',
+          'seqid',
           'source',
           'type',
           'start',
@@ -453,15 +428,15 @@ async function extractGeneHeader(file) {
  * 
  * @param {File} file - Local file.
  * @param {number} button_data_track_number - Button data track number.
- * @param {object} viewSpec - The plot specification object.
+ * @param {object} plotSpec - The plot specification object.
  * @returns {Promise<Array>} - Promise resolving to the extracted header.
  */
-async function extractHeader(file, button_data_track_number, viewSpec) {
+async function extractHeader(file, button_data_track_number, plotSpec) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
       const text = reader.result;
-      const data = text.split('\n').map(row => row.split(viewSpec[button_data_track_number].data.separator));
+      const data = text.split('\n').map(row => row.split(plotSpec.tracks[button_data_track_number].data.separator));
       const header = data[0];
       resolve(header);
     };
@@ -474,13 +449,13 @@ async function extractHeader(file, button_data_track_number, viewSpec) {
  * Extract the header from server data using a Blob. 
  * @param {Blob} fileBlob - Blob data from the server.
  * @param {number} button_data_track_number - Button data track number.
- * @param {object} viewSpec - The plot specification object.
+ * @param {object} plotSpec - The plot specification object.
  * @returns {Promise<Array>} - Promise resolving to the extracted header.
  */
-async function extractHeaderFromServer(fileBlob, button_data_track_number, viewSpec) {
+async function extractHeaderFromServer(fileBlob, button_data_track_number, plotSpec) {
   try {
     const text = await new Response(fileBlob).text();
-    const data = text.split('\n').map(row => row.split(viewSpec[button_data_track_number].data.separator));
+    const data = text.split('\n').map(row => row.split(plotSpec.tracks[button_data_track_number].data.separator));
     const header = data[0];
     return header;
   } catch (error) {
@@ -503,20 +478,18 @@ export async function updateURLParameters(parameter, value) {
 
 /**
  * Function to update tooltips dynamically based on available columns in the data file.
- * @param {Object} viewSpec - The current plot specification object.
+ * @param {Object} plotSpec - The current plot specification object.
  * @param {Array} header - List of column headers extracted from the data file.
  * @param {number} button_data_track_number - Button data track number.
  */
-function updateDynamicTooltips(tracks, header, canvasNum) {
+function updateDynamicTooltips(plotSpec, header, button_data_track_number) {
+  const trackCount = plotSpec.tracks.length;
 
-  const trackCount = tracks.length;
-  
   for (let i = 0; i < trackCount; i++) {
-    console.log(tracks[i].tooltip)
-    if (canvasNum  === 0) {
+    if (window.canvas_num === 0) {
       // For GFF data, include all relevant fields in tooltips
-      tracks[i].tooltip = [
-        // { field: "seqid", type: "nominal", alt: "Chromosome" },
+      plotSpec.tracks[i].tooltip = [
+        { field: "seqid", type: "nominal", alt: "Chromosome" },
         { field: "start", type: "quantitative", alt: "Start" },
         { field: "end", type: "quantitative", alt: "End" },
         { field: "strand", type: "nominal", alt: "Strand" },
@@ -524,10 +497,10 @@ function updateDynamicTooltips(tracks, header, canvasNum) {
         { field: "gene_biotype", type: "nominal", alt: "Gene Biotype" },
         { field: "Name", type: "nominal", alt: "Gene Name" },
         { field: "ID", type: "nominal", alt: "Gene ID" }
-      ]
+      ];
     } else {
       // For CSV/TSV data, use dynamic tooltips
-      tracks[i].tooltip = header.map(column => ({
+      plotSpec.tracks[i].tooltip = header.map(column => ({
         field: column,
         type: 'nominal',
         alt: column

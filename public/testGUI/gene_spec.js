@@ -6,7 +6,7 @@ const gene_template = {
   "views": [
     {
       "id": "canvas0",
-      "xDomain": { "chromosome": "", "interval": [69651, 437352] },
+      "xDomain": { "chromosome": "", "interval":  [0, 200000] },
       "alignment": "overlay",
       "data": {
         "url": "",
