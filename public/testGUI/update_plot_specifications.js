@@ -340,11 +340,22 @@ async function extractGeneHeader(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
-    reader.onload = () => {
+    reader.onload = async () => {
       try {
-        const compressedData = new Uint8Array(reader.result);
-        const decompressedData = pako.ungzip(compressedData, { to: 'string' });
-        const lines = decompressedData.split('\n');
+        // Check if file is gzipped by looking at magic numbers
+        const buffer = reader.result;
+        const bytes = new Uint8Array(buffer);
+        let fileContent;
+
+        if (bytes.length > 2 && bytes[0] === 0x1f && bytes[1] === 0x8b) {
+          // File is gzipped
+          fileContent = pako.ungzip(bytes, { to: 'string' });
+        } else {
+          // File is plain text
+          fileContent = new TextDecoder().decode(buffer);
+        }
+
+        const lines = fileContent.split('\n');
 
         const standardHeader = [
           'seqid',
@@ -363,6 +374,8 @@ async function extractGeneHeader(file) {
 
         const data = [];
         let skippedLines = 0;
+        let maxEnd = 0;
+        let seqId = null;
 
         for (let line of lines) {
           if (line.trim() === '' || line.startsWith('#')) {
@@ -376,6 +389,13 @@ async function extractGeneHeader(file) {
             standardHeader.forEach((col, index) => {
               entry[col] = row[index];
             });
+
+            // Track maximum end position and sequence ID
+            const end = parseInt(entry.end);
+            if (end > maxEnd) {
+              maxEnd = end;
+              seqId = entry.seqid;
+            }
 
             const attributes = row[8].split(';').reduce((acc, attribute) => {
               const [key, ...rest] = attribute.split('=');
@@ -409,9 +429,19 @@ async function extractGeneHeader(file) {
           console.warn(`Skipped ${skippedLines} malformed lines.`);
         }
 
+        // Update the plot spec manager with the new assembly information
+        if (seqId && maxEnd) {
+          // Add 10% padding to the maximum end position
+          const paddedMaxEnd = Math.ceil(maxEnd * 1.1);
+          if (window.plotSpecManager && typeof window.plotSpecManager.updateAssemblyInfo === 'function') {
+            window.plotSpecManager.updateAssemblyInfo(seqId, paddedMaxEnd);
+          }
+        }
+
         resolve({ header, data });
       } catch (error) {
-        reject(new Error('Error decompressing or parsing GFF file'));
+        console.error('Error processing file:', error);
+        reject(new Error('Error processing GFF file: ' + error.message));
       }
     };
 
@@ -422,7 +452,6 @@ async function extractGeneHeader(file) {
     reader.readAsArrayBuffer(file);
   });
 }
-
 /**
  * Extract the header from a local file using FileReader.
  * 

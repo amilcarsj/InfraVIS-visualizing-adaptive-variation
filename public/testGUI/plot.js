@@ -38,7 +38,7 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
         data: gzFile.name,
         index: tbiFile.name,
       };
-
+      
       // Update the filename display
       const filenameElement = document.getElementById(`filename-display-${button_data_track_number}`);
       if (filenameElement) {
@@ -47,7 +47,7 @@ export async function URLfromFile(fileInputs, button_data_track_number) {
 
       const gzURL = URL.createObjectURL(gzFile);
       const tbiURL = URL.createObjectURL(tbiFile);
-
+  
       const plotSpec = getCurrentViewSpec();
       
       // Set the URLs for all tracks

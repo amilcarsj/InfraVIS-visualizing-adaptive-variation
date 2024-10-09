@@ -129,11 +129,6 @@ export async function all_buttons(container) {
             if (!window.object_2_created) {
                 addOrUpdateCanvasObject('canvas2');
                 window.object_2_created = true;
-                view2_btn.style.display = 'block';
-                window.currentView = 2
-                view_control.innerHTML = 'View Controls B'
-                updateViewSettings(2);
-                setActiveViews(view2_btn);
             }
             setActiveCanvas(canvas2);
             updateCanvasUI();

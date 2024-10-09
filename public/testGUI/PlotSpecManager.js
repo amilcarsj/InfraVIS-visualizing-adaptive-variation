@@ -22,6 +22,9 @@ function deepCopy(obj) {
 
 class PlotSpecManager {
   constructor() {
+    // Initialize with a default assembly info
+    this.assemblyInfo = [["", 0]];
+    
     this.plotSpecs = {
       1: this.createNewPlotSpec(),
     };
@@ -36,7 +39,35 @@ class PlotSpecManager {
     return plotSpec.views.find(view => view.id === viewId);
   }
 
+  updateAssemblyInfo(seqid, length) {
+    if (seqid && length) {
+      this.assemblyInfo = [[seqid, length]];
+      
+      // Update existing plot specs with new assembly info
+      if (this.plotSpecs[1].views && this.plotSpecs[1].views.length > 0) {
+        this.plotSpecs[1].views[0].assembly = this.assemblyInfo;
+      }
+
+      // Store in local storage for persistence
+      try {
+        localStorage.setItem('gosling-assembly-info', JSON.stringify(this.assemblyInfo));
+      } catch (e) {
+        console.warn('Failed to store assembly info in localStorage:', e);
+      }
+    }
+  }
+
   createNewPlotSpec() {
+    // Try to load saved assembly info from localStorage
+    try {
+      const savedAssembly = localStorage.getItem('gosling-assembly-info');
+      if (savedAssembly) {
+        this.assemblyInfo = JSON.parse(savedAssembly);
+      }
+    } catch (e) {
+      console.warn('Failed to load assembly info from localStorage:', e);
+    }
+
     if (window.canvas_num == 0) {
       return {
         views: [
@@ -48,7 +79,7 @@ class PlotSpecManager {
             alignment: "overlay",
             width: 900,
             height: 150,
-            assembly: [["seq_s_6130", 4641652]], // Updated to match gene_spec.js
+            assembly: this.assemblyInfo, // Will always have a value now
             linkingId: "detail",
             style: {
               background: "#D3D3D3",
