@@ -180,37 +180,38 @@ export async function generateTrackBinAndSampleInputs(trackNumber) {
   
     return `
     <div class='bin-sample-container track-${trackNumber}'> 
-        <div class="file-info">
-            File: <span class='filename-display' id="filename-display-${trackNumber}">${displayName}</span>
-        </div>
-        <div class="btn-row" id ='inner-container'>
-            <div class="left-side">
-                <div class="input-group">
-                    <label for="binsize_${trackNumber}">Bin size</label>
-                    <input type="number" class="interval-input" name="binsize" id="binsize_${trackNumber}">
-                </div>
-                <div class="input-group">
-                    <label for="samplelength_${trackNumber}">Sample length</label>
-                    <input type="number" class="interval-input" name="samplelength" id="samplelength_${trackNumber}">
-                </div>
-                <div class="input-group"> 
-                    <label for="mark_${trackNumber}">Marker type</label>
-                    <select name="mark" id="mark_${trackNumber}" class="mark" data-track="${trackNumber}">
-                        <option> </option>
-                        <option value="point">point</option>
-                        <option value="line">line</option>
-                        <option value="area">area</option>
-                        <option value="bar">bar</option>
-                        <option value="rect">rect</option>
-                        <option value="text">text</option>
-                        <option value="betweenLink">link</option>
-                        <option value="rule">rule</option>
-                        <option value="triangleRight">triangle R</option>
-                        <option value="triangleLeft">triangle L</option>
-                    </select>
-                </div>
+            <div class="file-info">
+              File: <span class='filename-display' id="filename-display-${trackNumber}">${displayName}</span>
             </div>
-            <div class="right-side">
+        <div class="btn-row" id ='inner-container'>
+          <div class="left-side">
+
+            <div class="input-group">
+              <label for="binsize_${trackNumber}">Bin size</label>
+                <input type="number" class="interval-input" name="binsize" id="binsize_${trackNumber}">
+            </div>
+            <div class="input-group">
+              <label for="samplelength_${trackNumber}">Sample length</label>
+              <input type="number" class="interval-input" name="samplelength" id="samplelength_${trackNumber}">
+            </div>
+            <div class="input-group"> 
+              <label for="mark_${trackNumber}">Marker type</label>
+              <select name="mark" id="mark_${trackNumber}" class="mark" data-track="${trackNumber}">
+                  <option> </option>
+                  <option value="point">point</option>
+                  <option value="line">line</option>
+                  <option value="area">area</option>
+                  <option value="bar">bar</option>
+                  <option value="rect">rect</option>
+                  <option value="text">text</option>
+                  <option value="betweenLink">link</option>
+                  <option value="rule">rule</option>
+                  <option value="triangleRight">triangle R</option>
+                  <option value="triangleLeft">triangle L</option>
+              </select>
+            </div>
+          </div>
+          <div class="right-side">
                 <div class="input-group"> 
                     <label for="color_${trackNumber}">Color</label>
                     <select name="color" id="color_${trackNumber}" class="color" data-track="${trackNumber}">

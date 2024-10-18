@@ -68,7 +68,7 @@ export async function handleOptions(data, button_data_track_number) {
     msg.textContent = "Invalid data type. Expected File or Blob.";
     msg.className = "error-msg";
     console.error("Invalid data type. Expected File or Blob.");
-    return; // Exit the function early
+    return;
   }
 
   if (!fileHeaders.has(button_data_track_number)) {
@@ -285,6 +285,7 @@ async function _eventsSelectedTracksPerYAxis(columnSelector, side, plotSpec) {
           plotSpec.tracks[trackIndex].tooltip = [];
         }
         if (plotSpec.tracks[trackIndex].tooltip[0]) {
+          
           plotSpec.tracks[trackIndex].tooltip[0].field = chosenColumnName;
           plotSpec.tracks[trackIndex].tooltip[0].alt = chosenColumnName;
         } else {
@@ -513,12 +514,12 @@ export async function updateURLParameters(parameter, value) {
  */
 function updateDynamicTooltips(plotSpec, header, button_data_track_number) {
   const trackCount = plotSpec.tracks.length;
+  const cleanedHeader = header.map(item => item.trim().replace(/\r$/, ''));
 
   for (let i = 0; i < trackCount; i++) {
     if (window.canvas_num === 0) {
       // For GFF data, include all relevant fields in tooltips
       plotSpec.tracks[i].tooltip = [
-        { field: "seqid", type: "nominal", alt: "Chromosome" },
         { field: "start", type: "quantitative", alt: "Start" },
         { field: "end", type: "quantitative", alt: "End" },
         { field: "strand", type: "nominal", alt: "Strand" },
@@ -529,7 +530,7 @@ function updateDynamicTooltips(plotSpec, header, button_data_track_number) {
       ];
     } else {
       // For CSV/TSV data, use dynamic tooltips
-      plotSpec.tracks[i].tooltip = header.map(column => ({
+      plotSpec.tracks[i].tooltip = cleanedHeader.map(column => ({
         field: column,
         type: 'nominal',
         alt: column

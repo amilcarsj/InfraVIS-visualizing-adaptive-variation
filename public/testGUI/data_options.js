@@ -20,7 +20,7 @@ export async function all_buttons(container) {
                 <button id="canvas3" class="canvas-button">Canvas 3</button>
                 <button id="add_canvas" aria-label="Close"> <i class="fa fa-plus"></i></button>
             </div>  
-            <div id="notification" style="display: none; color:white;border-radius: 5px ; padding: 10px; opacity:0.7; margin-top: 10px; position: absolute; top: 10px; left: 12%; transform: translateX(-50%); z-index: 1000;"></div>   
+            <div id="notification" style="display: none; color:white;border-radius: 5px ; padding: 10px; opacity:0.7; margin-top: 10px; position: absolute; top: 60px; left: 23%; transform: translateX(-50%); z-index: 1000;"></div>   
             <div id="header" class="buttons-container">   
                 <select id="export-dropdown" class="dropdown-content">
                     <option value="" disabled selected>Export as</option>
@@ -255,7 +255,7 @@ export function addOrUpdateCanvasObject(canvasId) {
         static: false,
         xDomain: { interval: [0, 200000] },
         alignment: "overlay",
-        width: 900,
+        width: 1000,
         height: 200,
         assembly: "unknown",
         linkingId: "detail",
@@ -282,6 +282,7 @@ export function addCanvasBarToggle(barId, containerId) {
     if (canvasBar && canvasContainer) {
         canvasBar.addEventListener('click', () => {
             const canvasContent = canvasContainer.querySelector('.canvas_content');
+         
             if (canvasContent) {
                 canvasContent.classList.toggle('hidden');
             }
@@ -495,7 +496,6 @@ export function generateViewControl(currentView){
                                         <option value="start"> X Start</option>
                                         <option value="end"> X End</option>
                                     </select>
-
                                 </div>
                                 <div class = 'column1'> 
                                     <label for="x_range_start">X-range:</label>

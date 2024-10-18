@@ -77,7 +77,7 @@ class PlotSpecManager {
             static: false,
             xDomain: { interval: [0, 200000] },
             alignment: "overlay",
-            width: 900,
+            width: 1000,
             height: 150,
             assembly: this.assemblyInfo, // Will always have a value now
             linkingId: "detail",
@@ -104,7 +104,7 @@ class PlotSpecManager {
             static: false,
             xDomain: { interval: [0, 200000] },
             alignment: "overlay",
-            width: 900,
+            width: 1000,
             height: 200,
             assembly: "unknown",
             linkingId: "detail",
