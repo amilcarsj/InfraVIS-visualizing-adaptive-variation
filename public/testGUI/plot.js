@@ -273,12 +273,7 @@ export async function GoslingPlotWithLocalData() {
           if (!track.data.url || !track.data.indexUrl) {
             console.warn(`URL or indexURL is not set for track ${index} in view ${view.id}`);
           }
-        } else {
-          // For non-GFF data
-          if (!track.data.url) {
-            console.warn(`URL is not set for track ${index} in view ${view.id}`);
-          }
-        }
+        } 
       });
     });
     const container = document.getElementById(`plot-container-1`);

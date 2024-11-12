@@ -463,12 +463,21 @@ async function extractGeneHeader(file) {
  * @returns {Promise<Array>} - Promise resolving to the extracted header.
  */
 async function extractHeader(file, button_data_track_number, plotSpec) {
+  let temp = null
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
       const text = reader.result;
       const data = text.split('\n').map(row => row.split(plotSpec.tracks[button_data_track_number].data.separator));
       const header = data[0];
+      // Find the position column (case-insensitive)
+      const posIndex = header.findIndex(column => 
+        column.trim().toLowerCase() === 'pos'
+      );
+      temp = header[0]
+      header[0] = header[posIndex]
+      header[posIndex] = temp
+
       resolve(header);
     };
     reader.onerror = reject;
