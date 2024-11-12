@@ -36,12 +36,15 @@ export function resetTrackSettings (trackNumber) {
  */
 export async function updateTrackNumber () {
   const currentCanvasState = window.canvas_states[window.canvas_num];
-  currentCanvasState.trackCount++;
-  if (currentCanvasState.trackCount > 5) currentCanvasState.trackCount = 5;
-  else {
-      document.getElementById("trackCountSelector").value = currentCanvasState.trackCount;
-      generateTracks();
+  if (window.canvas_num !== 0) {
+    currentCanvasState.trackCount++;
+    if (currentCanvasState.trackCount > 5) currentCanvasState.trackCount = 5;
+    else {
+        document.getElementById("trackCountSelector").value = currentCanvasState.trackCount;
+        generateTracks();
+    }
   }
+
 }
 
 
@@ -133,11 +136,48 @@ export async function generateTracks () {
             correspondingCheckbox.checked = !this.checked;            
         });
     });
+
+    document.querySelectorAll('[data-description-id]').forEach(element => {
+      const descriptionId = element.getAttribute('data-description-id');
+      const description = tooltips[descriptionId];
+  
+      element.addEventListener('mouseenter', function() {
+        showTooltip(element, description);
+      });
+  
+      element.addEventListener('mouseleave', function() {
+        hideTooltip(element);
+      });
+    });
     await new Promise(resolve => setTimeout(resolve, 0));
     await track_settings_btns(trackCount);  
     await showHideTracks();
 }
 
+function showTooltip(element, description) {
+  // Create tooltip element
+  const tooltip = document.createElement('div');
+  tooltip.className = 'custom-tooltip';
+  tooltip.innerText = description;
+
+  // Append to body
+  document.body.appendChild(tooltip);
+
+  // Position the tooltip
+  const rect = element.getBoundingClientRect();
+  tooltip.style.left = rect.left + window.pageXOffset + 'px';
+  tooltip.style.top = rect.top + window.pageYOffset - tooltip.offsetHeight + 'px';
+
+  // Store reference to tooltip element
+  element._tooltip = tooltip;
+}
+
+function hideTooltip(element) {
+  if (element._tooltip) {
+    document.body.removeChild(element._tooltip);
+    delete element._tooltip;
+  }
+}
 
 // Ensure the Add Track button triggers the track count update
 window.onload = function () {
@@ -157,7 +197,14 @@ export async function showHideTracks () {
       }
   }
 }
-
+const tooltips = {
+  binsize: 'The bin size defines the size of bins in your data visualization.',
+  samplelength: 'Sample length is the number of data points to sample.',
+  mark: 'Choose the marker type for the visualization.',
+  color: 'Select the color for the plots.',
+  marksize: 'Specify the size of the markers.',
+  file:"File name"
+};
 
 /**
  * Generates HTML for input fields related to bin size and sample length for a track.
@@ -177,62 +224,65 @@ export async function generateTrackBinAndSampleInputs(trackNumber) {
     } else if (!isCanvas0 && typeof fileNames === 'string') {
       displayName = fileNames;
     }
+    if (!isCanvas0){
+      return `
+      <div class='bin-sample-container track-${trackNumber}'> 
+              <div class="file-info" data-description-id="file">
+                File: <span class='filename-display'  id="filename-display-${trackNumber}">${displayName}</span>
+              </div>
+          <div class="btn-row" id ='inner-container'>
+            <div class="left-side">
   
-    return `
-    <div class='bin-sample-container track-${trackNumber}'> 
-            <div class="file-info">
-              File: <span class='filename-display' id="filename-display-${trackNumber}">${displayName}</span>
+              <div class="input-group">
+              <label for="binsize_${trackNumber}" data-description-id="binsize">Bin size</label>
+                  <input type="number" class="interval-input" name="binsize" id="binsize_${trackNumber}" value="10">
+              </div>
+              <div class="input-group">
+              <label for="samplelength_${trackNumber}" data-description-id="samplelength">Sample length</label>
+                <input type="number" class="interval-input" name="samplelength" id="samplelength_${trackNumber}" value="1000">
+              </div>
+              <div class="input-group"> 
+                <label for="mark_${trackNumber}" data-description-id="mark">Marker type</label>
+                <select name="mark" id="mark_${trackNumber}" class="mark" data-track="${trackNumber}" >
+                    <option  value="point">point</option>
+                    <option value="line">line</option>
+                    <option value="area">area</option>
+                    <option value="rect">rect</option>
+                    <option value="rule">rule</option>
+                    <option value="triangleRight">triangle R</option>
+                    <option value="triangleLeft">triangle L</option>
+                </select>
+              </div>
             </div>
-        <div class="btn-row" id ='inner-container'>
-          <div class="left-side">
-
-            <div class="input-group">
-              <label for="binsize_${trackNumber}">Bin size</label>
-                <input type="number" class="interval-input" name="binsize" id="binsize_${trackNumber}">
-            </div>
-            <div class="input-group">
-              <label for="samplelength_${trackNumber}">Sample length</label>
-              <input type="number" class="interval-input" name="samplelength" id="samplelength_${trackNumber}">
-            </div>
-            <div class="input-group"> 
-              <label for="mark_${trackNumber}">Marker type</label>
-              <select name="mark" id="mark_${trackNumber}" class="mark" data-track="${trackNumber}">
-                  <option> </option>
-                  <option value="point">point</option>
-                  <option value="line">line</option>
-                  <option value="area">area</option>
-                  <option value="bar">bar</option>
-                  <option value="rect">rect</option>
-                  <option value="text">text</option>
-                  <option value="betweenLink">link</option>
-                  <option value="rule">rule</option>
-                  <option value="triangleRight">triangle R</option>
-                  <option value="triangleLeft">triangle L</option>
-              </select>
-            </div>
+            <div class="right-side">
+                  <div class="input-group"> 
+                      <label for="color_${trackNumber}" data-description-id="color">Color</label>
+                      <select name="color" id="color_${trackNumber}" class="color" data-track="${trackNumber}">
+                          <option value="#e41a1c"${trackNumber === 0 ? " selected" : ""}>red</option>
+                          <option value="#377eb8"${trackNumber === 1 ? " selected" : ""}>blue</option>
+                          <option value="#4daf4a"${trackNumber === 2 ? " selected" : ""}>green</option>
+                          <option value="#984ea3"${trackNumber === 3 ? " selected" : ""}>purple</option>
+                          <option value="#ff7f00"${trackNumber === 4 ? " selected" : ""}>orange</option>
+                          <option value="#000000"${trackNumber === 5 ? " selected" : ""}>black</option>
+                          <option value="#808080"${trackNumber === 6 ? " selected" : ""}>grey</option>
+  
+                      </select>
+                  </div>
+                  <div class="input-group">
+                      <label for="marksize_${trackNumber}" data-description-id="marksize">Mark size</label>
+                      <input name="size" type="number" class="interval-input" id="marksize_${trackNumber}" data-track="${trackNumber}" value = "3">
+                  </div>
+                  <div class="input-group"> 
+                      <button class="apply-button" data-track="${trackNumber}">Apply</button>
+                      <button class="delete-track-button" data-track="${trackNumber}" aria-label="Close"><i class="fa fa-trash"></i></button>
+                  </div>
+              </div>
           </div>
-          <div class="right-side">
-                <div class="input-group"> 
-                    <label for="color_${trackNumber}">Color</label>
-                    <select name="color" id="color_${trackNumber}" class="color" data-track="${trackNumber}">
-                        <option value="#e41a1c"${trackNumber === 0 ? " selected" : ""}>red</option>
-                        <option value="#377eb8"${trackNumber === 1 ? " selected" : ""}>blue</option>
-                        <option value="#4daf4a"${trackNumber === 2 ? " selected" : ""}>green</option>
-                        <option value="#984ea3"${trackNumber === 3 ? " selected" : ""}>purple</option>
-                        <option value="#ff7f00"${trackNumber === 4 ? " selected" : ""}>orange</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label for="marksize_${trackNumber}">Mark size</label>
-                    <input name="size" type="number" class="interval-input" id="marksize_${trackNumber}" data-track="${trackNumber}">
-                </div>
-                <div class="input-group"> 
-                    <button class="apply-button" data-track="${trackNumber}">Apply</button>
-                    <button class="delete-track-button" data-track="${trackNumber}" aria-label="Close"><i class="fa fa-trash"></i></button>
-                </div>
-            </div>
-        </div>
-    </div>`;
+      </div>`
+    } else{
+      return ``
+    }
+
   }
 /**
  * Delete the track based on its number.

@@ -14,7 +14,7 @@ export async function all_buttons(container) {
     <div class="body-container">
         <div class="left-section">
             <div class="canvas"> 
-                <button id="canvas0" class="canvas-button">Canvas 0</button>
+                <button id="canvas0" class="canvas-button">Annotations</button>
                 <button id="canvas1" class="canvas-button">Canvas 1</button>
                 <button id="canvas2" class="canvas-button">Canvas 2</button>
                 <button id="canvas3" class="canvas-button">Canvas 3</button>
@@ -29,7 +29,7 @@ export async function all_buttons(container) {
                     <option id="export-html-button" value="html">HTML</option>
                 </select> 
                 <div class="btn-row">
-                    <h2 class='canvas_number'>Canvas 0</h2>
+                    <h2 class='canvas_number'>Gene Canvas</h2>
                     <h2>Track Controls</h2>
                     <span id="clear_url_button" class="clear_all_settings"><u>  Clear All </u></span>                   
                     <button id='add_track_button' class="add_track_button"><i class="fa fa-plus-circle" style="font-size:24px;"></i>Add Track</button>
@@ -79,6 +79,7 @@ export async function all_buttons(container) {
     const view3_btn = document.getElementById('view3-btn');
     const current_canvas = document.querySelector('.current-canvas')
     //Adding views functionality
+    document.querySelector('.canvas-container').style.display = 'none';
     
     add_view.addEventListener('click', function(){
         if(currentView === 1) {                       
@@ -154,8 +155,10 @@ export async function all_buttons(container) {
     canvas0.addEventListener('click', function () {
         setActiveCanvas(canvas0);
         window.canvas_num = 0;
-        canvas_number.innerHTML = 'Canvas 0';
-        current_canvas.innerHTML = 'Current Canvas 0'
+        canvas_number.innerHTML = 'Gene Canvas';
+        current_canvas.innerHTML = 'Current Canvas Gene'
+        document.querySelector('.canvas-container').style.display = 'none';
+
         updateCanvasUI();
     });
     // Making canvas1 active
@@ -168,6 +171,8 @@ export async function all_buttons(container) {
             addOrUpdateCanvasObject('canvas1');
             window.object_1_created = true;
         }
+        document.querySelector('.canvas-container').style.display = 'block';
+
         updateCanvasUI();
     });
     // Making canvas2 active
@@ -180,6 +185,8 @@ export async function all_buttons(container) {
             addOrUpdateCanvasObject('canvas2');
             window.object_2_created = true;
         }
+        document.querySelector('.canvas-container').style.display = 'block';
+
         updateCanvasUI();
     });
     // Making canvas3 active
@@ -192,6 +199,8 @@ export async function all_buttons(container) {
             addOrUpdateCanvasObject('canvas3');
             window.object_3_created = true;
         }
+        document.querySelector('.canvas-container').style.display = 'block';
+
         updateCanvasUI();
     });
 
@@ -475,97 +484,100 @@ export function view_control_apply_changes () {
  * @returns 
  */
 export function generateViewControl(currentView){   
-    return`            
-    <div id='canvas-container-${currentView}' class='canvas-container'>
-                <div id='canvas-bar-${currentView}' class='canvas_bar'>
-                    <span class = 'view-control'>View Controls A </span>
-                    <span class = 'current-canvas'> </span>
-                </div>
-                <div class="canvas_content hidden">
-                    <div class="btn-row" id="global-variables">
-                        <h2 class='x_axis_h2'>X axis</h2>
-                            <div class="column-container">
-                                 <span class='copy_range_msg'>Range Copied</span>
-                                <div class='x-axis-select'>
-                                    <label for="columnSelectorX_0">X-axis: </label>
-                                    <select name="xcolumn" id="columnSelectorX_0" class="columnSelectorX"  data-track="0">
-                                        <option value="" disabled selected></option>
-                                    </select>
-                                    <select id="x_range_select">
-                                        <option value = "" disabled selected>Copy</option>
-                                        <option value="start"> X Start</option>
-                                        <option value="end"> X End</option>
-                                    </select>
-                                </div>
-                                <div class = 'column1'> 
-                                    <label for="x_range_start">X-range:</label>
-                                    <input type="text" class="interval-input" id="x_range_start">                    
-                                    <span class='dashed-range'>-</span>
-                                    <input type="text" class="interval-input" id="x_range_end">
-                                </div>
-                            </div>
-                        <div class='bcolor-container'> 
-                            <label for="bcolor">Select background color  </label>
-                            <select name="bcolor" id="bcolor">
-                                <option value="white">white</option>
-                                <option value="grey">grey</option>
-                            </select>
-                        </div>
+
+        return`            
+        <div id='canvas-container-${currentView}' class='canvas-container'>
+                    <div id='canvas-bar-${currentView}' class='canvas_bar'>
+                        <span class = 'view-control'>View Controls A </span>
+                        <span class = 'current-canvas'> </span>
                     </div>
-                    <div class="btn-row" id="global-y-variables-left"> 
-                        <h2>Y-axis</h2>
-                        <div class = 'column2'>                
-                            <h2 class='y-axis-left'><i class="fa fa-solid fa-caret-left"></i>  Left Y-axis </h2>
-                            <form id="checkbox-left-axis">
-                                <div class="y-checkbox-option">    
-                                    <input class="y-checkbox-option" type="checkbox" id="track1-left" name="option" value="Track 1" checked>
-                                    <label for="track1-left">Track 1</label><br>
+                    <div class="canvas_content hidden">
+                        <div class="btn-row" id="global-variables">
+                            <h2 class='x_axis_h2'>X axis</h2>
+                                <div class="column-container">
+                                     <span class='copy_range_msg'>Range Copied</span>
+                                    <div class='x-axis-select'>
+                                        <label for="columnSelectorX_0">X-axis: </label>
+                                        <select name="xcolumn" id="columnSelectorX_0" class="columnSelectorX"  data-track="0">
+                                            <option value="" disabled selected></option>
+                                        </select>
+                                        <select id="x_range_select">
+                                            <option value = "" disabled selected>Copy</option>
+                                            <option value="start"> X Start</option>
+                                            <option value="end"> X End</option>
+                                        </select>
+                                    </div>
+                                    <div class = 'column1'> 
+                                        <label for="x_range_start">X-range:</label>
+                                        <input type="text" class="interval-input" id="x_range_start">                    
+                                        <span class='dashed-range'>-</span>
+                                        <input type="text" class="interval-input" id="x_range_end">
+                                    </div>
                                 </div>
-                                <div class="y-checkbox-option">        
-                                    <input class="y-checkbox-option" type="checkbox" id="track2-left" name="option" value="Track 2" checked>
-                                    <label for="track2-left">Track 2</label><br>                    
-                                </div>
-                            </form>
-                            <div class="column-container">
-                                <label for="columnSelectorYLeft">Left-Y-axis: </label>
-                                <select name="ycolumn" id="columnSelectorYLeft" class="columnSelectorY" data-track="0">
-                                    <option value="" disabled selected=""></option>
+                            <div class='bcolor-container'> 
+                                <label for="bcolor">Select background color  </label>
+                                <select name="bcolor" id="bcolor">
+                                    <option value="white">white</option>
+                                    <option value="grey">grey</option>
                                 </select>
-                                <div class = 'y-range-left'>                
-                                    <label for="y_start_left">Y-range:</label>
-                                    <input type="text" class="interval-input" id="y_start_left">
-                                    <span class='dashed-range'>-</span>
-                                    <input type="text" class="interval-input" id="y_end_left">
-                                </div> 
                             </div>
                         </div>
-                    </div>
-                    <div class="btn-row" id="global-y-variables-right">
-                        <div class = 'column3'>                 
-                            <h2 class='y-axis-right'>Right Y-axis  <i class="fa fa-solid fa-caret-right"></i></h2>
-                            <form id="checkbox-right-axis">
-                                <div class="y-checkbox-option">    
-                                    <input class="y-checkbox-option" type="checkbox" id="track1-right" name="option" value="Track 1">
-                                    <label for="track1-right">Track 1</label><br>
-                                </div>
-                            </form>
-                            <div class="column-container">
-                                <label for="columnSelectorYRight">Right-Y-axis: </label>
-                                <select name="ycolumn" id="columnSelectorYRight" class="columnSelectorY" data-track="0">
-                                    <option value="" disabled selected=""></option>
-                                </select>
-                                <div class = 'y-range-right'>   
-                                    <label for="y_start_right">Y-range:</label>
-                                    <input type="text" class="interval-input" id="y_start_right">
-                                    <span class='dashed-range'>-</span>
-                                    <input type="text" class="interval-input" id="y_end_right">
+                        <div class="btn-row" id="global-y-variables-left"> 
+                            <h2>Y-axis</h2>
+                            <div class = 'column2'>                
+                                <h2 class='y-axis-left'><i class="fa fa-solid fa-caret-left"></i>  Left Y-axis </h2>
+                                <form id="checkbox-left-axis">
+                                    <div class="y-checkbox-option">    
+                                        <input class="y-checkbox-option" type="checkbox" id="track1-left" name="option" value="Track 1" checked>
+                                        <label for="track1-left">Track 1</label><br>
+                                    </div>
+                                    <div class="y-checkbox-option">        
+                                        <input class="y-checkbox-option" type="checkbox" id="track2-left" name="option" value="Track 2" checked>
+                                        <label for="track2-left">Track 2</label><br>                    
+                                    </div>
+                                </form>
+                                <div class="column-container">
+                                    <label for="columnSelectorYLeft">Left-Y-axis: </label>
+                                    <select name="ycolumn" id="columnSelectorYLeft" class="columnSelectorY" data-track="0">
+                                        <option value="" disabled selected=""></option>
+                                    </select>
+                                    <div class = 'y-range-left'>                
+                                        <label for="y_start_left">Y-range:</label>
+                                        <input type="text" class="interval-input" id="y_start_left">
+                                        <span class='dashed-range'>-</span>
+                                        <input type="text" class="interval-input" id="y_end_left">
+                                    </div> 
                                 </div>
                             </div>
                         </div>
+                        <div class="btn-row" id="global-y-variables-right">
+                            <div class = 'column3'>                 
+                                <h2 class='y-axis-right'>Right Y-axis  <i class="fa fa-solid fa-caret-right"></i></h2>
+                                <form id="checkbox-right-axis">
+                                    <div class="y-checkbox-option">    
+                                        <input class="y-checkbox-option" type="checkbox" id="track1-right" name="option" value="Track 1">
+                                        <label for="track1-right">Track 1</label><br>
+                                    </div>
+                                </form>
+                                <div class="column-container">
+                                    <label for="columnSelectorYRight">Right-Y-axis: </label>
+                                    <select name="ycolumn" id="columnSelectorYRight" class="columnSelectorY" data-track="0">
+                                        <option value="" disabled selected=""></option>
+                                    </select>
+                                    <div class = 'y-range-right'>   
+                                        <label for="y_start_right">Y-range:</label>
+                                        <input type="text" class="interval-input" id="y_start_right">
+                                        <span class='dashed-range'>-</span>
+                                        <input type="text" class="interval-input" id="y_end_right">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="btn-row">
+                            <button class="apply-all-button">Apply</button>
+                        </div>
                     </div>
-                    <div class="btn-row">
-                        <button class="apply-all-button">Apply</button>
-                    </div>
-                </div>
-            </div>`
+                </div>`
+
+    
 }

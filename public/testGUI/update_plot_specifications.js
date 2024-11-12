@@ -120,9 +120,10 @@ export async function handleOptions(data, button_data_track_number) {
         if (window.canvas_num !== 0) { // Only modify tooltips for non-GFF data
           plotSpec.tracks[trackValue].tooltip[1].field = chosenColumnName;
           plotSpec.tracks[trackValue].tooltip[1].alt = chosenColumnName;
+          
+
         }
       }                
-  
       updateURLParameters("x.field", chosenColumnName);
     });
   });

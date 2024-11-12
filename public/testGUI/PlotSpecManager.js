@@ -79,7 +79,7 @@ class PlotSpecManager {
             alignment: "overlay",
             width: 1000,
             height: 150,
-            assembly: this.assemblyInfo, // Will always have a value now
+            assembly: this.assemblyInfo,
             linkingId: "detail",
             style: {
               background: "#D3D3D3",
@@ -137,8 +137,7 @@ class PlotSpecManager {
   createGeneTrack(index) {
     if (gene_template.views && gene_template.views[0] && gene_template.views[0].tracks && gene_template.views[0].tracks[index]) {
       const track = deepCopy(gene_template.views[0].tracks[index]);
-      
-      // Ensure data configuration is correct
+
       if (!track.data) {
         track.data = {
           type: "gff",
@@ -147,11 +146,10 @@ class PlotSpecManager {
           attributesToFields: [
             { attribute: "gene_biotype", defaultValue: "unknown" },
             { attribute: "Name", defaultValue: "unknown" },
-            { attribute: "ID", defaultValue: "unknown" } // Added ID attribute
+            { attribute: "ID", defaultValue: "unknown" }
           ]
         };
       }
-      // Update tooltip configuration
       track.tooltip = [
         { field: "seqid", type: "nominal", alt: "Chromosome" },
         { field: "start", type: "quantitative", alt: "Start" },
@@ -159,7 +157,12 @@ class PlotSpecManager {
         { field: "strand", type: "nominal", alt: "Strand" },
         { field: "type", type: "nominal", alt: "Feature Type" },
         { field: "gene_biotype", type: "nominal", alt: "Gene Biotype" },
-        { field: "Name", type: "nominal", alt: "Gene Name" },
+        {
+          field: "Name", 
+          type: "nominal", 
+          alt: "Gene Name", 
+          valueGetter: (d) => d.Name !== 'unknown' ? d.Name : d.ID
+        },
         { field: "ID", type: "nominal", alt: "Gene ID" }
       ];
       
