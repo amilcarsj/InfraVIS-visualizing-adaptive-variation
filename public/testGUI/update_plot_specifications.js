@@ -522,29 +522,43 @@ export async function updateURLParameters(parameter, value) {
  * @param {number} button_data_track_number - Button data track number.
  */
 function updateDynamicTooltips(plotSpec, header, button_data_track_number) {
-  const trackCount = plotSpec.tracks.length;
-  const cleanedHeader = header.map(item => item.trim().replace(/\r$/, ''));
-
-  for (let i = 0; i < trackCount; i++) {
-    if (window.canvas_num === 0) {
-      // For GFF data, include all relevant fields in tooltips
-      plotSpec.tracks[i].tooltip = [
-        { field: "start", type: "quantitative", alt: "Start" },
-        { field: "end", type: "quantitative", alt: "End" },
-        { field: "strand", type: "nominal", alt: "Strand" },
-        { field: "type", type: "nominal", alt: "Feature Type" },
-        { field: "gene_biotype", type: "nominal", alt: "Gene Biotype" },
-        { field: "ID", type: "nominal", alt: "Gene ID" }
-      ];
-    } else {
-      // For CSV/TSV data, use dynamic tooltips
-      plotSpec.tracks[i].tooltip = cleanedHeader.map(column => ({
-        field: column,
-        type: 'nominal',
-        alt: column
-      }));
+    // Store headers per canvas and track
+    if (!window.tooltipHeaders) {
+        window.tooltipHeaders = {
+            0: {}, // Canvas 0 tracks
+            1: {}, // Canvas 1 tracks
+            2: {}, // Canvas 2 tracks
+            3: {}  // Canvas 3 tracks
+        };
     }
-  }
+
+    // Store headers for this specific canvas and track
+    window.tooltipHeaders[window.canvas_num][button_data_track_number] = header.map(item => 
+        item.trim().replace(/\r$/, '')
+    );
+
+    // Only update the specific track's tooltip
+    if (plotSpec.tracks[button_data_track_number]) {
+        if (window.canvas_num === 0) {
+            // For GFF data
+            plotSpec.tracks[button_data_track_number].tooltip = [
+                { field: "start", type: "quantitative", alt: "Start" },
+                { field: "end", type: "quantitative", alt: "End" },
+                { field: "strand", type: "nominal", alt: "Strand" },
+                { field: "type", type: "nominal", alt: "Feature Type" },
+                { field: "gene_biotype", type: "nominal", alt: "Gene Biotype" },
+                { field: "ID", type: "nominal", alt: "Gene ID" }
+            ];
+        } else {
+            // For CSV/TSV data, use stored headers for this specific track
+            const trackHeaders = window.tooltipHeaders[window.canvas_num][button_data_track_number];
+            plotSpec.tracks[button_data_track_number].tooltip = trackHeaders.map(column => ({
+                field: column,
+                type: 'nominal',
+                alt: column
+            }));
+        }
+    }
 }
 
 async function handleChromosomeSelection(file) {
