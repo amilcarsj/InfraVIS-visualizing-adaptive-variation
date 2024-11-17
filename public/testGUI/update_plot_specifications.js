@@ -276,25 +276,24 @@ async function _eventsSelectedTracksPerYAxis(columnSelector, side, plotSpec) {
     const trackIndex = trackValue - 1;
     if (plotSpec.tracks[trackIndex]) {
       if (window.canvas_num !== 0) {
-        // For non-GFF data
-        plotSpec.tracks[trackIndex].data.value = chosenColumnName;            
-        if (!(Number.isNaN(intervalArray[0]) || Number.isNaN(intervalArray[1]))) {
-          plotSpec.tracks[trackIndex].y.domain = intervalArray;
-        }            
-        // plotSpec.tracks[trackIndex].y.axis = side;
-        // plotSpec.tracks[trackIndex].y.field = chosenColumnName;
+        // Update value field for data binding
+        plotSpec.tracks[trackIndex].data.value = chosenColumnName;
+        plotSpec.tracks[trackIndex].y = {
+          field: chosenColumnName,
+          type: 'quantitative',
+          axis: side,
+          domain: intervalArray
+        };
         
-        // Ensure tooltip is an array before modifying it
+        // Ensure tooltip shows correct value
         if (!Array.isArray(plotSpec.tracks[trackIndex].tooltip)) {
           plotSpec.tracks[trackIndex].tooltip = [];
         }
-        if (plotSpec.tracks[trackIndex].tooltip[0]) {
-          
-          plotSpec.tracks[trackIndex].tooltip[0].field = chosenColumnName;
-          plotSpec.tracks[trackIndex].tooltip[0].alt = chosenColumnName;
-        } else {
-          plotSpec.tracks[trackIndex].tooltip[0] = { field: chosenColumnName, alt: chosenColumnName };
-        }
+        plotSpec.tracks[trackIndex].tooltip[0] = {
+          field: chosenColumnName,
+          type: 'quantitative',
+          alt: chosenColumnName
+        };
       } else {
         // For GFF data, we don't need to modify these properties
         console.log("GFF data: Not modifying y-axis properties");

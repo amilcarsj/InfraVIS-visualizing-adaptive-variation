@@ -257,25 +257,25 @@ export async function all_buttons(container) {
     });
 
     // Switching between views functionality
-    view1_btn.addEventListener('click', function () {
+    view1_btn.addEventListener('click', async function () {
         window.currentView = 1;
-        view_control.innerHTML = 'View Controls A'
+        view_control.innerHTML = 'View Controls A';
         setActiveViews(view1_btn);
-        updateViewSettings(1);  // Load View 1 settings
+        await loadAndApplyViewSettings(1);
     });
     
-    view2_btn.addEventListener('click', function () {
+    view2_btn.addEventListener('click', async function () {
         window.currentView = 2;
-        view_control.innerHTML = 'View Controls B'
+        view_control.innerHTML = 'View Controls B';
         setActiveViews(view2_btn);
-        updateViewSettings(2);  // Load View 2 settings
+        await loadAndApplyViewSettings(2);
     });
     
-    view3_btn.addEventListener('click', function () {
+    view3_btn.addEventListener('click', async function () {
         window.currentView = 3;
-        view_control.innerHTML = 'View Controls C'
+        view_control.innerHTML = 'View Controls C';
         setActiveViews(view3_btn);
-        updateViewSettings(3);  // Load View 3 settings
+        await loadAndApplyViewSettings(3);
     });
     // Add the toggle effect for the initial canvas container
     addCanvasBarToggle('canvas-bar-1', 'canvas-container-1');
@@ -648,4 +648,63 @@ export function generateViewControl(currentView){
                 </div>`
 
     
+}
+
+async function loadAndApplyViewSettings(view) {
+    // First update the UI controls
+    updateViewSettings(view);
+    
+    const currentCanvasState = window.canvas_states[view];
+    const plotSpec = getCurrentViewSpec();
+
+    // Apply X-axis settings
+    plotSpec.xDomain.interval = currentCanvasState.view_control_settings.x_range;
+
+    // Process left axis checkboxes
+    const leftChecked = document.querySelectorAll('#checkbox-left-axis input[type="checkbox"]:checked');
+    leftChecked.forEach(function (checkbox) {
+        const trackIndex = parseInt(checkbox.value.split(' ')[1]) - 1;
+        if (plotSpec.tracks[trackIndex]) {
+            const leftSelector = document.getElementById('columnSelectorYLeft');
+            if (leftSelector && leftSelector.options[currentCanvasState.view_control_settings.left_y_axis]) {
+                const fieldName = leftSelector.options[currentCanvasState.view_control_settings.left_y_axis].textContent;
+                
+                // Update both data value and y field
+                plotSpec.tracks[trackIndex].data.value = fieldName;
+                plotSpec.tracks[trackIndex].y = {
+                    field: fieldName,
+                    type: 'quantitative',
+                    axis: 'left',
+                    domain: currentCanvasState.view_control_settings.left_y_range
+                };
+            }
+            
+            const xSelector = document.getElementById('columnSelectorX_0');
+            if (xSelector && xSelector.options[currentCanvasState.view_control_settings.x_axis]) {
+                plotSpec.tracks[trackIndex].x.field = xSelector.options[currentCanvasState.view_control_settings.x_axis].textContent;
+            }
+        }
+    });
+
+    // Process right axis checkboxes
+    const rightChecked = document.querySelectorAll('#checkbox-right-axis input[type="checkbox"]:checked');
+    rightChecked.forEach(function (checkbox) {
+        const trackIndex = parseInt(checkbox.value.split(' ')[1]) - 1;
+        if (plotSpec.tracks[trackIndex]) {
+            plotSpec.tracks[trackIndex].y.domain = currentCanvasState.view_control_settings.right_y_range;
+            const rightSelector = document.getElementById('columnSelectorYRight');
+            if (rightSelector && rightSelector.options[currentCanvasState.view_control_settings.right_y_axis]) {
+                plotSpec.tracks[trackIndex].y.field = rightSelector.options[currentCanvasState.view_control_settings.right_y_axis].textContent;
+            }
+            plotSpec.tracks[trackIndex].y.axis = 'right';
+            
+            const xSelector = document.getElementById('columnSelectorX_0');
+            if (xSelector && xSelector.options[currentCanvasState.view_control_settings.x_axis]) {
+                plotSpec.tracks[trackIndex].x.field = xSelector.options[currentCanvasState.view_control_settings.x_axis].textContent;
+            }
+        }
+    });
+
+    // Update plot
+    await GoslingPlotWithLocalData();
 }
