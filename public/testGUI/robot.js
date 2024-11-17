@@ -1,3 +1,14 @@
+/**
+ * @fileoverview Robot assistant interface module
+ * Provides an interactive help system for users
+ * @module robot
+ */
+
+/**
+ * Initializes the robot assistant interface
+ * Sets up event listeners and interaction handlers
+ * @returns {void}
+ */
 export const robotInit = () => {
   // Get DOM elements
   const robotFace = document.getElementById('robotFace');
@@ -70,7 +81,7 @@ export const robotInit = () => {
   }
 };
 
-// Make sure the DOM is fully loaded before initializing
+// To make sure the DOM is fully loaded before initializing
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', robotInit);
 } else {

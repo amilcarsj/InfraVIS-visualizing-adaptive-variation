@@ -1,9 +1,15 @@
+/**
+ * @fileoverview Track management module for InfraVIS visualization
+ * Handles track creation, deletion, settings management and UI interactions
+ * @module track
+ */
+
 import { URLfromFile, URLfromServer, GoslingPlotWithLocalData, getCurrentViewSpec } from './plot.js';
 import { updateURLParameters } from './update_plot_specifications.js';
 
 /**
- * To reset the track settings to default.
- * @param {int} trackNumber 
+ * Resets track settings to their default values
+ * @param {number} trackNumber - Index of the track to reset
  */
 export function resetTrackSettings (trackNumber) {
   document.getElementById(`binsize_${trackNumber}`).value = '';
@@ -32,7 +38,8 @@ export function resetTrackSettings (trackNumber) {
 }
 
 /**
- * To keep track of the current track number.
+ * Updates the track count and refreshes the track display
+ * @returns {Promise<void>}
  */
 export async function updateTrackNumber () {
   const currentCanvasState = window.canvas_states[window.canvas_num];
@@ -47,9 +54,10 @@ export async function updateTrackNumber () {
 
 }
 
-
-
-// Generate track elements based on the selected track count
+/**
+ * Generates and renders track elements based on the current track count
+ * @returns {Promise<void>}
+ */
 export async function generateTracks () {
     let currentCanvasState = window.canvas_states[window.canvas_num];
     const trackCount = currentCanvasState.trackCount;
@@ -154,6 +162,11 @@ export async function generateTracks () {
     await showHideTracks();
 }
 
+/**
+ * Creates a tooltip element with the given description
+ * @param {HTMLElement} element - Element to attach tooltip to
+ * @param {string} description - Text content for tooltip
+ */
 function showTooltip(element, description) {
   // Create tooltip element
   const tooltip = document.createElement('div');
@@ -172,6 +185,10 @@ function showTooltip(element, description) {
   element._tooltip = tooltip;
 }
 
+/**
+ * Removes the tooltip from the given element
+ * @param {HTMLElement} element - Element containing tooltip
+ */
 function hideTooltip(element) {
   if (element._tooltip) {
     document.body.removeChild(element._tooltip);
@@ -197,6 +214,7 @@ export async function showHideTracks () {
       }
   }
 }
+// The questions for the robot
 const tooltips = {
   binsize: 'The bin size defines the size of bins in your data visualization.',
   samplelength: 'Sample length is the number of data points to sample.',
@@ -303,8 +321,9 @@ export async function generateTrackBinAndSampleInputs(trackNumber) {
 
   }
 /**
- * Delete the track based on its number.
- * @param {int} trackToDelete the track number
+ * Deletes a track and updates the visualization
+ * @param {number} trackToDelete - Index of track to remove
+ * @returns {Promise<void>}
  */
 export async function deleteTrack (trackToDelete) {
   const currentCanvasState = window.canvas_states[window.canvas_num];
@@ -334,8 +353,9 @@ export async function deleteTrack (trackToDelete) {
 }
 
 /**
- * To update the track settings based on the selected ones by the user.
- * @param {int} trackNumber 
+ * Initialize track settings buttons and event listeners
+ * @param {number} trackNumber - Number of tracks to initialize
+ * @returns {Promise<void>}
  */
 export async function track_settings_btns(trackNumber) {
     // Load files based on local file input

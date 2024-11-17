@@ -1,6 +1,17 @@
+/**
+ * @fileoverview Plot specification manager for InfraVIS visualization
+ * Manages plot specifications, canvas states, and assembly information
+ * @module PlotSpecManager
+ */
+
 import { trackTemplate } from './track_spec.js';
 import { gene_template } from './gene_spec.js';
 
+/**
+ * Deep copies an object without reference links
+ * @param {Object} obj - Object to copy
+ * @returns {Object} Deep copy of input object
+ */
 function deepCopy(obj) {
   if (typeof obj !== 'object' || obj === null) {
     return obj;
@@ -20,7 +31,15 @@ function deepCopy(obj) {
   return copied;
 }
 
+/**
+ * Manages plot specifications and canvas states
+ * @class PlotSpecManager
+ */
 class PlotSpecManager {
+  /**
+   * Creates a new PlotSpecManager instance
+   * @constructor
+   */
   constructor() {
     this.assemblyInfo = [["", 0]];
     this.currentChromosome = null;
@@ -29,6 +48,11 @@ class PlotSpecManager {
     };
   }
 
+  /**
+   * Updates assembly information with new sequence data
+   * @param {string} seqid - Sequence identifier
+   * @param {number} length - Sequence length
+   */
   updateAssemblyInfo(seqid, length) {
     if (seqid && length) {
         this.assemblyInfo = [[seqid, length]];

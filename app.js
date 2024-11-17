@@ -1,3 +1,12 @@
+/**
+ * @fileoverview Express server application for InfraVIS
+ * Provides API endpoints for visualization data and export functionality
+ * @module app
+ * @requires express
+ * @requires puppeteer
+ * @requires cors
+ */
+
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
@@ -27,10 +36,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Other security headers
 app.use(
   helmet({
-    contentSecurityPolicy: false, // We're using our custom CSP above
+    contentSecurityPolicy: false,
   })
 );
 
@@ -53,6 +61,12 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', '/testGUI/index.html'));
 });
 
+/**
+ * Save visualization as HTML
+ * @route POST /save-html
+ * @param {Object} req.body.htmlContent - HTML content to save
+ * @returns {string} HTML file download
+ */
 app.post('/save-html', async (req, res) => {
   try {
     const htmlContent = req.body.htmlContent;
@@ -68,6 +82,12 @@ app.post('/save-html', async (req, res) => {
   }
 });
 
+/**
+ * Save visualization as PNG
+ * @route POST /save-png
+ * @param {Object} req.body.htmlContent - HTML content to convert
+ * @returns {Buffer} PNG image data
+ */
 app.post('/save-png', async (req, res) => {
   try {
     const htmlContent = req.body.htmlContent;
@@ -89,6 +109,12 @@ app.post('/save-png', async (req, res) => {
   }
 });
 
+/**
+ * Save visualization specification as JSON
+ * @route POST /save-json
+ * @param {Object} req.body.jsonContent - JSON content to save
+ * @returns {Object} Formatted JSON data
+ */
 app.post('/save-json', (req, res) => {
   try {
     const jsonContent = req.body.jsonContent;

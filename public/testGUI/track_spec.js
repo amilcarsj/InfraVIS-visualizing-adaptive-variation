@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Track specification template for InfraVIS visualization
+ * Defines the default configuration for visualization tracks
+ * @module track_spec
+ */
+
 // Track specification used in GUI
 const y_col_preset = ""
 const x_col_preset = ""
