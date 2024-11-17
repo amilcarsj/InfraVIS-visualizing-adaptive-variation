@@ -5,7 +5,7 @@
  */
 
 import { URLfromFile, URLfromServer, GoslingPlotWithLocalData, getCurrentViewSpec } from './plot.js';
-import { updateURLParameters } from './update_plot_specifications.js';
+import { updateURLParameters, updateChromosomeView } from './update_plot_specifications.js';
 
 /**
  * Resets track settings to their default values
@@ -246,6 +246,7 @@ export async function generateTrackBinAndSampleInputs(trackNumber) {
                                 : `ID: ${chromosome}`}</option>
                         `).join('') : ''}
                     </select>
+                    <button id="apply-chromosome" class="apply-button">Apply</button>
                 </div>
             </div>`;
     }
@@ -467,5 +468,35 @@ export async function track_settings_btns(trackNumber) {
           resetTrackSettings(i);
         });
       }
+    }
+
+    // Add chromosome apply button handler
+    const applyChromosomeBtn = document.getElementById('apply-chromosome');
+    if (applyChromosomeBtn) {
+        applyChromosomeBtn.addEventListener('click', async function() {
+            const chromosomeSelect = document.getElementById('chromosomeSelect');
+            if (!chromosomeSelect) {
+                console.error('Chromosome select element not found');
+                return;
+            }
+
+            const selectedChromosome = chromosomeSelect.value;
+            const chromosomeData = window.canvas_states[0].chromosomeData;
+            
+            if (selectedChromosome && chromosomeData && chromosomeData.options) {
+                const maxPosition = chromosomeData.options[selectedChromosome];
+                if (maxPosition) {
+                    try {
+                        localStorage.setItem('lastChromosomeSelection', selectedChromosome);
+                        await updateChromosomeView(selectedChromosome, maxPosition);
+                        console.log('Successfully updated chromosome view');
+                    } catch (error) {
+                        console.error('Error applying chromosome selection:', error);
+                    }
+                }
+            } else {
+                console.error('Missing required data for chromosome update');
+            }
+        });
     }
   }

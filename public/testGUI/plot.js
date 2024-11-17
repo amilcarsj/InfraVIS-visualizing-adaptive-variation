@@ -315,61 +315,51 @@ async function configureDataType(extension, track) {
  * @returns {Promise<void>}
  */
 export async function GoslingPlotWithLocalData() {
-  try {
-      const plotSpec = window.plotSpecManager.getPlotSpec();
-      
-      // Validate and ensure required properties exist
-      if (!plotSpec) {
-          throw new Error('Plot specification not found');
-      }
+    try {
+        const plotSpec = window.plotSpecManager.getPlotSpec();
+        
+        if (!plotSpec) {
+            throw new Error('Plot specification not found');
+        }
 
-      // Ensure views array exists
-      if (!Array.isArray(plotSpec.views)) {
-          plotSpec.views = [];
-      }
+        // Only update assembly info if we're on canvas0
+        if (window.canvas_num === 0 && window.currentAssemblyInfo?.seqid) {
+            const { seqid, length } = window.currentAssemblyInfo;
+            
+            // Only update the first view (canvas0) with chromosome info
+            if (plotSpec.views[0]) {
+                plotSpec.views[0].assembly = [[seqid, length]];
+                plotSpec.views[0].xDomain = {
+                    chromosome: seqid,
+                    interval: [0, length]
+                };
 
-      // Handle assembly info
-      if (window.currentAssemblyInfo && window.currentAssemblyInfo.seqid) {
-          const { seqid, length } = window.currentAssemblyInfo;
-          
-          plotSpec.views.forEach(view => {
-              // Ensure view has required properties
-              view.assembly = [[seqid, length]];
-              view.xDomain = {
-                  chromosome: seqid,
-                  interval: [0, length]
-              };
-          });
-      }
+                // Update GFF tracks
+                plotSpec.views[0].tracks?.forEach(track => {
+                    if (!track.data) track.data = {};
+                    track.data = {
+                        ...track.data,
+                        type: 'gff',
+                        url: window.fileURLs.gff,
+                        indexUrl: window.fileURLs.index,
+                        chromosomeId: seqid
+                    };
+                });
+            }
+        }
 
-      // Validate file URLs for Canvas 0
-      if (window.canvas_num === 0) {
-          if (!window.fileURLs?.gff || !window.fileURLs?.index) {
-              throw new Error('Missing required file URLs for Canvas 0');
-          }
-          
-          plotSpec.views.forEach(view => {
-              view.tracks?.forEach(track => {
-                  if (!track.data) track.data = {};
-                  track.data.url = window.fileURLs.gff;
-                  track.data.indexUrl = window.fileURLs.index;
-                  track.data.type = 'gff';
-              });
-          });
-      }
+        const container = document.getElementById('plot-container-1');
+        if (!container) {
+            throw new Error('Plot container not found');
+        }
 
-      const container = document.getElementById('plot-container-1');
-      if (!container) {
-          throw new Error('Plot container not found');
-      }
+        await embed(container, plotSpec);
+        console.log('Plot embedded successfully');
 
-      await embed(container, plotSpec);
-      console.log('Plot embedded successfully');
-
-  } catch (error) {
-      console.error('Error in GoslingPlotWithLocalData:', error);
-      throw error;
-  }
+    } catch (error) {
+        console.error('Error in GoslingPlotWithLocalData:', error);
+        throw error;
+    }
 }
 
 // Add cleanup listener

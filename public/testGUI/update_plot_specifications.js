@@ -620,7 +620,7 @@ async function handleChromosomeSelection(file) {
 }
 
 // Add helper functions
-function updateChromosomeSelect(chromosomeInfo, selectElement) {
+export function updateChromosomeSelect(chromosomeInfo, selectElement) {
   selectElement.innerHTML = '<option value="" disabled selected>Select chromosome</option>';
   Object.keys(chromosomeInfo).forEach(chromosome => {
       if (chromosome?.trim()) {
@@ -634,23 +634,27 @@ function updateChromosomeSelect(chromosomeInfo, selectElement) {
   });
 }
 
-async function updateChromosomeView(selectedChromosome, maxPosition) {
+export async function updateChromosomeView(selectedChromosome, maxPosition) {
   try {
       const plotSpec = window.plotSpecManager.getPlotSpec();
       
-      // Update assembly info
-      plotSpec.assembly = [[selectedChromosome, maxPosition]];
-      
-      // Update views
-      plotSpec.views.forEach(view => {
-          view.assembly = [[selectedChromosome, maxPosition]];
-          view.xDomain = {
+      // Store current selection
+      window.currentAssemblyInfo = {
+          seqid: selectedChromosome,
+          length: maxPosition
+      };
+
+      // Only update canvas0 view
+      if (plotSpec.views[0]) {
+          // Update assembly info for canvas0 only
+          plotSpec.views[0].assembly = [[selectedChromosome, maxPosition]];
+          plotSpec.views[0].xDomain = {
               chromosome: selectedChromosome,
               interval: [0, maxPosition]
           };
 
-          // Update tracks
-          view.tracks?.forEach(track => {
+          // Update tracks for canvas0 only
+          plotSpec.views[0].tracks?.forEach(track => {
               if (!track.data) track.data = {};
               track.data = {
                   ...track.data,
@@ -660,16 +664,13 @@ async function updateChromosomeView(selectedChromosome, maxPosition) {
                   chromosomeId: selectedChromosome
               };
           });
-      });
-
-      // Store current selection
-      window.currentAssemblyInfo = {
-          seqid: selectedChromosome,
-          length: maxPosition
-      };
+      }
 
       // Update state
       window.plotSpecManager.updateAssemblyInfo(selectedChromosome, maxPosition);
+      
+      // Save current chromosome info
+      localStorage.setItem('lastChromosomeSelection', selectedChromosome);
       
       // Force rerender
       await GoslingPlotWithLocalData();

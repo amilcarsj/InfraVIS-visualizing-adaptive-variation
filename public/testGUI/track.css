@@ -186,3 +186,14 @@ button:active, #info_button:active, #close_button:active {
   z-index: 1000;
   pointer-events: none;
 }
+
+
+.chromosome-select {
+  margin-right: 10px;
+}
+
+#chromosome-selector .column-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

@@ -54,6 +54,9 @@ class PlotSpecManager {
    * @param {number} length - Sequence length
    */
   updateAssemblyInfo(seqid, length) {
+    if (window.canvas_num === 0) {
+
+    
     if (seqid && length) {
         this.assemblyInfo = [[seqid, length]];
         this.currentChromosome = seqid;
@@ -83,17 +86,21 @@ class PlotSpecManager {
         } catch (e) {
             console.warn('Failed to save assembly info to localStorage:', e);
         }
+      }
     }
 }
 
   getChromosomeTitle(seqid) {
-    // Check if seqid looks like a chromosome name (e.g., "chr1", "X", "Y")
+    if (window.canvas_num === 0) {
+      
+    
     const isChromosomeName = /^(chr)?([0-9]+|[XY]|MT)$/i.test(seqid);
     if (isChromosomeName) {
       return `Gene Annotations - Chromosome ${seqid}`;
     } else {
       return `Gene Annotations - ID: ${seqid}`;
     }
+  }
   }
 
   getPlotSpec() {
