@@ -6,7 +6,7 @@ const gene_template = {
   "views": [
     {
       "id": "canvas0",
-      "xDomain": { "chromosome": "", "interval":  [0, 200000] },
+      "xDomain": { "chromosome": "", "interval": [0, 200000] },
       "alignment": "overlay",
       "data": {
         "url": "",
@@ -18,27 +18,14 @@ const gene_template = {
           { "attribute": "ID", "defaultValue": "unknown" }
         ]
       },
-      "color": {
-        "type": "nominal",
-        "field": "gene_biotype",
-        "domain": [
-          "protein_coding",
-          "tRNA",
-          "rRNA",
-          "ncRNA",
-          "pseudogene",
-          "unknown"
-        ],
-        "range": ["orange", "blue", "green", "red", "purple", "black"]
-      },
       "tracks": [
         {
           "mark": "triangleRight",
           "x": { "field": "end", "type": "genomic", "axis": "top" },
           "size": { "value": 10 },
-          "tooltip": [
-            { "field": "gene_biotype", "type": "nominal", "alt": "Gene Biotype" },
-            { "field": "Name", "type": "nominal", "alt": "Gene Name" }
+          "color": { "value": "#FF0000" },
+          "filter": [
+            {"field": "strand", "oneOf": ["+"]}
           ]
         },
         {
@@ -46,20 +33,17 @@ const gene_template = {
           "text": { "field": "Name", "type": "nominal" },
           "x": { "field": "start", "type": "genomic" },
           "xe": { "field": "end", "type": "genomic" },
-          "style": { "dy": -10 },
-          "tooltip": [
-            { "field": "gene_biotype", "type": "nominal", "alt": "Gene Biotype" },
-            { "field": "Name", "type": "nominal", "alt": "Gene Name" }
-          ]
+          "color": { "value": "#000000" },
+          "style": { "dy": -10 }
         },
         {
           "mark": "triangleLeft",
           "x": { "field": "start", "type": "genomic" },
           "size": { "value": 10 },
+          "color": { "value": "#0000FF" },
           "style": { "align": "right" },
-          "tooltip": [
-            { "field": "gene_biotype", "type": "nominal", "alt": "Gene Biotype" },
-            { "field": "Name", "type": "nominal", "alt": "Gene Name" }
+          "filter": [
+            {"field": "strand", "oneOf": ["-"]}
           ]
         },
         {
@@ -67,10 +51,10 @@ const gene_template = {
           "x": { "field": "start", "type": "genomic" },
           "strokeWidth": { "value": 3 },
           "xe": { "field": "end", "type": "genomic" },
+          "color": { "value": "#FF0000" },
           "style": { "linePattern": { "type": "triangleRight", "size": 5 } },
-          "tooltip": [
-            { "field": "gene_biotype", "type": "nominal", "alt": "Gene Biotype" },
-            { "field": "Name", "type": "nominal", "alt": "Gene Name" }
+          "filter": [
+            {"field": "strand", "oneOf": ["+"]}
           ]
         },
         {
@@ -78,10 +62,10 @@ const gene_template = {
           "x": { "field": "start", "type": "genomic" },
           "strokeWidth": { "value": 3 },
           "xe": { "field": "end", "type": "genomic" },
+          "color": { "value": "#0000FF" },
           "style": { "linePattern": { "type": "triangleLeft", "size": 5 } },
-          "tooltip": [
-            { "field": "gene_biotype", "type": "nominal", "alt": "Gene Biotype" },
-            { "field": "Name", "type": "nominal", "alt": "Gene Name" }
+          "filter": [
+            {"field": "strand", "oneOf": ["-"]}
           ]
         }
       ],
@@ -90,6 +74,6 @@ const gene_template = {
       "height": 80
     }
   ]
-}
+};
 
 export { gene_template };

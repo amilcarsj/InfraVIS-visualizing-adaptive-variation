@@ -1,6 +1,6 @@
 import { getCurrentViewSpec, GoslingPlotWithLocalData } from './plot.js';
-import { PlotSpecManager } from './PlotSpecManager.js'; // Correct import
-
+import { PlotSpecManager } from './PlotSpecManager.js';
+import { gene_template } from './gene_spec.js';
 
 window.canvas_states = {
   0: { trackCount: 1, tracks: [],filenames:{}, view_control_settings: {x_axis: '', x_range: [0, 200000], left_y_axis: '', left_y_range: [0, 1], right_y_axis: '', right_y_range: [0, 1], checked_left : [], checked_right : []}},
@@ -45,6 +45,10 @@ export async function handleOptions(data, button_data_track_number) {
     // Remove indexUrl for non-GFF data
     delete plotSpec.tracks[button_data_track_number].data.indexUrl;
   }
+  if (window.canvas_num === 0 && data instanceof File) {
+    // For GFF data, set up chromosome selector
+    await handleChromosomeSelection(data);
+}
   if (data instanceof File) {
     if (window.canvas_num === 0) {
       // GFF data
@@ -52,7 +56,6 @@ export async function handleOptions(data, button_data_track_number) {
       header = geneHeaderResult.header;
       geneData = geneHeaderResult.data;
       
-      // Ensure URLs are set for all tracks
       plotSpec.tracks.forEach(track => {
         if (!track.data.url || !track.data.indexUrl) {
           console.error('URL or indexURL is not set for a track');
@@ -401,7 +404,7 @@ async function extractGeneHeader(file) {
 
             const attributes = row[8].split(';').reduce((acc, attribute) => {
               const [key, ...rest] = attribute.split('=');
-              const value = rest.join('=').trim(); // Handle multiple '='
+              const value = rest.join('=').trim();
               if (key && value) {
                 acc[key.trim()] = value;
               }
@@ -430,10 +433,7 @@ async function extractGeneHeader(file) {
         if (skippedLines > 0) {
           console.warn(`Skipped ${skippedLines} malformed lines.`);
         }
-
-        // Update the plot spec manager with the new assembly information
         if (seqId && maxEnd) {
-          // Add 10% padding to the maximum end position
           const paddedMaxEnd = Math.ceil(maxEnd * 1.1);
           if (window.plotSpecManager && typeof window.plotSpecManager.updateAssemblyInfo === 'function') {
             window.plotSpecManager.updateAssemblyInfo(seqId, paddedMaxEnd);
@@ -470,7 +470,6 @@ async function extractHeader(file, button_data_track_number, plotSpec) {
       const text = reader.result;
       const data = text.split('\n').map(row => row.split(plotSpec.tracks[button_data_track_number].data.separator));
       const header = data[0];
-      // Find the position column (case-insensitive)
       const posIndex = header.findIndex(column => 
         column.trim().toLowerCase() === 'pos'
       );
@@ -535,7 +534,6 @@ function updateDynamicTooltips(plotSpec, header, button_data_track_number) {
         { field: "strand", type: "nominal", alt: "Strand" },
         { field: "type", type: "nominal", alt: "Feature Type" },
         { field: "gene_biotype", type: "nominal", alt: "Gene Biotype" },
-        { field: "Name", type: "nominal", alt: "Gene Name" },
         { field: "ID", type: "nominal", alt: "Gene ID" }
       ];
     } else {
@@ -546,5 +544,138 @@ function updateDynamicTooltips(plotSpec, header, button_data_track_number) {
         alt: column
       }));
     }
+  }
+}
+
+async function handleChromosomeSelection(file) {
+  try {
+      // Load gene data if not already loaded or if new file
+      if (!window.geneData || window.canvas_states[0].chromosomeData?.currentFile !== file.name) {
+          const { data } = await extractGeneHeader(file);
+          window.geneData = data;
+          
+          // Store chromosome data in canvas state
+          const chromosomeInfo = window.geneData.reduce((acc, entry) => {
+              const seqid = entry.seqid;
+              const end = parseInt(entry.end);
+              if (!acc[seqid] || end > acc[seqid]) {
+                  acc[seqid] = end;
+              }
+              return acc;
+          }, {});
+
+          window.canvas_states[0].chromosomeData = {
+              data: window.geneData,
+              currentFile: file.name,
+              options: chromosomeInfo
+          };
+
+          const chromosomeSelect = document.getElementById('chromosomeSelect');
+          if (!chromosomeSelect) {
+              throw new Error('Chromosome select element not found');
+          }
+
+          // Update dropdown
+          updateChromosomeSelect(chromosomeInfo, chromosomeSelect);
+
+          // Remove old event listeners
+          const newSelect = chromosomeSelect.cloneNode(true);
+          chromosomeSelect.parentNode.replaceChild(newSelect, chromosomeSelect);
+
+          // Add new event listener
+          newSelect.addEventListener('change', async function() {
+              try {
+                  const selectedChromosome = this.value;
+                  const maxPosition = chromosomeInfo[selectedChromosome];
+
+                  if (!maxPosition) {
+                      throw new Error(`No position data found for chromosome ${selectedChromosome}`);
+                  }
+
+                  // Store current selection
+                  localStorage.setItem('lastChromosomeSelection', selectedChromosome);
+                  
+                  // Force update and rerender
+                  await updateChromosomeView(selectedChromosome, maxPosition);
+                  
+              } catch (error) {
+                  console.error('Error in chromosome selection change handler:', error);
+              }
+          });
+
+          // Select first chromosome or restore previous selection
+          const lastSelection = localStorage.getItem('lastChromosomeSelection');
+          if (lastSelection && chromosomeInfo[lastSelection]) {
+              newSelect.value = lastSelection;
+          } else {
+              newSelect.value = Object.keys(chromosomeInfo)[0];
+          }
+          newSelect.dispatchEvent(new Event('change'));
+      }
+
+  } catch (error) {
+      console.error('Error in handleChromosomeSelection:', error);
+      throw error;
+  }
+}
+
+// Add helper functions
+function updateChromosomeSelect(chromosomeInfo, selectElement) {
+  selectElement.innerHTML = '<option value="" disabled selected>Select chromosome</option>';
+  Object.keys(chromosomeInfo).forEach(chromosome => {
+      if (chromosome?.trim()) {
+          const option = document.createElement('option');
+          option.value = chromosome;
+          option.textContent = /^(chr)?([0-9]+|[XY]|MT)$/i.test(chromosome) 
+              ? `Chromosome ${chromosome}`
+              : `ID: ${chromosome}`;
+          selectElement.appendChild(option);
+      }
+  });
+}
+
+async function updateChromosomeView(selectedChromosome, maxPosition) {
+  try {
+      const plotSpec = window.plotSpecManager.getPlotSpec();
+      
+      // Update assembly info
+      plotSpec.assembly = [[selectedChromosome, maxPosition]];
+      
+      // Update views
+      plotSpec.views.forEach(view => {
+          view.assembly = [[selectedChromosome, maxPosition]];
+          view.xDomain = {
+              chromosome: selectedChromosome,
+              interval: [0, maxPosition]
+          };
+
+          // Update tracks
+          view.tracks?.forEach(track => {
+              if (!track.data) track.data = {};
+              track.data = {
+                  ...track.data,
+                  type: 'gff',
+                  url: window.fileURLs.gff,
+                  indexUrl: window.fileURLs.index,
+                  chromosomeId: selectedChromosome
+              };
+          });
+      });
+
+      // Store current selection
+      window.currentAssemblyInfo = {
+          seqid: selectedChromosome,
+          length: maxPosition
+      };
+
+      // Update state
+      window.plotSpecManager.updateAssemblyInfo(selectedChromosome, maxPosition);
+      
+      // Force rerender
+      await GoslingPlotWithLocalData();
+      
+  } catch (error) {
+      console.error('Error in updateChromosomeView:', error);
+      throw error;
   }
 }

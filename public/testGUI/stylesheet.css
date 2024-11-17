@@ -547,3 +547,39 @@ label {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
 }
+
+
+.chromosome-select {
+    width: 200px;
+    padding: 15px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 15px;
+}
+
+#chromosome-selector {
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: rgb(182, 181, 181);
+    border-radius: 4px;
+}
+
+.chromosome-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.apply-chromosome-button {
+    padding: 5px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.apply-chromosome-button:hover {
+    background-color: #45a049;
+}

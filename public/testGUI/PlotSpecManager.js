@@ -22,12 +22,54 @@ function deepCopy(obj) {
 
 class PlotSpecManager {
   constructor() {
-    // Initialize with a default assembly info
     this.assemblyInfo = [["", 0]];
-    
+    this.currentChromosome = null;
     this.plotSpecs = {
       1: this.createNewPlotSpec(),
     };
+  }
+
+  updateAssemblyInfo(seqid, length) {
+    if (seqid && length) {
+        this.assemblyInfo = [[seqid, length]];
+        this.currentChromosome = seqid;
+        
+        // Store assembly info globally
+        window.currentAssemblyInfo = {
+            seqid: seqid,
+            length: length
+        };
+        
+        // Update views with new assembly info
+        if (this.plotSpecs[1].views && this.plotSpecs[1].views.length > 0) {
+            this.plotSpecs[1].views[0].assembly = this.assemblyInfo;
+            this.plotSpecs[1].views[0].title = this.getChromosomeTitle(seqid);
+            
+            // Update xDomain
+            this.plotSpecs[1].views[0].xDomain = {
+                chromosome: seqid,
+                interval: [0, length]
+            };
+        }
+
+        try {
+            localStorage.setItem('gosling-assembly-info', JSON.stringify(this.assemblyInfo));
+            localStorage.setItem('current-chromosome', seqid);
+            localStorage.setItem('chromosome-length', length.toString());
+        } catch (e) {
+            console.warn('Failed to save assembly info to localStorage:', e);
+        }
+    }
+}
+
+  getChromosomeTitle(seqid) {
+    // Check if seqid looks like a chromosome name (e.g., "chr1", "X", "Y")
+    const isChromosomeName = /^(chr)?([0-9]+|[XY]|MT)$/i.test(seqid);
+    if (isChromosomeName) {
+      return `Gene Annotations - Chromosome ${seqid}`;
+    } else {
+      return `Gene Annotations - ID: ${seqid}`;
+    }
   }
 
   getPlotSpec() {
@@ -135,43 +177,42 @@ class PlotSpecManager {
    * @returns {Object} - A single track object
    */
   createGeneTrack(index) {
-    if (gene_template.views && gene_template.views[0] && gene_template.views[0].tracks && gene_template.views[0].tracks[index]) {
-      const track = deepCopy(gene_template.views[0].tracks[index]);
+    if (gene_template.views?.[0]?.tracks?.[index]) {
+        const track = deepCopy(gene_template.views[0].tracks[index]);
 
-      if (!track.data) {
+        // Set up basic track data configuration
         track.data = {
-          type: "gff",
-          url: "",
-          indexUrl: "",
-          attributesToFields: [
-            { attribute: "gene_biotype", defaultValue: "unknown" },
-            { attribute: "Name", defaultValue: "unknown" },
-            { attribute: "ID", defaultValue: "unknown" }
-          ]
+            type: "gff",
+            url: "",
+            indexUrl: "",
+            attributesToFields: [
+                { attribute: "gene_biotype", defaultValue: "unknown" },
+                { attribute: "Name", defaultValue: "unknown" },
+                { attribute: "ID", defaultValue: "unknown" }
+            ]
         };
-      }
-      track.tooltip = [
-        { field: "seqid", type: "nominal", alt: "Chromosome" },
-        { field: "start", type: "quantitative", alt: "Start" },
-        { field: "end", type: "quantitative", alt: "End" },
-        { field: "strand", type: "nominal", alt: "Strand" },
-        { field: "type", type: "nominal", alt: "Feature Type" },
-        { field: "gene_biotype", type: "nominal", alt: "Gene Biotype" },
-        {
-          field: "Name", 
-          type: "nominal", 
-          alt: "Gene Name", 
-          valueGetter: (d) => d.Name !== 'unknown' ? d.Name : d.ID
-        },
-        { field: "ID", type: "nominal", alt: "Gene ID" }
-      ];
-      
-      return track;
-    } else {
-      console.error(`Track index ${index} does not exist in gene_template.`);
-      return {};
+
+        // Add color configuration for strands
+        track.color = {
+            field: "strand",
+            type: "nominal",
+            domain: ["+", "-"],
+            range: ["#FF0000", "#0000FF"]
+        };
+
+        track.tooltip = [
+            { field: "start", type: "quantitative", alt: "Start Position" },
+            { field: "end", type: "quantitative", alt: "End Position" },
+            { field: "strand", type: "nominal", alt: "Strand" },
+            { field: "type", type: "nominal", alt: "Feature Type" },
+            { field: "gene_biotype", type: "nominal", alt: "Gene Biotype" },
+            { field: "ID", type: "nominal", alt: "Gene ID" }
+        ];
+
+        return track;
     }
-  }
+    return {};
+}
 
   generateCanvas(canvasId, newCanvasObject) {
     const plotSpec = this.getPlotSpec();

@@ -212,7 +212,25 @@ const tooltips = {
  * @returns {string} - The HTML content for bin and sample inputs.
  */
 export async function generateTrackBinAndSampleInputs(trackNumber) {
-    const isCanvas0 = window.canvas_num === 0;
+        const isCanvas0 = window.canvas_num === 0;
+    
+    if (isCanvas0) {
+        const chromosomeData = window.canvas_states[0].chromosomeData;
+        return `
+            <div class="btn-row" id="chromosome-selector">
+                <h2>Chromosome Selection</h2>
+                <div class="column-container">
+                    <select id="chromosomeSelect" class="chromosome-select">
+                        <option value="" disabled selected>Select chromosome</option>
+                        ${chromosomeData ? Object.keys(chromosomeData.options).map(chromosome => `
+                            <option value="${chromosome}">${/^(chr)?([0-9]+|[XY]|MT)$/i.test(chromosome) 
+                                ? `Chromosome ${chromosome}`
+                                : `ID: ${chromosome}`}</option>
+                        `).join('') : ''}
+                    </select>
+                </div>
+            </div>`;
+    }
     const fileNames = window.canvas_states[window.canvas_num].filenames[trackNumber];
   
     let displayName = "No file selected";

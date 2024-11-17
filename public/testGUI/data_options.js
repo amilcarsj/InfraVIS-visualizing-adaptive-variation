@@ -9,6 +9,33 @@ import { updateURLParameters } from './update_plot_specifications.js';
 import {exportingFigures} from './exporting_functionality.js';
 import {generateTracks} from './track.js'
 
+/**
+ * Sets up all button functionality and event listeners for the application's GUI.
+ * 
+ * @async
+ * @function all_buttons
+ * @param {HTMLElement} container - The DOM element container where the GUI elements will be rendered
+ * 
+ * @description
+ * This function:
+ * - Initializes the main GUI layout with canvas and view controls
+ * - Sets up canvas switching functionality (Canvas 0-3)
+ * - Implements view management (View A-C)
+ * - Handles canvas addition through the '+' button
+ * - Manages view switching and their respective controls
+ * - Sets up export functionality
+ * - Initializes track controls and selectors
+ * 
+ * The function manages several states:
+ * - Current active canvas
+ * - Current view (1-3)
+ * - Canvas object creation states
+ * - Display states for various UI elements
+ * 
+ * @example
+ * const container = document.getElementById('main-container');
+ * await all_buttons(container);
+ */
 export async function all_buttons(container) {
     container.innerHTML = `
     <div class="body-container">
@@ -156,9 +183,34 @@ export async function all_buttons(container) {
         setActiveCanvas(canvas0);
         window.canvas_num = 0;
         canvas_number.innerHTML = 'Gene Canvas';
-        current_canvas.innerHTML = 'Current Canvas Gene'
+        current_canvas.innerHTML = 'Current Canvas Gene';
+    
+        // Restore chromosome selector and trigger rerender
+        const chromosomeData = window.canvas_states[0].chromosomeData;
+        if (chromosomeData) {
+            const chromosomeSelect = document.getElementById('chromosomeSelect');
+            if (chromosomeSelect) {
+                // Restore dropdown options
+                updateChromosomeSelect(chromosomeData.options, chromosomeSelect);
+                
+                // Get last selected chromosome
+                const lastSelection = localStorage.getItem('lastChromosomeSelection');
+                if (lastSelection && chromosomeData.options[lastSelection]) {
+                    chromosomeSelect.value = lastSelection;
+                    // Force rerender with stored chromosome
+                    const maxPosition = chromosomeData.options[lastSelection];
+                    updateChromosomeView(lastSelection, maxPosition)
+                        .then(() => {
+                            console.log('Successfully restored chromosome view');
+                        })
+                        .catch(error => {
+                            console.error('Error restoring chromosome view:', error);
+                        });
+                }
+            }
+        }
+    
         document.querySelector('.canvas-container').style.display = 'none';
-
         updateCanvasUI();
     });
     // Making canvas1 active
@@ -241,6 +293,10 @@ export function setActiveCanvas(activeCanvas) {
     activeCanvas.classList.add('active');
 }
 
+/**
+ * To change the active view, the views that is passed in as param will be active. 
+ * @param {activeViews} activeViews 
+ */
 export function setActiveViews(activeViews) {
     const viewButtons = document.querySelectorAll('.view-btn');
     viewButtons.forEach(button => button.classList.remove('active'));
@@ -363,8 +419,9 @@ export function updateViewSettings(view) {
     });
 
 }
+
+// Reset all input fields to default or blank
 export function resetViewSettings() {
-    // Reset all input fields to default or blank
     document.getElementById('x_range_start').value = '';
     document.getElementById('x_range_end').value = '';
     document.getElementById('columnSelectorX_0').value = '';
@@ -483,6 +540,16 @@ export function view_control_apply_changes () {
  * @param {int} currentView 
  * @returns 
  */
+/**
+ * Generates HTML markup for a view control panel that allows users to customize visualization settings
+ * @param {string|number} currentView - Identifier for the current view being generated
+ * @returns {string} HTML markup string containing:
+ * - Canvas container with unique ID based on currentView
+ * - X-axis controls (column selector, range inputs, background color)
+ * - Left Y-axis controls (track checkboxes, column selector, range inputs)
+ * - Right Y-axis controls (track checkbox, column selector, range inputs)
+ * - Apply button to confirm settings
+ */
 export function generateViewControl(currentView){   
 
         return`            
@@ -492,6 +559,7 @@ export function generateViewControl(currentView){
                         <span class = 'current-canvas'> </span>
                     </div>
                     <div class="canvas_content hidden">
+                    
                         <div class="btn-row" id="global-variables">
                             <h2 class='x_axis_h2'>X axis</h2>
                                 <div class="column-container">
