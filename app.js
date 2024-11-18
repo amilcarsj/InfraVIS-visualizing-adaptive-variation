@@ -25,13 +25,13 @@ app.use(morgan('combined'));
 app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; " +
+    "default-src 'self' https: data: blob:; " +
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://esm.sh https://cdnjs.cloudflare.com data:; " +
     "style-src 'self' 'unsafe-inline' https://esm.sh https://cdnjs.cloudflare.com; " +
-    "img-src 'self' data:; " +
     "font-src 'self' https://cdnjs.cloudflare.com; " +
-    "connect-src 'self' https://esm.sh https://raw.githubusercontent.com blob:; " +
-    "worker-src 'self' blob:;" 
+    "img-src 'self' data: blob:; " +
+    "connect-src 'self' https: data: blob:; " +
+    "worker-src 'self' blob:;"
   );
   next();
 });
@@ -44,8 +44,12 @@ app.use(
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*',
-  optionsSuccessStatus: 200
+  origin: '*',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204,
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Disposition']
 };
 app.use(cors(corsOptions));
 
@@ -64,11 +68,8 @@ app.get('/', (req, res) => {
 /**
  * Save visualization as HTML
  * @route POST /save-html
- * @param {Object} req.body.htmlContent - HTML content to save
- * @returns {string} HTML file download
  */
 app.post('/save-html', async (req, res) => {
-  try {
     const htmlContent = req.body.htmlContent;
     
     // Set content type to HTML
@@ -76,102 +77,163 @@ app.post('/save-html', async (req, res) => {
     res.setHeader('Content-Disposition', 'attachment; filename=plot-container.html');
     
     res.send(htmlContent);
-  } catch (error) {
-    console.error('Error in /save-html:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
 });
 
 /**
  * Save visualization as PNG
  * @route POST /save-png
- * @param {Object} req.body.htmlContent - HTML content to convert
- * @returns {Buffer} PNG image data
  */
 app.post('/save-png', async (req, res) => {
-  try {
-    const htmlContent = req.body.htmlContent;
-    const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
-    const page = await browser.newPage();
+    try {
+        const htmlContent = req.body.htmlContent;
+        const browser = await puppeteer.launch({
+            headless: 'new',
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-web-security',
+                '--allow-file-access-from-files',
+                '--disable-features=site-per-process'
+            ]
+        });
+        
+        const page = await browser.newPage();
+        
+        // Enable console log from the page
+        page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+        
+        // Set viewport
+        await page.setViewport({
+            width: 1200,
+            height: 800,
+            deviceScaleFactor: 2
+        });
 
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+        // Set content with proper waiting
+        await page.setContent(htmlContent, { 
+            waitUntil: ['networkidle0', 'domcontentloaded'],
+            timeout: 60000 
+        });
 
-    const pngBuffer = await page.screenshot({ fullPage: true });
-    await browser.close();
+        // Wait for the container and its content
+        await page.waitForSelector('#gosling-container');
+        
+        // Use evaluate to wait for content to be rendered
+        await page.evaluate(() => {
+            return new Promise((resolve) => {
+                const checkContent = () => {
+                    const container = document.querySelector('#gosling-container');
+                    if (container && 
+                        container.children.length > 0 && 
+                        container.getBoundingClientRect().height > 0) {
+                        resolve();
+                    } else {
+                        setTimeout(checkContent, 100);
+                    }
+                };
+                checkContent();
+            });
+        });
 
-    res.contentType('image/png');
-    res.send(pngBuffer);
-  } catch (error) {
-    console.error('Error in /save-png:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+        // Small delay to ensure rendering is complete
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        // Take the screenshot
+        const element = await page.$('#gosling-container');
+        if (!element) {
+            throw new Error('Container not found after waiting');
+        }
+
+        // Get the element's dimensions
+        const boundingBox = await element.boundingBox();
+        
+        const pngBuffer = await page.screenshot({
+            type: 'png',
+            clip: boundingBox,
+            omitBackground: true,
+            fullPage: false
+        });
+
+        await browser.close();
+
+        // Send the response
+        res.writeHead(200, {
+            'Content-Type': 'image/png',
+            'Content-Length': pngBuffer.length,
+            'Content-Disposition': 'attachment; filename="plot.png"'
+        });
+        res.end(pngBuffer);
+        
+    } catch (error) {
+        console.error('Detailed error in /save-png:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+        res.status(500).json({ 
+            error: 'Internal server error',
+            details: error.message,
+            stack: error.stack 
+        });
+    }
 });
 
 /**
  * Save visualization specification as JSON
  * @route POST /save-json
- * @param {Object} req.body.jsonContent - JSON content to save
- * @returns {Object} Formatted JSON data
  */
 app.post('/save-json', (req, res) => {
-  try {
-    const jsonContent = req.body.jsonContent;
-
-    // Attempt to parse the incoming JSON to ensure it's valid
-    let parsedJSON;
     try {
-      parsedJSON = JSON.parse(jsonContent);
-    } catch (error) {
-      return res.status(400).json({ message: 'Invalid JSON format' });
-    }
+        const jsonContent = req.body.jsonContent;
+        
+        // Validate JSON
+        let parsedJSON;
+        try {
+            parsedJSON = typeof jsonContent === 'string' ? JSON.parse(jsonContent) : jsonContent;
+        } catch (error) {
+            return res.status(400).json({ message: 'Invalid JSON format' });
+        }
 
-    // Convert the JSON format to Gosling-compatible format
-    const goslingFormattedJSON = {
-      arrangement: "vertical",
-      views: parsedJSON.views.map(view => {
-        return {
-          layout: "linear",
-          alignment: view.alignment || "stack",
-          static: view.static || false,
-          width: view.width,
-          height: view.height,
-          // Filter out tracks that do not have loaded data
-          tracks: view.tracks
-            .filter(track => track.data && track.data.url && track.data.type)  // Ensure data is loaded
-            .map(track => ({
-              data: track.data,
-              mark: track.mark,
-              x: track.x,
-              xe: track.xe,
-              y: track.y,
-              stroke: track.stroke || { value: "black" },
-              strokeWidth: track.strokeWidth || { value: 0.3 },
-              style: track.style || { outlineWidth: 0 }
+        // Convert to Gosling format
+        const goslingFormattedJSON = {
+            arrangement: "vertical",
+            views: parsedJSON.views.map(view => ({
+                layout: "linear",
+                alignment: view.alignment || "stack",
+                static: view.static || false,
+                width: view.width,
+                height: view.height,
+                tracks: view.tracks
+                    .filter(track => track.data && track.data.url && track.data.type)
+                    .map(track => ({
+                        data: track.data,
+                        mark: track.mark,
+                        x: track.x,
+                        xe: track.xe,
+                        y: track.y,
+                        stroke: track.stroke || { value: "black" },
+                        strokeWidth: track.strokeWidth || { value: 0.3 },
+                        style: track.style || { outlineWidth: 0 }
+                    }))
             }))
         };
-      })
-    };
 
-    // Set content type to JSON
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', 'attachment; filename=plot.json');
-
-    res.send(JSON.stringify(goslingFormattedJSON, null, 2));  // Ensure it is formatted nicely
-  } catch (error) {
-    console.error('Error in /save-json:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', 'attachment; filename=plot.json');
+        res.send(JSON.stringify(goslingFormattedJSON, null, 2));
+    } catch (error) {
+        console.error('Error in /save-json:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Something broke!');
-  });
-  
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
-  });
+});

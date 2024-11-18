@@ -1,3 +1,95 @@
+async function convertBlobToDataURL(blobUrl) {
+    try {
+        const response = await fetch(blobUrl);
+        const blob = await response.blob();
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    } catch (error) {
+        console.error('Error converting blob to data URL:', error);
+        return blobUrl; // Return original URL if conversion fails
+    }
+}
+
+async function generateHTMLContent(plotSpec) {
+    // Deep clone the spec to avoid modifying the original
+    const processedSpec = JSON.parse(JSON.stringify(plotSpec));
+    
+    // Convert the data URLs now
+    if (processedSpec.views) {
+        for (const view of processedSpec.views) {
+            if (view.tracks) {
+                for (const track of view.tracks) {
+                    if (track.data?.url && track.data.url.startsWith('blob:')) {
+                        const dataUrl = await convertBlobToDataURL(track.data.url);
+                        track.data.url = dataUrl;
+                    }
+                    if (track.data?.indexUrl && track.data.indexUrl.startsWith('blob:')) {
+                        const indexUrl = await convertBlobToDataURL(track.data.indexUrl);
+                        track.data.indexUrl = indexUrl;
+                    }
+                }
+            }
+        }
+    }
+
+    return `
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <title>Exported Plot</title>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+                <script type="importmap">
+                {
+                    "imports": {
+                        "react": "https://esm.sh/react@18",
+                        "react-dom": "https://esm.sh/react-dom@18",
+                        "pixi": "https://esm.sh/pixi.js@6",
+                        "higlass": "https://esm.sh/higlass@^1.13.4?external=react,react-dom,pixi",
+                        "gosling.js": "https://esm.sh/gosling.js@0.17.0?external=react,react-dom,pixi,higlass"
+                    }
+                }
+                </script>
+                <style>
+                    #gosling-container {
+                        width: 100%;
+                        height: 100vh;
+                        margin: 0;
+                        padding: 0;
+                    }
+                </style>
+            </head>
+            <body style="margin:0; padding:0;">
+                <div id="gosling-container"></div>
+                <script type="module">
+                    import { embed } from 'gosling.js';
+                    
+                    // Wait for pako to be available
+                    await new Promise(resolve => {
+                        if (window.pako) resolve();
+                        else window.addEventListener('load', resolve);
+                    });
+
+                    const spec = ${JSON.stringify(processedSpec, null, 2)};
+                    
+                    async function initVisualization() {
+                        try {
+                            await embed(document.getElementById('gosling-container'), spec);
+                        } catch (error) {
+                            console.error('Error initializing visualization:', error);
+                        }
+                    }
+
+                    initVisualization();
+                </script>
+            </body>
+        </html>
+    `;
+}
+
 export function exportingFigures() {
     // The loading settings
     const loadingOverlay = document.createElement('div');
@@ -22,7 +114,7 @@ export function exportingFigures() {
         loadingOverlay.style.display = 'none';
     };
 
-    document.getElementById('export-dropdown').addEventListener('change', (event) => {
+    document.getElementById('export-dropdown').addEventListener('change', async (event) => {
         const selectedValue = event.target.value;
         const container = document.getElementById('plot-container-1');
         const notification = document.getElementById('notification');
@@ -53,35 +145,9 @@ export function exportingFigures() {
         const svgContent = container.innerHTML;
         // to fetch the JSON of the SVG.
         const jsonSpec = window.plotSpecManager.exportPlotSpecAsJSON();
-        // The dependencies that are required for the SVG to be renderd
-        const htmlContent = `
-            <!DOCTYPE html>
-            <html>
-                <head>
-                    <title>Exported Plot</title>
-                    <script type="importmap">
-                        {
-                            "imports": {
-                                "react": "https://esm.sh/react@18",
-                                "react-dom": "https://esm.sh/react-dom@18",
-                                "pixi": "https://esm.sh/pixi.js@6",
-                                "higlass": "https://esm.sh/higlass@^1.13.4?external=react,react-dom,pixi",
-                                "gosling.js": "https://esm.sh/gosling.js@0.17.0?external=react,react-dom,pixi,higlass"
-                            }
-                        }
-                    </script>
-                </head>
-                <body>
-                    <div id="gosling-container">
-                        ${svgContent}
-                    </div>
-                    <script type="module">
-                        import { embed } from 'gosling.js';
-                        embed(document.getElementById('gosling-container'), ${jsonSpec});
-                    </script>
-                </body>
-            </html>
-        `;
+        // The dependencies that are required for the SVG to be rendered
+        const plotSpec = window.plotSpecManager.getPlotSpec();
+        const htmlContent = await generateHTMLContent(plotSpec);
 
         let endpoint = '';
         switch (selectedValue) {
