@@ -179,6 +179,101 @@ app.post('/save-png', async (req, res) => {
 });
 
 /**
+ * Save visualization as PDF
+ * @route POST /save-pdf
+ */
+app.post('/save-pdf', async (req, res) => {
+    try {
+        const htmlContent = req.body.htmlContent;
+        const browser = await puppeteer.launch({
+            headless: 'new',
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-web-security',
+                '--allow-file-access-from-files',
+                '--disable-features=site-per-process'
+            ]
+        });
+        
+        const page = await browser.newPage();
+        
+        // Enable console log from the page
+        page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+        
+        // Set viewport
+        await page.setViewport({
+            width: 1200,
+            height: 800,
+            deviceScaleFactor: 2
+        });
+
+        // Set content with proper waiting
+        await page.setContent(htmlContent, { 
+            waitUntil: ['networkidle0', 'domcontentloaded'],
+            timeout: 60000 
+        });
+
+        // Wait for the container and its content
+        await page.waitForSelector('#gosling-container');
+        
+        // Wait for content to be rendered
+        await page.evaluate(() => {
+            return new Promise((resolve) => {
+                const checkContent = () => {
+                    const container = document.querySelector('#gosling-container');
+                    if (container && 
+                        container.children.length > 0 && 
+                        container.getBoundingClientRect().height > 0) {
+                        resolve();
+                    } else {
+                        setTimeout(checkContent, 100);
+                    }
+                };
+                checkContent();
+            });
+        });
+
+        // Small delay to ensure rendering is complete
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        // Generate PDF
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            margin: {
+                top: '20px',
+                right: '20px',
+                bottom: '20px',
+                left: '20px'
+            }
+        });
+
+        await browser.close();
+
+        // Send the response
+        res.writeHead(200, {
+            'Content-Type': 'application/pdf',
+            'Content-Length': pdfBuffer.length,
+            'Content-Disposition': 'attachment; filename="plot.pdf"'
+        });
+        res.end(pdfBuffer);
+        
+    } catch (error) {
+        console.error('Detailed error in /save-pdf:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+        res.status(500).json({ 
+            error: 'Internal server error',
+            details: error.message,
+            stack: error.stack 
+        });
+    }
+});
+
+/**
  * Save visualization specification as JSON
  * @route POST /save-json
  */

@@ -51,7 +51,7 @@ export async function all_buttons(container) {
             <div id="header" class="buttons-container">   
                 <select id="export-dropdown" class="dropdown-content">
                     <option value="" disabled selected>Export as</option>
-                    <option id="export-json-button" value="json">JSON</option>
+                    <option id="export-pdf-button" value="pdf">PDF</option>
                     <option id="export-png-button" value="png">PNG</option>
                     <option id="export-html-button" value="html">HTML</option>
                 </select> 
@@ -681,7 +681,8 @@ async function loadAndApplyViewSettings(view) {
             
             const xSelector = document.getElementById('columnSelectorX_0');
             if (xSelector && xSelector.options[currentCanvasState.view_control_settings.x_axis]) {
-                plotSpec.tracks[trackIndex].x.field = xSelector.options[currentCanvasState.view_control_settings.x_axis].textContent;
+                const fieldName = xSelector.options[currentCanvasState.view_control_settings.x_axis].textContent;
+                plotSpec.tracks[trackIndex].x.field = fieldName;
             }
         }
     });
@@ -694,13 +695,15 @@ async function loadAndApplyViewSettings(view) {
             plotSpec.tracks[trackIndex].y.domain = currentCanvasState.view_control_settings.right_y_range;
             const rightSelector = document.getElementById('columnSelectorYRight');
             if (rightSelector && rightSelector.options[currentCanvasState.view_control_settings.right_y_axis]) {
-                plotSpec.tracks[trackIndex].y.field = rightSelector.options[currentCanvasState.view_control_settings.right_y_axis].textContent;
+                const fieldName = rightSelector.options[currentCanvasState.view_control_settings.right_y_axis].textContent;
+                plotSpec.tracks[trackIndex].y.field = fieldName;
             }
             plotSpec.tracks[trackIndex].y.axis = 'right';
             
             const xSelector = document.getElementById('columnSelectorX_0');
             if (xSelector && xSelector.options[currentCanvasState.view_control_settings.x_axis]) {
-                plotSpec.tracks[trackIndex].x.field = xSelector.options[currentCanvasState.view_control_settings.x_axis].textContent;
+                const fieldName = xSelector.options[currentCanvasState.view_control_settings.x_axis].textContent;
+                plotSpec.tracks[trackIndex].x.field = fieldName;
             }
         }
     });

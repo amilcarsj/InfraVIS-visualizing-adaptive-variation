@@ -114,7 +114,14 @@ export function exportingFigures() {
         loadingOverlay.style.display = 'none';
     };
 
-    document.getElementById('export-dropdown').addEventListener('change', async (event) => {
+    const exportDropdown = document.getElementById('export-dropdown');
+    // Add null check before adding event listener
+    if (!exportDropdown) {
+        console.error('Export dropdown element not found');
+        return;
+    }
+
+    exportDropdown.addEventListener('change', async (event) => {
         const selectedValue = event.target.value;
         const container = document.getElementById('plot-container-1');
         const notification = document.getElementById('notification');
@@ -151,8 +158,8 @@ export function exportingFigures() {
 
         let endpoint = '';
         switch (selectedValue) {
-            case 'json':
-                endpoint = '/save-json';
+            case 'pdf':
+                endpoint = '/save-pdf';
                 break;
             case 'png':
                 endpoint = '/save-png';
@@ -168,7 +175,37 @@ export function exportingFigures() {
 
         showLoading();
 
-         if (selectedValue === 'png') {
+        if (selectedValue === 'pdf') {
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ htmlContent }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'plot.pdf';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                showMessage('PDF file downloaded successfully', '#02a102');
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                showMessage('Error during export: ' + error.message, '#ff0000');
+            })
+            .finally(hideLoading);
+        } else if (selectedValue === 'png') {
             fetch(endpoint, {
                 method: 'POST',
                 headers: {
@@ -198,7 +235,7 @@ export function exportingFigures() {
                 showMessage('Error during export: ' + error.message, '#ff0000');
             })
             .finally(hideLoading);
-        }else if (selectedValue === 'html') {
+        } else if (selectedValue === 'html') {
             fetch(endpoint, {
                 method: 'POST',
                 headers: {
@@ -263,36 +300,40 @@ export function exportingFigures() {
         }
     });
 
-    // To export the SVG as JSON
-    document.getElementById('export-json-button').addEventListener('click', () => {
-        const jsonSpec = window.plotSpecManager.exportPlotSpecAsJSON();
-        showLoading();
-        fetch('/save-json', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ jsonContent: jsonSpec }),
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            const a = document.createElement('a');
-            a.href = data.fileUrl;
-            a.download = 'plotSpec.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            showMessage('JSON file downloaded successfully', '#02a102');
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            showMessage('Error during export: ' + error.message, '#ff0000');
-        })
-        .finally(hideLoading);
-    });
+    // Remove or update the JSON export button listener since we're replacing it with PDF
+    // If you want to keep it for reference, add a null check:
+    const exportJsonButton = document.getElementById('export-json-button');
+    if (exportJsonButton) {
+        exportJsonButton.addEventListener('click', () => {
+            const jsonSpec = window.plotSpecManager.exportPlotSpecAsJSON();
+            showLoading();
+            fetch('/save-json', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ jsonContent: jsonSpec }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const a = document.createElement('a');
+                a.href = data.fileUrl;
+                a.download = 'plotSpec.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showMessage('JSON file downloaded successfully', '#02a102');
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                showMessage('Error during export: ' + error.message, '#ff0000');
+            })
+            .finally(hideLoading);
+        });
+    }
 }
