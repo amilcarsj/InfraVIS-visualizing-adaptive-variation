@@ -251,10 +251,6 @@ export async function URLfromServer(URL_input, button_data_track_number) {
           if (extension === 'gz') {
             await configureDataType('gz', current_track);
             await handleOptions(fileBlob, button_data_track_number);
-          } else if (extension === 'tbi') {
-            // Assuming handleOptions can process index files if necessary
-            // If not, you might need to adjust this accordingly
-            // For example, associate the index file with the data file
           }
         } else {
           await configureDataType(extension, current_track);
@@ -285,7 +281,7 @@ async function configureDataType(extension, track) {
 
   if (isCanvas0) {
     track.data.type = 'gff'; // Correct data type for GFF
-    track.data.indexUrl = track.data.indexUrl || ''; // Ensure indexUrl exists
+    track.data.indexUrl = track.data.indexUrl || '';
   } else {
     const validExtensions = ['tsv', 'csv'];
     if (!validExtensions.includes(extension)) {
