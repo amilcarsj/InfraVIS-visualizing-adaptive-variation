@@ -13,8 +13,9 @@
               "react": "https://esm.sh/react@18",
               "react-dom": "https://esm.sh/react-dom@18",
               "pixi": "https://esm.sh/pixi.js@6",
+              "higlass-text": "https://esm.sh/higlass-text/es/index.js",
               "higlass": "https://esm.sh/higlass@1.13?external=react,react-dom,pixi",
-              "gosling.js": "https://esm.sh/gosling.js@0.11.0?external=react,react-dom,pixi,higlass"
+              "gosling.js": "https://esm.sh/gosling.js@0.17.0?external=react,react-dom,pixi,higlass,higlass-text"
             }
         }
     </script>
@@ -23,34 +24,7 @@
     <div class="container">
         <div id="overlay"></div> 
         <div id="buttons" class="all_buttons"></div>
-        
-        <!-- Add the Robot Q&A Interface -->
-        <div class="robot-container">
-            <div class="robot-head" id="robotFace">
-                <div class="antenna"></div>
-                <div class="circuits">
-                    <div class="circuit circuit-1"></div>
-                    <div class="circuit circuit-2"></div>
-                </div>
-                <div class="eyes">
-                    <div class="eye"></div>
-                    <div class="eye"></div>
-                </div>
-            </div>
-        
-            <div class="qa-container" id="qaContainer">
-                <div class="chat-interface">
-                    <button class="close-chat" id="closeChat" aria-label="Close chat">×</button>
-                    <h3>How can I help you?</h3>
-                    <div class="questions">
-                        <button class="question-button" data-question="purpose">Question 1</button>
-                        <button class="question-button" data-question="work">Question 2</button>
-                        <button class="question-button" data-question="learn">Question 3</button>
-                    </div>
-                    <div class="answer" id="answerBox"></div>
-                </div>
-            </div>
-        </div>
+    
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 
@@ -65,15 +39,14 @@
         import { URLfromFile, URLfromServer, GoslingPlotWithLocalData } from './testGUI/plot.js';
         import { trackTemplate } from './testGUI/track_spec.js';
         import {generateTracks} from './testGUI/track.js';
-        import {robotInit}  from './testGUI/robot.js'
 
 
         document.addEventListener('DOMContentLoaded', async function () { 
             await overlay(overlay_container);
             await all_buttons(buttons_container);
             await generateTracks();
-            robotInit();
         });
     </script>
+    </div>
 </body>
 </html>
