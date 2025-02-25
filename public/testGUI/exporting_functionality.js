@@ -45,11 +45,12 @@ async function generateHTMLContent(plotSpec) {
                 <script type="importmap">
                 {
                     "imports": {
-                        "react": "https://esm.sh/react@18",
-                        "react-dom": "https://esm.sh/react-dom@18",
-                        "pixi": "https://esm.sh/pixi.js@6",
-                        "higlass": "https://esm.sh/higlass@^1.13.4?external=react,react-dom,pixi",
-                        "gosling.js": "https://esm.sh/gosling.js@0.17.0?external=react,react-dom,pixi,higlass"
+              "react": "https://esm.sh/react@18",
+              "react-dom": "https://esm.sh/react-dom@18",
+              "pixi": "https://esm.sh/pixi.js@6",
+              "higlass-text": "https://esm.sh/higlass-text/es/index.js",
+              "higlass": "https://esm.sh/higlass@1.13?external=react,react-dom,pixi",
+              "gosling.js": "https://esm.sh/gosling.js@0.17.0?external=react,react-dom,pixi,higlass,higlass-text"
                     }
                 }
                 </script>
